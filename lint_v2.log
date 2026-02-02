@@ -1,0 +1,31 @@
+﻿
+> fareeth-portfolio@0.1.0 lint
+> eslint
+
+
+C:\Users\IDEA PAD 3\.gemini\antigravity\scratch\fareeth-portfolio\src\app\layout.tsx
+  7:10  warning  'DebugButton' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\IDEA PAD 3\.gemini\antigravity\scratch\fareeth-portfolio\src\app\page.tsx
+  1:8  warning  'Image' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\IDEA PAD 3\.gemini\antigravity\scratch\fareeth-portfolio\src\components\sections\Hero.tsx
+  4:8   warning  'Link' is defined but never used        @typescript-eslint/no-unused-vars
+  6:10  warning  'Shapes' is defined but never used      @typescript-eslint/no-unused-vars
+  6:18  warning  'ArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+  6:30  warning  'Plus' is defined but never used        @typescript-eslint/no-unused-vars
+  7:10  warning  'Button' is defined but never used      @typescript-eslint/no-unused-vars
+
+C:\Users\IDEA PAD 3\.gemini\antigravity\scratch\fareeth-portfolio\src\components\sections\Projects.tsx
+  3:10  warning  'motion' is defined but never used  @typescript-eslint/no-unused-vars
+  6:10  warning  'cn' is defined but never used      @typescript-eslint/no-unused-vars
+
+C:\Users\IDEA PAD 3\.gemini\antigravity\scratch\fareeth-portfolio\src\components\ui\animated-letter-text.tsx
+  14:11  warning  'parts' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\IDEA PAD 3\.gemini\antigravity\scratch\fareeth-portfolio\src\components\ui\glowing-effect.tsx
+  80:25  error  'targetAngle' is never reassigned. Use 'const' instead  prefer-const
+
+Γ£û 11 problems (1 error, 10 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+
