@@ -1,3 +1,4 @@
+// @ts-nocheck
 /* eslint-disable */
 "use client";
 
@@ -47,7 +48,8 @@ Line.prototype = {
         // @ts-ignore
         this.nodes = [];
         for (var t, n = 0; n < E.size; n++) {
-            t = new Node();
+            // @ts-ignore
+            t = new ParticleNode();
             // @ts-ignore
             t.x = pos.x;
             // @ts-ignore
@@ -198,7 +200,7 @@ var ctx,
         dampening: 0.025,
         tension: 0.99,
     };
-function Node() {
+function ParticleNode() {
     this.x = 0;
     this.y = 0;
     this.vy = 0;

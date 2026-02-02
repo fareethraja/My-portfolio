@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button"; // Assuming configured
-import { Input } from "@/components/ui/input"; // Assuming configured. If not, will use basic input.
+
 
 const ACCESS_CODE = "admin123"; // Simple client-side protection for demo
 
@@ -31,7 +30,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white p-4">
+        <div className="relative z-50 min-h-screen flex items-center justify-center bg-zinc-950 text-white p-4">
             <div className="w-full max-w-md p-8 rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-xl">
                 <h2 className="text-2xl font-bold mb-6 text-center">Analytics Access</h2>
                 <div className="space-y-4">

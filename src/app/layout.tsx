@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { NavBar } from "@/components/ui/tubelight-navbar";
+import { ClientNavBar } from "@/components/ui/client-navbar";
 import ProceduralGroundBackground from "@/components/ui/procedural-ground-background";
 import { MouseTrail } from "@/components/ui/mouse-trail";
 import { DebugButton } from "@/components/ui/debug-button";
@@ -127,7 +127,7 @@ export default function RootLayout({
           <AnalyticsTracker />
           {/* <DebugButton /> */}
           {children}
-          <NavBar />
+          <ClientNavBar />
         </ThemeProvider>
       </body>
     </html>
