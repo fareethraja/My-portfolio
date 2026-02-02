@@ -127,7 +127,9 @@ export default function RootLayout({
           <AnalyticsTracker />
           {/* <DebugButton /> */}
           {children}
-          <ClientNavBar />
+          <div className="hidden md:block">
+            <ClientNavBar />
+          </div>
         </ThemeProvider>
       </body>
     </html>

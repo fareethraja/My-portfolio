@@ -10,7 +10,7 @@ export function MouseTrail() {
 
     return (
         <canvas
-            className="pointer-events-none fixed inset-0 z-[5] opacity-30 dark:opacity-20"
+            className="hidden md:block pointer-events-none fixed inset-0 z-[5] opacity-30 dark:opacity-20"
             id="canvas"
         />
     );
