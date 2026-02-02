@@ -10,7 +10,7 @@ export function Hero() {
         <div className="mb-10 mt-4 md:mt-20">
           <div className="px-2">
             <div className="relative mx-auto h-full max-w-7xl p-6 md:px-12 md:py-20">
-              <h1 className="flex flex-col items-center justify-center select-none px-3 py-2 text-center text-5xl font-semibold leading-tight tracking-tight md:text-8xl lg:text-8xl text-foreground">
+              <h1 className="flex flex-col items-center justify-center select-none px-3 py-2 text-center text-4xl font-semibold leading-tight tracking-tight md:text-8xl lg:text-8xl text-foreground">
                 Building the Future of <br />
                 <AnimatedLetterText text="Digital Products" />
               </h1>

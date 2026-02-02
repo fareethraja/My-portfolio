@@ -56,7 +56,7 @@ export function Projects() {
             <div className="section-container">
                 <h2 className="text-3xl font-bold mb-16 text-center">Projects</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {PROJECTS_DATA.map((project, index) => (
                         <GridItem
                             key={index}

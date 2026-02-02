@@ -84,8 +84,7 @@ export function Timeline() {
                 <div className="relative pl-8 md:pl-0">
                     {/* Vertical Line Container */}
                     <div
-                        className="absolute md:left-1/2 top-0 bottom-0 w-0.5 bg-zinc-200 dark:bg-zinc-800 -translate-x-1/2 z-timeline-line pointer-events-none"
-                        style={{ left: "calc(var(--timeline-x) - 1.5rem)" }} /* Mobile alignment: var(3.5rem) - padding(1.5rem) = 2rem */
+                        className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-zinc-200 dark:bg-zinc-800 md:-translate-x-1/2 z-timeline-line pointer-events-none"
                     >
                         {/* Scroll Progress Line */}
                         <motion.div
@@ -103,10 +102,10 @@ export function Timeline() {
                                 viewport={{ once: true, margin: "-40% 0px -40% 0px" }}
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
                                 className={`flex flex-col md:flex-row items-start ${index % 2 !== 0 ? "md:flex-row-reverse" : ""
-                                    } relative`}
+                                    } relative pl-12 md:pl-0`}
                             >
                                 {/* Timeline Dot */}
-                                <div className="absolute left-0 md:left-1/2 w-4 h-4 bg-white border-2 border-black dark:border-white dark:bg-black rounded-full -translate-x-[50%] z-10 mt-1.5" />
+                                <div className="absolute left-4 md:left-1/2 w-4 h-4 bg-white border-2 border-black dark:border-white dark:bg-black rounded-full -translate-x-1/2 z-10 mt-1.5" />
 
                                 <div className="md:w-1/2" />
                                 <div className="md:w-1/2 px-8">

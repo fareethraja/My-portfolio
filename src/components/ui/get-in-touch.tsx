@@ -119,7 +119,7 @@ export const ProfessionalConnect = () => {
         <div className="w-full min-h-[80vh] flex flex-col items-center justify-center p-4 relative overflow-hidden">
 
             {/* Main Flex Container - Desktop: Row, Mobile: Column */}
-            <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-7xl relative z-50">
+            <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-7xl relative z-50 space-y-12 md:space-y-0">
 
                 {/* LEFT SIDE: Project / Collab */}
                 <div className="w-full md:w-1/3 flex flex-col items-center md:items-start gap-6 order-2 md:order-1 mt-8 md:mt-0">

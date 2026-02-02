@@ -79,9 +79,9 @@ export function About() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.2 }}
-                        className="relative"
+                        className="relative w-full overflow-hidden md:overflow-visible pb-8 md:pb-0"
                     >
-                        <div className="relative">
+                        <div className="relative w-full">
                             <CardCanvas>
                                 <Card>
                                     <XCard
