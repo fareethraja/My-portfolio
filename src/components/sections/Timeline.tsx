@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import TiltedCard from "@/components/ui/tilted-card";
 
 const TIMELINE_DATA = [
     {
@@ -108,14 +109,26 @@ export function Timeline() {
                                 <div className="absolute left-4 md:left-1/2 w-4 h-4 bg-white border-2 border-black dark:border-white dark:bg-black rounded-full -translate-x-1/2 z-10 mt-1.5" />
 
                                 <div className="md:w-1/2" />
-                                <div className="md:w-1/2 px-8">
-                                    <span className="text-sm font-mono text-zinc-500 block mb-2">
-                                        {item.year}
-                                    </span>
-                                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                                    <p className="text-zinc-600 dark:text-zinc-400">
-                                        {item.description}
-                                    </p>
+                                <div className="md:w-1/2 px-2 sm:px-4 md:px-6">
+                                    <TiltedCard
+                                        captionText={item.year}
+                                        scaleOnHover={1.08}
+                                        rotateAmplitude={14}
+                                        showTooltip={true}
+                                        className="w-full"
+                                    >
+                                        <div className="liquid-glass w-full aspect-[16/7] sm:aspect-[16/6] rounded-2xl p-5 sm:p-6 md:p-8 flex flex-col justify-center">
+                                            <span className="relative z-10 text-xs sm:text-sm font-mono text-zinc-400 block mb-2">
+                                                {item.year}
+                                            </span>
+                                            <h3 className="relative z-10 text-base sm:text-lg md:text-xl font-semibold mb-2 text-white">
+                                                {item.title}
+                                            </h3>
+                                            <p className="relative z-10 text-xs sm:text-sm md:text-base text-zinc-300/90 leading-relaxed">
+                                                {item.description}
+                                            </p>
+                                        </div>
+                                    </TiltedCard>
                                 </div>
                             </motion.div>
                         ))}

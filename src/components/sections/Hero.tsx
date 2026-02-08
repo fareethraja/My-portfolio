@@ -10,7 +10,7 @@ export function Hero() {
         <div className="mb-10 mt-4 md:mt-20">
           <div className="px-2">
             <div className="relative mx-auto h-full max-w-7xl p-6 md:px-12 md:py-20">
-              <h1 className="flex flex-col items-center justify-center select-none px-3 py-2 text-center text-3xl font-semibold leading-tight tracking-tight md:text-8xl lg:text-8xl text-foreground">
+              <h1 className="flex flex-col items-center justify-center select-none px-3 py-2 text-center text-3xl font-semibold leading-tight tracking-tight md:text-8xl lg:text-8xl text-foreground font-orbitron">
                 Building the Future of <br />
                 <AnimatedLetterText text="Digital Products" />
               </h1>
@@ -24,12 +24,12 @@ export function Hero() {
             </div>
           </div>
 
-          <h1 className="mt-8 text-2xl md:text-3xl font-medium text-foreground">
+          <h1 className="mt-8 text-2xl md:text-3xl font-medium text-foreground font-cormorant">
             Welcome to my digital playground! I&#39;m{" "}
             <span className="text-primary font-bold">Fareeth Raja</span>
           </h1>
 
-          <p className="md:text-lg mx-auto mb-16 mt-4 max-w-2xl px-6 text-sm text-muted-foreground sm:px-6 md:max-w-4xl md:px-20">
+          <p className="md:text-lg mx-auto mb-16 mt-4 max-w-2xl px-6 text-sm text-muted-foreground sm:px-6 md:max-w-4xl md:px-20 font-cormorant">
             I craft scalable systems, automate workflows, and build intelligent products that empower businesses to grow.
           </p>
 

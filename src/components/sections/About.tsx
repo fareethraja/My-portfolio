@@ -4,25 +4,48 @@ import { motion } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { Card, CardCanvas } from "@/components/ui/animated-glow-card";
 import { XCard } from "@/components/ui/x-gradient-card";
+import { Target, Rocket, Puzzle, FlaskConical } from "lucide-react";
 
 const SKILLS_DATA = [
     {
         title: "Strategic Thinking",
         description: "Seeing the bigger picture and connecting dots others might miss",
+        icon: Target,
+        gradient: "from-violet-500 to-purple-600",
     },
     {
         title: "Execution Focus",
         description: "Moving from ideas to implementation without getting stuck",
+        icon: Rocket,
+        gradient: "from-pink-500 to-rose-600",
     },
     {
-        title: "System-Level Problem Solving",
+        title: "System-Level Thinking",
         description: "Understanding how pieces fit together",
+        icon: Puzzle,
+        gradient: "from-cyan-500 to-blue-600",
     },
     {
-        title: "Experimentation Mindset",
+        title: "Experimentation",
         description: "Testing assumptions, learning from failures",
+        icon: FlaskConical,
+        gradient: "from-amber-500 to-orange-600",
     },
 ];
+
+const skillCardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: (i: number) => ({
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: {
+            delay: i * 0.1,
+            duration: 0.4,
+            ease: "easeOut",
+        },
+    }),
+};
 
 export function About() {
     return (
@@ -50,12 +73,12 @@ export function About() {
                                 I&apos;m an MBA student specializing in Finance and Marketing with a background in Economics.
                             </p>
                             <p>
-                                My interest lies in understanding how products work—not just the surface-level features, but the systems behind them. I enjoy breaking down complex problems, running experiments, and finding solutions that actually make sense.
+                                My interest lies in understanding how products work. Not just the surface-level features, but the systems behind them. I enjoy breaking down complex problems, running experiments, and finding solutions that actually make sense.
                             </p>
                             <p>
                                 I&apos;m particularly drawn to{" "}
                                 <span className="text-foreground font-medium">AI-driven products</span> and the{" "}
-                                <span className="text-foreground font-medium">gaming industry</span>—spaces where technology meets user experience in interesting ways.
+                                <span className="text-foreground font-medium">gaming industry</span>. These are spaces where technology meets user experience in interesting ways.
                             </p>
                         </div>
 
@@ -91,18 +114,42 @@ export function About() {
                                         timestamp="Always Learning"
                                         link="#"
                                     >
-                                        <h3 className="text-xl font-bold text-foreground mb-4">What I Bring</h3>
-                                        <ul className="space-y-4">
-                                            {SKILLS_DATA.map((skill, index) => (
-                                                <li key={index} className="flex items-start gap-3">
-                                                    <span className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
-                                                    <div>
-                                                        <span className="font-semibold text-foreground">{skill.title}</span>
-                                                        <span className="text-muted-foreground block text-sm"> — {skill.description}</span>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        <h3 className="text-xl font-bold text-foreground mb-5">What I Bring</h3>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {SKILLS_DATA.map((skill, index) => {
+                                                const Icon = skill.icon;
+                                                return (
+                                                    <motion.div
+                                                        key={index}
+                                                        custom={index}
+                                                        initial="hidden"
+                                                        whileInView="visible"
+                                                        viewport={{ once: true }}
+                                                        variants={skillCardVariants}
+                                                        whileHover={{ scale: 1.05, y: -2 }}
+                                                        className="group relative p-3 rounded-xl bg-white/5 dark:bg-white/[0.03] border border-white/10 dark:border-white/5 cursor-default transition-all duration-300 hover:border-white/20 hover:bg-white/10 dark:hover:bg-white/[0.06]"
+                                                    >
+                                                        {/* Hover glow effect */}
+                                                        <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${skill.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 blur-sm`} />
+                                                        
+                                                        {/* Icon */}
+                                                        <div className={`relative z-10 w-8 h-8 rounded-lg bg-gradient-to-br ${skill.gradient} flex items-center justify-center mb-2 shadow-lg group-hover:shadow-xl transition-shadow duration-300`}>
+                                                            <Icon className="w-4 h-4 text-white" />
+                                                        </div>
+                                                        
+                                                        {/* Title */}
+                                                        <h4 className="relative z-10 font-semibold text-sm text-foreground mb-1 group-hover:text-white transition-colors duration-300">
+                                                            {skill.title}
+                                                        </h4>
+                                                        
+                                                        {/* Description */}
+                                                        <p className="relative z-10 text-xs text-muted-foreground leading-relaxed group-hover:text-white/70 transition-colors duration-300">
+                                                            {skill.description}
+                                                        </p>
+                                                    </motion.div>
+                                                );
+                                            })}
+                                        </div>
                                     </XCard>
                                 </Card>
                             </CardCanvas>

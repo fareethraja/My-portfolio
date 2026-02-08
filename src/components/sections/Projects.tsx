@@ -10,8 +10,8 @@ import { useAnalytics } from "@/hooks/use-analytics";
 
 const PROJECTS_DATA = [
     {
-        title: "SmartSlot – Appointment Management PWA",
-        subtitle: "Product-first | Real users | Healthcare domain",
+        title: "SmartSlot",
+        subtitle: "Appointment Management PWA for Healthcare",
         description:
             "Built a simple booking system where patients can book appointments through a single link. Clinics can plan their day better, avoid overbooking, and spend less time coordinating so they focus more on patients, not schedules.",
         tags: ["Product Management", "PWA", "User Experience", "Healthcare Tech", "Supabase"],
@@ -21,7 +21,7 @@ const PROJECTS_DATA = [
     },
     {
         title: "Roommate Key Tracker",
-        subtitle: "Problem-solving | IoT concept | Utility product",
+        subtitle: "IoT-based Utility for Shared Living",
         description:
             "Reduced key-related confusion in shared homes by ~30%, improving trust and daily coordination among roommates.",
         tags: ["Product Ideation", "IoT Concept", "Problem Validation", "UX Thinking"],
@@ -31,17 +31,17 @@ const PROJECTS_DATA = [
     },
     {
         title: "Automated Workflow Engine",
-        subtitle: "Scalability | Ops | Automation mindset",
+        subtitle: "Enterprise Automation with n8n",
         description:
             "Built an enterprise-style automation engine using n8n to streamline repetitive workflows, API integrations, and notifications. Reduced manual coordination and improved reliability across operational processes.",
         tags: ["Automation", "n8n", "API Integration", "Systems Thinking"],
         icon: <Workflow className="h-4 w-4" />,
     },
     {
-        title: "Hybrid 2.0 – Renewable Mobility Research",
-        subtitle: "Research | Strategy | Vision",
+        title: "Hybrid 2.0",
+        subtitle: "Renewable Mobility Research",
         description:
-            "Authored a research-backed concept on a renewable-energy–based hybrid mobility system targeting ~40% efficiency improvement. Focused on feasibility analysis, AI-assisted validation, and future scalability.",
+            "Authored a research-backed concept on a renewable energy hybrid mobility system targeting ~40% efficiency improvement. Focused on feasibility analysis, AI-assisted validation, and future scalability.",
         tags: ["Market Research", "Feasibility Analysis", "Sustainable Tech", "AI Strategy"],
         icon: <Zap className="h-4 w-4" />,
     },

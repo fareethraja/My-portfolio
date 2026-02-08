@@ -125,8 +125,9 @@ const ProceduralGroundBackground: React.FC = () => {
     <div className="fixed inset-0 w-full h-full bg-zinc-950 -z-10 pointer-events-none">
       <canvas
         ref={canvasRef}
-        className="w-full h-full block"
-        style={{ filter: 'contrast(1.1) brightness(0.9)' }}
+        className="w-full h-full block pointer-events-none"
+        aria-hidden="true"
+        style={{ pointerEvents: "none", filter: "contrast(1.1) brightness(0.9)" }}
       />
     </div>
   );

@@ -12,6 +12,8 @@ export function MouseTrail() {
         <canvas
             className="hidden md:block pointer-events-none fixed inset-0 z-[5] opacity-30 dark:opacity-20"
             id="canvas"
+            aria-hidden="true"
+            style={{ pointerEvents: "none" }}
         />
     );
 }

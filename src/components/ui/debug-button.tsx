@@ -3,20 +3,41 @@
 import React from 'react';
 
 export const DebugButton = () => {
-    const [blocker, setBlocker] = React.useState<string>("Checking...");
+    const [blocker, setBlocker] = React.useState<string>("Move cursor...");
+    const lastPosRef = React.useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
     React.useEffect(() => {
+        const handleMove = (e: PointerEvent) => {
+            lastPosRef.current = { x: e.clientX, y: e.clientY };
+        };
+
         const interval = setInterval(() => {
-            const el = document.elementFromPoint(50, 50); // Coordinates of this button approx
-            if (el) {
-                const id = el.id ? `#${el.id}` : '';
-                const cls = el.className ? `.${typeof el.className === 'string' ? el.className.split(' ')[0] : 'svg'}` : '';
-                setBlocker(`${el.tagName}${id}${cls}`);
+            const { x, y } = lastPosRef.current;
+            const elements = document.elementsFromPoint(x, y);
+
+            const hit = elements.find((node) => {
+                if (!(node instanceof HTMLElement)) return false;
+                if (node.id === "test-button") return false;
+                const style = window.getComputedStyle(node);
+                return style.pointerEvents !== "none";
+            }) as HTMLElement | undefined;
+
+            if (hit) {
+                const id = hit.id ? `#${hit.id}` : "";
+                const cls = hit.className ? `.${String(hit.className).split(" ")[0]}` : "";
+                const style = window.getComputedStyle(hit);
+                const z = style.zIndex === "auto" ? "auto" : style.zIndex;
+                setBlocker(`${hit.tagName}${id}${cls} z:${z} @ ${x},${y}`);
             } else {
-                setBlocker("None");
+                setBlocker(`None @ ${x},${y}`);
             }
-        }, 1000);
-        return () => clearInterval(interval);
+        }, 250);
+
+        window.addEventListener("pointermove", handleMove, { passive: true });
+        return () => {
+            window.removeEventListener("pointermove", handleMove);
+            clearInterval(interval);
+        };
     }, []);
 
     return (
