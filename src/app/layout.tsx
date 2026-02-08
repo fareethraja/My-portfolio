@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display, Orbitron, Cormorant_Garamond } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display, Orbitron, Cormorant_Garamond, Gravitas_One } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClientNavBar } from "@/components/ui/client-navbar";
@@ -34,28 +34,47 @@ const cormorant = Cormorant_Garamond({
   weight: ["400", "500", "600", "700"],
 });
 
+const oswald = Gravitas_One({
+  variable: "--font-oswald",
+  subsets: ["latin"],
+  weight: ["400"],
+});
+
 export const metadata: Metadata = {
   title: {
-    default: "Fareeth Raja | Product Manager & AI Strategist",
+    default: "Fareeth Raja | Product Manager & AI Strategist | Official Portfolio",
     template: "%s | Fareeth Raja",
   },
   description:
-    "Portfolio of Fareeth Raja – Product Manager specializing in AI-driven automation, strategic product growth, and enterprise solutions. Explore projects like SmartSlot, Roommate Key Tracker, and more.",
+    "Official portfolio of Fareeth Raja, a Product Manager and AI Strategist. Fareeth Raja specializes in AI-driven automation, strategic product growth, and enterprise solutions. Explore Fareeth Raja's projects, skills, and expertise.",
   keywords: [
     "Fareeth Raja",
+    "Fareeth Raja Portfolio",
+    "Fareeth Raja Product Manager",
+    "Fareeth Raja AI",
     "Fareeth",
+    "Raja Fareeth",
+    "Product Manager Fareeth Raja",
+    "AI Strategist Fareeth Raja",
+    "Fareeth Raja Developer",
+    "Fareeth Raja Projects",
     "Product Manager",
     "Product Management",
     "AI Strategist",
-    "Automation",
+    "Automation Expert",
+    "Digital Products",
     "Portfolio",
     "React Developer",
-    "Next.js",
+    "Next.js Developer",
     "SmartSlot",
     "Roommate Key Tracker",
   ],
-  authors: [{ name: "Fareeth Raja" }],
+  authors: [{ name: "Fareeth Raja", url: "https://fareeth.com" }],
   creator: "Fareeth Raja",
+  publisher: "Fareeth Raja",
+  alternates: {
+    canonical: "https://fareeth.com",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -102,7 +121,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${orbitron.variable} ${cormorant.variable} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${orbitron.variable} ${cormorant.variable} ${oswald.variable} antialiased min-h-screen flex flex-col`}
       >
         <ThemeProvider
           attribute="class"
@@ -116,20 +135,51 @@ export default function RootLayout({
               __html: JSON.stringify({
                 "@context": "https://schema.org",
                 "@type": "Person",
+                "@id": "https://fareeth.com/#person",
                 name: "Fareeth Raja",
+                givenName: "Fareeth",
+                familyName: "Raja",
+                alternateName: ["Fareeth", "Raja Fareeth", "F. Raja"],
                 url: "https://fareeth.com",
+                image: "https://fareeth.com/og-image.png",
                 sameAs: [
-                  "https://twitter.com/fareeth",
-                  "https://linkedin.com/in/fareeth",
-                  "https://github.com/fareeth",
+                  "https://twitter.com/fareeeth",
+                  "https://linkedin.com/in/fareeeth",
+                  "https://github.com/fareeeth",
                 ],
-                jobTitle: "Product Manager",
+                jobTitle: "Product Manager & AI Strategist",
                 worksFor: {
                   "@type": "Organization",
-                  name: "Independent",
+                  name: "Independent Consultant",
                 },
+                knowsAbout: [
+                  "Product Management",
+                  "AI Automation",
+                  "Digital Products",
+                  "Strategic Growth",
+                  "React",
+                  "Next.js",
+                  "TypeScript",
+                ],
                 description:
-                  "Product Manager specializing in AI-driven automation, strategic product growth, and enterprise solutions.",
+                  "Fareeth Raja is a Product Manager and AI Strategist specializing in building digital products, AI-driven automation, and strategic product growth.",
+              }),
+            }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "@id": "https://fareeth.com/#website",
+                url: "https://fareeth.com",
+                name: "Fareeth Raja Portfolio",
+                description: "Official portfolio website of Fareeth Raja",
+                publisher: {
+                  "@id": "https://fareeth.com/#person"
+                },
+                inLanguage: "en-US",
               }),
             }}
           />

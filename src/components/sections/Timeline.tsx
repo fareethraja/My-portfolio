@@ -117,8 +117,8 @@ export function Timeline() {
                                         showTooltip={true}
                                         className="w-full"
                                     >
-                                        <div className="liquid-glass w-full aspect-[16/7] sm:aspect-[16/6] rounded-2xl p-5 sm:p-6 md:p-8 flex flex-col justify-center">
-                                            <span className="relative z-10 text-xs sm:text-sm font-mono text-zinc-400 block mb-2">
+                                        <div className="liquid-glass w-full rounded-2xl p-5 sm:p-6 md:p-8 flex flex-col justify-start min-h-[220px] sm:min-h-[200px]">
+                                            <span className="relative z-10 text-sm sm:text-base font-mono text-zinc-400 block mb-2">
                                                 {item.year}
                                             </span>
                                             <h3 className="relative z-10 text-base sm:text-lg md:text-xl font-semibold mb-2 text-white">

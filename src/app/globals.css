@@ -1,6 +1,26 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: 'SourGummy';
+  src: url('/fonts/SourGummy_Expanded-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+.font-sourgummy {
+  font-family: 'SourGummy', sans-serif !important;
+}
+
+.font-oswald {
+  font-family: var(--font-oswald), sans-serif !important;
+}
+
+.font-orbitron {
+  font-family: var(--font-orbitron), sans-serif !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
