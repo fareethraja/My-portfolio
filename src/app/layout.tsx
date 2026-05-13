@@ -47,7 +47,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://fareeth.com"),
+  metadataBase: new URL("https://fareeth.vercel.app"),
   title: {
     default: "Fareeth Raja | Product Manager & Full-Stack Product Engineer",
     template: "%s | Fareeth Raja",
@@ -80,16 +80,16 @@ export const metadata: Metadata = {
     "SmartSlot",
     "RoomSpace",
   ],
-  authors: [{ name: "Fareeth Raja", url: "https://fareeth.com" }],
+  authors: [{ name: "Fareeth Raja", url: "https://fareeth.vercel.app" }],
   creator: "Fareeth Raja",
   publisher: "Fareeth Raja",
   alternates: {
-    canonical: "https://fareeth.com",
+    canonical: "https://fareeth.vercel.app",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://fareeth.com",
+    url: "https://fareeth.vercel.app",
     title: "Fareeth Raja | Product Manager & Full-Stack Product Engineer",
     description:
       "Explore the portfolio of Fareeth Raja, building FinTech, AI chat, trading, payments, and automation products.",
@@ -147,13 +147,13 @@ export default function RootLayout({
               __html: JSON.stringify({
                 "@context": "https://schema.org",
                 "@type": "Person",
-                "@id": "https://fareeth.com/#person",
+                "@id": "https://fareeth.vercel.app/#person",
                 name: "Fareeth Raja",
                 givenName: "Fareeth",
                 familyName: "Raja",
                 alternateName: ["Fareeth", "Raja Fareeth", "F. Raja"],
-                url: "https://fareeth.com",
-                image: "https://fareeth.com/og-image.png",
+                url: "https://fareeth.vercel.app",
+                image: "https://fareeth.vercel.app/og-image.png",
                 sameAs: [
                   "https://www.linkedin.com/in/fareethraja/",
                   "https://github.com/fareethraja",
@@ -187,12 +187,12 @@ export default function RootLayout({
               __html: JSON.stringify({
                 "@context": "https://schema.org",
                 "@type": "WebSite",
-                "@id": "https://fareeth.com/#website",
-                url: "https://fareeth.com",
+                "@id": "https://fareeth.vercel.app/#website",
+                url: "https://fareeth.vercel.app",
                 name: "Fareeth Raja Portfolio",
                 description: "Official portfolio website of Fareeth Raja",
                 publisher: {
-                  "@id": "https://fareeth.com/#person"
+                  "@id": "https://fareeth.vercel.app/#person"
                 },
                 inLanguage: "en-US",
               }),
