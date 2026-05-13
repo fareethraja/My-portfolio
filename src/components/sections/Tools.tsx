@@ -2,43 +2,51 @@
 
 import { motion } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import { LineChart, Cpu, Database, Layout } from "lucide-react";
+import { Cpu, CreditCard, Database, Layout, LineChart, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TOOLS_DATA = [
     {
-        category: "Product Strategy",
-        items: ["Market Research", "User Framing", "MVP Definition", "Stakeholder Comm"],
+        category: "Product Management",
+        items: ["Roadmapping", "Requirement Gathering", "Feature Planning", "User Flows", "Stakeholder Communication"],
         icon: LineChart,
         gradient: "from-blue-500 to-cyan-400",
         glowColor: "rgba(59, 130, 246, 0.5)",
     },
     {
-        category: "AI & Engineering",
-        items: ["AI Agents", "Prompt Engineering", "Automation Logic", "React & Node.js"],
-        icon: Cpu,
+        category: "Frontend Stack",
+        items: ["Next.js", "React.js", "TypeScript", "Tailwind CSS", "Radix UI", "Framer Motion", "Recharts"],
+        icon: Layout,
         gradient: "from-pink-500 to-rose-400",
         glowColor: "rgba(236, 72, 153, 0.5)",
     },
     {
-        category: "Data & Analytics",
-        items: ["SQL", "Power BI", "Excel Strategies", "Data Interpretation"],
+        category: "Backend & APIs",
+        items: ["Go", "Echo", "GORM", "MySQL", "Node.js", "REST APIs", "WebSocket APIs", "RBAC"],
         icon: Database,
         gradient: "from-emerald-500 to-teal-400",
         glowColor: "rgba(16, 185, 129, 0.5)",
     },
     {
-        category: "Core Stack",
-        items: [
-            "React / Tailwind",
-            "Firebase",
-            "Git / GitHub",
-            "Figma",
-            "n8n",
-        ],
-        icon: Layout,
+        category: "AI & FinTech",
+        items: ["Azure OpenAI", "AI Chatbots", "Prompt Engineering", "Market Data", "Screeners", "Backtesting", "Paper Trading"],
+        icon: Cpu,
         gradient: "from-violet-500 via-pink-500 to-orange-400",
         glowColor: "rgba(139, 92, 246, 0.5)",
+    },
+    {
+        category: "Payments & Cloud",
+        items: ["Razorpay", "Webhooks", "Subscriptions", "Feature Flags", "Docker", "Azure Blob Storage", "Vercel"],
+        icon: CreditCard,
+        gradient: "from-amber-500 to-orange-400",
+        glowColor: "rgba(245, 158, 11, 0.5)",
+    },
+    {
+        category: "Analytics & Design",
+        items: ["Power BI", "Excel", "Data Visualization", "Figma", "Canva", "Financial Analysis", "GitHub"],
+        icon: Palette,
+        gradient: "from-sky-500 to-indigo-400",
+        glowColor: "rgba(14, 165, 233, 0.5)",
     },
 ];
 
@@ -83,15 +91,21 @@ export function Tools() {
             className="min-h-screen py-24 flex flex-col items-center justify-center"
         >
             <div className="section-container">
-                <motion.h2 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5 }}
-                    className="text-3xl font-bold mb-16 text-center"
+                    className="flex flex-col items-center mb-16 text-center"
                 >
-                    Skills
-                </motion.h2>
+                    <span className="eyebrow mb-5">Stack</span>
+                    <h2 className="font-display text-4xl md:text-6xl font-bold tracking-[-0.03em] text-foreground">
+                        Skills &amp; <span className="text-gradient-primary">tools</span>
+                    </h2>
+                    <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground">
+                        The kit I reach for when shipping product, AI, and FinTech experiences.
+                    </p>
+                </motion.div>
 
                 <motion.div 
                     variants={containerVariants}

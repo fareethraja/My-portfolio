@@ -2,47 +2,48 @@
 
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import { Workflow, Home, Zap, Calendar, Key } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Calendar, Key, TrendingUp, Zap } from "lucide-react";
 import Link from "next/link";
 import React, { useRef, useState } from "react";
 import { useAnalytics } from "@/hooks/use-analytics";
 
 const PROJECTS_DATA = [
     {
-        title: "SmartSlot",
-        subtitle: "Appointment Management PWA for Healthcare",
+        title: "Finverse",
+        subtitle: "AI-powered Stock Market Super App",
         description:
-            "Built a simple booking system where patients can book appointments through a single link. Clinics can plan their day better, avoid overbooking, and spend less time coordinating so they focus more on patients, not schedules.",
-        tags: ["Product Management", "PWA", "User Experience", "Healthcare Tech", "Supabase"],
+            "Own product planning and execution across Zeno AI, screeners, strategy builder, backtesting, paper trading, courses, checkout, admin workflows, and real-time market tools.",
+        tags: ["Product Management", "FinTech", "AI Chat", "Next.js", "Go", "Razorpay"],
+        icon: <TrendingUp className="h-4 w-4" />,
+        link: "https://finverse.trade/",
+        hasDemo: true,
+    },
+    {
+        title: "SmartSlot",
+        subtitle: "Mobile-first Dental Appointment PWA",
+        description:
+            "Built a Progressive Web App for dental students and interns to create daily slots, share WhatsApp booking links, manage leave days, and track case progress without requiring patient login.",
+        tags: ["React", "Tailwind CSS", "Supabase", "Vercel", "Clinic Workflow"],
         icon: <Calendar className="h-4 w-4" />,
         link: "https://smartslot-lilac.vercel.app/",
         hasDemo: true,
     },
     {
-        title: "Roommate Key Tracker",
-        subtitle: "IoT-based Utility for Shared Living",
+        title: "RoomSpace",
+        subtitle: "Roommate Key Tracker",
         description:
-            "Reduced key-related confusion in shared homes by ~30%, improving trust and daily coordination among roommates.",
-        tags: ["Product Ideation", "IoT Concept", "Problem Validation", "UX Thinking"],
+            "Built a mobile/web app to help roommates track who holds the room key with accountability, real-time updates, and offline synchronization for shared-living coordination.",
+        tags: ["React", "Node.js", "Firebase", "Offline Sync", "UX Thinking"],
         icon: <Key className="h-4 w-4" />,
-        hasDemo: true, // Requested hover effect, link can be added later or defaults to #
         link: "https://roommate-key-tracker.vercel.app/",
-    },
-    {
-        title: "Automated Workflow Engine",
-        subtitle: "Enterprise Automation with n8n",
-        description:
-            "Built an enterprise-style automation engine using n8n to streamline repetitive workflows, API integrations, and notifications. Reduced manual coordination and improved reliability across operational processes.",
-        tags: ["Automation", "n8n", "API Integration", "Systems Thinking"],
-        icon: <Workflow className="h-4 w-4" />,
+        hasDemo: true,
     },
     {
         title: "Hybrid 2.0",
         subtitle: "Renewable Mobility Research",
         description:
-            "Authored a research-backed concept on a renewable energy hybrid mobility system targeting ~40% efficiency improvement. Focused on feasibility analysis, AI-assisted validation, and future scalability.",
-        tags: ["Market Research", "Feasibility Analysis", "Sustainable Tech", "AI Strategy"],
+            "Researched and presented a renewable-energy automobile mechanism focused on reducing fossil-fuel dependence and supporting sustainable development.",
+        tags: ["Market Research", "Sustainable Tech", "Business Presentation", "AI-assisted Research"],
         icon: <Zap className="h-4 w-4" />,
     },
 ];
@@ -54,7 +55,15 @@ export function Projects() {
             className="min-h-screen py-24 flex flex-col items-center justify-center"
         >
             <div className="section-container">
-                <h2 className="text-3xl font-bold mb-16 text-center">Projects</h2>
+                <div className="flex flex-col items-center mb-16 text-center">
+                    <span className="eyebrow mb-5">Selected Work</span>
+                    <h2 className="font-display text-4xl md:text-6xl font-bold tracking-[-0.03em] text-foreground">
+                        <span className="text-gradient-accent">Projects</span> I&apos;ve shipped
+                    </h2>
+                    <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground">
+                        FinTech super apps, mobile-first PWAs, and product experiments built end to end.
+                    </p>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {PROJECTS_DATA.map((project, index) => (

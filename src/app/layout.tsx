@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display, Orbitron, Cormorant_Garamond, Gravitas_One } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display, Orbitron, Cormorant_Garamond, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClientNavBar } from "@/components/ui/client-navbar";
@@ -34,40 +34,51 @@ const cormorant = Cormorant_Garamond({
   weight: ["400", "500", "600", "700"],
 });
 
-const oswald = Gravitas_One({
-  variable: "--font-oswald",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://fareeth.com"),
   title: {
-    default: "Fareeth Raja | Product Manager & AI Strategist | Official Portfolio",
+    default: "Fareeth Raja | Product Manager & Full-Stack Product Engineer",
     template: "%s | Fareeth Raja",
   },
   description:
-    "Official portfolio of Fareeth Raja, a Product Manager and AI Strategist. Fareeth Raja specializes in AI-driven automation, strategic product growth, and enterprise solutions. Explore Fareeth Raja's projects, skills, and expertise.",
+    "Official portfolio of Fareeth Raja, a Product Manager and full-stack product engineer building FinTech, AI chat, trading, payments, and automation products.",
   keywords: [
     "Fareeth Raja",
     "Fareeth Raja Portfolio",
     "Fareeth Raja Product Manager",
     "Fareeth Raja AI",
+    "Fareeth Raja Finverse",
     "Fareeth",
     "Raja Fareeth",
     "Product Manager Fareeth Raja",
-    "AI Strategist Fareeth Raja",
-    "Fareeth Raja Developer",
+    "Full-Stack Product Engineer Fareeth Raja",
+    "FinTech Product Manager",
     "Fareeth Raja Projects",
     "Product Manager",
     "Product Management",
-    "AI Strategist",
-    "Automation Expert",
-    "Digital Products",
+    "Full-Stack Product Engineer",
+    "FinTech",
+    "AI Products",
+    "Trading Tools",
+    "Finverse",
     "Portfolio",
     "React Developer",
     "Next.js Developer",
+    "Go Developer",
     "SmartSlot",
-    "Roommate Key Tracker",
+    "RoomSpace",
   ],
   authors: [{ name: "Fareeth Raja", url: "https://fareeth.com" }],
   creator: "Fareeth Raja",
@@ -78,10 +89,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://fareeth.com", // Replace with actual domain if known, or keep generic/env var
-    title: "Fareeth Raja | Product Manager & AI Strategist",
+    url: "https://fareeth.com",
+    title: "Fareeth Raja | Product Manager & Full-Stack Product Engineer",
     description:
-      "Explore the portfolio of Fareeth Raja, a Product Manager building AI-powered solutions and scalable products.",
+      "Explore the portfolio of Fareeth Raja, building FinTech, AI chat, trading, payments, and automation products.",
     siteName: "Fareeth Raja Portfolio",
     images: [
       {
@@ -94,9 +105,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fareeth Raja | Product Manager & AI Strategist",
+    title: "Fareeth Raja | Product Manager & Full-Stack Product Engineer",
     description:
-      "Product Manager specializing in AI, Automation, and Growth. Check out my latest work.",
+      "Product Manager building FinTech, AI chat, trading, payments, and automation products.",
     creator: "@fareeth", // Replace with actual handle if different
     images: ["/og-image.png"],
   },
@@ -119,14 +130,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${orbitron.variable} ${cormorant.variable} ${oswald.variable} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${orbitron.variable} ${cormorant.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
+          forcedTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <script
@@ -143,26 +155,29 @@ export default function RootLayout({
                 url: "https://fareeth.com",
                 image: "https://fareeth.com/og-image.png",
                 sameAs: [
-                  "https://twitter.com/fareeeth",
-                  "https://linkedin.com/in/fareeeth",
-                  "https://github.com/fareeeth",
+                  "https://www.linkedin.com/in/fareethraja/",
+                  "https://github.com/fareethraja",
                 ],
-                jobTitle: "Product Manager & AI Strategist",
+                jobTitle: "Product Manager & Full-Stack Product Engineer",
                 worksFor: {
                   "@type": "Organization",
-                  name: "Independent Consultant",
+                  name: "Bermer Software Limited",
                 },
                 knowsAbout: [
                   "Product Management",
                   "AI Automation",
+                  "FinTech Products",
+                  "Trading Tools",
+                  "Payments",
                   "Digital Products",
-                  "Strategic Growth",
                   "React",
                   "Next.js",
                   "TypeScript",
+                  "Go",
+                  "MySQL",
                 ],
                 description:
-                  "Fareeth Raja is a Product Manager and AI Strategist specializing in building digital products, AI-driven automation, and strategic product growth.",
+                  "Fareeth Raja is a Product Manager and full-stack product engineer building FinTech, AI chat, trading, payments, and automation products.",
               }),
             }}
           />

@@ -13,12 +13,73 @@
   font-family: 'SourGummy', sans-serif !important;
 }
 
+.font-display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif !important;
+  letter-spacing: -0.02em;
+}
+
+.font-jetbrains {
+  font-family: var(--font-jetbrains), ui-monospace, monospace !important;
+}
+
+/* legacy alias kept so existing markup doesn't break */
 .font-oswald {
-  font-family: var(--font-oswald), sans-serif !important;
+  font-family: var(--font-display), sans-serif !important;
+  letter-spacing: -0.02em;
 }
 
 .font-orbitron {
   font-family: var(--font-orbitron), sans-serif !important;
+}
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, #fafafa 0%, #a78bfa 50%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(135deg, #d4ff4a 0%, #34d399 50%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgb(212, 255, 74);
+}
+
+.eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgb(212, 255, 74);
+  box-shadow: 0 0 12px rgb(212, 255, 74);
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee-scroll 40s linear infinite;
 }
 
 @custom-variant dark (&:is(.dark *));

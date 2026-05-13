@@ -4,32 +4,32 @@ import { motion } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { Card, CardCanvas } from "@/components/ui/animated-glow-card";
 import { XCard } from "@/components/ui/x-gradient-card";
-import { Target, Rocket, Puzzle, FlaskConical } from "lucide-react";
+import { Cpu, LineChart, Rocket, Target } from "lucide-react";
 
 const SKILLS_DATA = [
     {
-        title: "Strategic Thinking",
-        description: "Seeing the bigger picture and connecting dots others might miss",
+        title: "Product Ownership",
+        description: "Turning messy requirements into roadmaps, user flows, and shipped product decisions",
         icon: Target,
-        gradient: "from-violet-500 to-purple-600",
+        gradient: "from-blue-500 to-cyan-500",
     },
     {
-        title: "Execution Focus",
-        description: "Moving from ideas to implementation without getting stuck",
+        title: "Technical Execution",
+        description: "Moving between product specs, frontend, backend, integrations, and QA",
         icon: Rocket,
-        gradient: "from-pink-500 to-rose-600",
+        gradient: "from-pink-500 to-rose-500",
     },
     {
-        title: "System-Level Thinking",
-        description: "Understanding how pieces fit together",
-        icon: Puzzle,
-        gradient: "from-cyan-500 to-blue-600",
+        title: "AI & Automation",
+        description: "Designing AI chat flows, automation logic, and workflows that reduce manual work",
+        icon: Cpu,
+        gradient: "from-violet-500 to-indigo-500",
     },
     {
-        title: "Experimentation",
-        description: "Testing assumptions, learning from failures",
-        icon: FlaskConical,
-        gradient: "from-amber-500 to-orange-600",
+        title: "Finance Context",
+        description: "Bringing fintech, payments, markets, and analytics context into product decisions",
+        icon: LineChart,
+        gradient: "from-emerald-500 to-teal-500",
     },
 ];
 
@@ -49,7 +49,7 @@ const skillCardVariants = {
 
 export function About() {
     return (
-        <section id="about" className="min-h-screen py-24 flex items-center justify-center relative">
+        <section id="about" className="min-h-fit md:min-h-screen py-12 md:py-24 flex items-center justify-center relative">
             <div className="w-full max-w-6xl mx-auto px-6 md:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
 
@@ -62,31 +62,30 @@ export function About() {
                         className="space-y-6"
                     >
                         <div>
-                            <p className="text-sm font-semibold uppercase tracking-widest text-primary mb-2">About</p>
-                            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-                                The Short Version
+                            <span className="eyebrow mb-5">About</span>
+                            <h2 className="font-display mt-5 text-4xl md:text-5xl font-bold tracking-[-0.03em] text-foreground">
+                                Product builder at the <span className="text-gradient-accent">finance &amp; AI</span> edge
                             </h2>
                         </div>
 
                         <div className="space-y-4 text-muted-foreground leading-relaxed">
                             <p>
-                                I&apos;m an MBA student specializing in Finance and Marketing with a background in Economics.
+                                I&apos;m an MBA Finance and Marketing candidate who works at the intersection of product management, full-stack execution, and fintech.
                             </p>
                             <p>
-                                My interest lies in understanding how products work. Not just the surface-level features, but the systems behind them. I enjoy breaking down complex problems, running experiments, and finding solutions that actually make sense.
+                                Right now, I work on Finverse through a Bermer Software Limited client engagement, owning product planning while shipping across Next.js, React, Go, MySQL, Azure OpenAI, Razorpay, and market-data workflows.
                             </p>
                             <p>
-                                I&apos;m particularly drawn to{" "}
-                                <span className="text-foreground font-medium">AI-driven products</span> and the{" "}
-                                <span className="text-foreground font-medium">gaming industry</span>. These are spaces where technology meets user experience in interesting ways.
+                                I care about products that move from idea to usable systems: clear user flows, reliable payments, AI chat experiences, admin tooling, analytics, and trading workflows that can survive real users.
                             </p>
                         </div>
 
                         {/* Download Resume Button - Interactive Hover Button */}
                         <a
-                            href="https://drive.google.com/file/d/1_6HAbWfhWHZm5Xq-6rw8G3j7D1u9Lbm_/view?usp=sharing"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href="/resume/fareeth-raja-resume-2026.pdf"
+                            download
+                            aria-label="Download Fareeth Raja resume"
+                            title="Download Fareeth Raja resume"
                             className="inline-block mt-4"
                         >
                             <InteractiveHoverButton
@@ -111,8 +110,8 @@ export function About() {
                                         authorName="Fareeth Raja"
                                         authorHandle="fareeth"
                                         authorImage="https://github.com/shadcn.png"
-                                        timestamp="Always Learning"
-                                        link="#"
+                                        timestamp="Product, AI, FinTech"
+                                        link="https://finverse.trade/"
                                     >
                                         <h3 className="text-xl font-bold text-foreground mb-5">What I Bring</h3>
                                         <div className="grid grid-cols-2 gap-3">
