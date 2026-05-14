@@ -14,6 +14,17 @@ const ProceduralGroundBackground: React.FC = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Skip heavy WebGL on low-end mobile, very small screens, or when the user
+    // prefers reduced motion. Falls back to the static gradient body.
+    if (typeof window !== "undefined") {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const tooSmall = window.innerWidth < 640;
+      const lowMemory = (navigator as unknown as { deviceMemory?: number }).deviceMemory;
+      if (reduceMotion || tooSmall || (typeof lowMemory === "number" && lowMemory <= 2)) {
+        return;
+      }
+    }
+
     const gl = canvas.getContext('webgl');
     if (!gl) return;
 

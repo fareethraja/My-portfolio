@@ -517,3 +517,49 @@
     opacity: 1;
   }
 }
+
+/* View Transitions for cross-page navigation (e.g., / -> /now) */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+}
+
+/* Respect users who prefer reduced motion. Disables loops, marquees,
+   shimmers, jiggles, and pings while leaving normal scrolling intact. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-marquee,
+  .animate-meteor-effect {
+    animation: none !important;
+  }
+
+  .liquid-glass::before {
+    animation: none !important;
+    transform: translateX(0) !important;
+    opacity: 0 !important;
+  }
+
+  .card-backdrop {
+    animation: none !important;
+  }
+
+  .glow-card .border-left,
+  .glow-card .border-right,
+  .glow-card .border-top,
+  .glow-card .border-bottom,
+  .glow-card::before {
+    animation: none !important;
+  }
+}

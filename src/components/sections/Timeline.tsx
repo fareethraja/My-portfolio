@@ -69,9 +69,16 @@ export function Timeline() {
                     <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground">
                         Product, fintech, AI, and business work shaping the current portfolio.
                     </p>
-                    <p className="mt-3 font-jetbrains text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
-                        psst, hover the last card
-                    </p>
+                    <span
+                        aria-hidden
+                        title="There's an easter egg in here…"
+                        className="mt-4 inline-flex h-2 w-2 rounded-full bg-amber-300"
+                        style={{
+                            boxShadow:
+                                "0 0 12px rgba(252, 211, 77, 0.85), 0 0 28px rgba(245, 158, 11, 0.45)",
+                            animation: "pulse 2.6s ease-in-out infinite",
+                        }}
+                    />
                 </div>
 
                 <div className="relative pl-8 md:pl-0">
@@ -173,6 +180,43 @@ function GoldenCard({ year, title, description }: GoldenCardProps) {
             aria-pressed={active}
             data-unlocked={unlocked}
         >
+            {/* "click me" hint until first unlock */}
+            <AnimatePresence>
+                {!unlocked && (
+                    <motion.div
+                        key="click-hint"
+                        initial={{ opacity: 0, y: -6, scale: 0.9 }}
+                        animate={{
+                            opacity: 1,
+                            y: [0, -4, 0],
+                            scale: 1,
+                            transition: {
+                                opacity: { duration: 0.4 },
+                                scale: { duration: 0.4 },
+                                y: { duration: 1.6, repeat: Infinity, ease: "easeInOut" },
+                            },
+                        }}
+                        exit={{ opacity: 0, y: -10, scale: 0.9, transition: { duration: 0.25 } }}
+                        className="pointer-events-none absolute -top-3 right-4 z-30 -translate-y-full"
+                    >
+                        <div className="relative inline-flex items-center gap-1.5 rounded-full border border-amber-300/40 bg-amber-300/15 px-3 py-1 backdrop-blur-md shadow-[0_0_20px_rgba(252,211,77,0.35)]">
+                            <span
+                                className="h-1.5 w-1.5 rounded-full bg-amber-300"
+                                style={{ boxShadow: "0 0 10px rgba(252, 211, 77, 1)" }}
+                            />
+                            <span className="font-jetbrains text-[10px] uppercase tracking-[0.18em] text-amber-100">
+                                tap me
+                            </span>
+                            {/* tail */}
+                            <span
+                                aria-hidden
+                                className="absolute -bottom-1 right-5 h-2 w-2 rotate-45 rounded-[2px] border-r border-b border-amber-300/40 bg-amber-300/15"
+                            />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <AnimatePresence>
                 {active && (
                     <motion.div

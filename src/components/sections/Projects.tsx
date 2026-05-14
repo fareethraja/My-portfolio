@@ -1,8 +1,8 @@
 "use client";
 
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import { Calendar, Key, TrendingUp, Zap } from "lucide-react";
+import { ArrowUpRight, Calendar, Key, TrendingUp, Zap } from "lucide-react";
 import Link from "next/link";
 import React, { useRef, useState } from "react";
 import { useAnalytics } from "@/hooks/use-analytics";
@@ -118,7 +118,7 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, hasDemo }: G
     const CardContent = (
         <div
             ref={cardRef}
-            className="relative h-full rounded-[1.25rem] border-[0.75px] border-zinc-200 dark:border-zinc-800 p-2 md:rounded-[1.5rem] md:p-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-zinc-500/20 dark:hover:shadow-zinc-900/40 will-change-transform cursor-pointer"
+            className="relative h-full rounded-[1.25rem] border-[0.75px] border-zinc-200 dark:border-zinc-800 p-2 md:rounded-[1.5rem] md:p-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-zinc-500/20 dark:hover:shadow-zinc-900/40 active:scale-[0.98] active:shadow-xl will-change-transform cursor-pointer"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
             onMouseMove={handleMouseMove}
@@ -163,27 +163,55 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, hasDemo }: G
             </div>
 
             {/* Float Tooltip */}
-            {hasDemo && isHovering && (
-                <motion.div
-                    style={{
-                        left: springX,
-                        top: springY,
-                        position: 'absolute',
-                        zIndex: 50,
-                        pointerEvents: 'none'
-                    }}
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/90 dark:bg-white/90 text-white dark:text-black text-xs font-bold shadow-xl border border-white/20 dark:border-black/20 transform -translate-x-1/2 -translate-y-[150%]"
-                >
-                    <span>Click to view demo</span>
-                    <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                    </span>
-                </motion.div>
-            )}
+            <AnimatePresence>
+                {hasDemo && isHovering && (
+                    <motion.div
+                        key="demo-tooltip"
+                        style={{
+                            left: springX,
+                            top: springY,
+                            position: 'absolute',
+                            zIndex: 50,
+                            pointerEvents: 'none',
+                        }}
+                        initial={{ opacity: 0, y: 6, scale: 0.92 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{
+                            opacity: 0,
+                            y: 4,
+                            scale: 0.94,
+                            transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] },
+                        }}
+                        transition={{ type: "spring", damping: 22, stiffness: 320, mass: 0.6 }}
+                        className="-translate-x-1/2 -translate-y-[160%]"
+                    >
+                        <div className="relative">
+                            {/* glow halo */}
+                            <div
+                                aria-hidden
+                                className="pointer-events-none absolute -inset-2 rounded-full bg-gradient-to-br from-violet-500/30 to-sky-500/30 opacity-70 blur-xl"
+                            />
+                            <div className="relative inline-flex items-center gap-2 rounded-full border border-white/15 bg-zinc-950/85 px-3 py-1.5 backdrop-blur-md shadow-[0_8px_24px_rgba(139,92,246,0.25)]">
+                                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-sky-500">
+                                    <ArrowUpRight className="h-2.5 w-2.5 text-white" strokeWidth={2.5} />
+                                </span>
+                                <span className="font-jetbrains text-[10px] uppercase tracking-[0.18em] text-white/85">
+                                    View live demo
+                                </span>
+                                <span className="relative flex h-1.5 w-1.5">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                                </span>
+                                {/* tail */}
+                                <span
+                                    aria-hidden
+                                    className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 rounded-[2px] border-r border-b border-white/15 bg-zinc-950/85"
+                                />
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 

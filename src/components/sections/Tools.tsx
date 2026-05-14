@@ -144,7 +144,7 @@ const GridItem = ({ Icon, title, items, gradient, glowColor }: GridItemProps) =>
             variants={cardVariants}
             className="min-h-56 list-none group/item"
         >
-            <div className="relative h-full rounded-2xl border border-zinc-200 dark:border-zinc-800 p-2 md:rounded-3xl md:p-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl will-change-transform"
+            <div className="relative h-full rounded-2xl border border-zinc-200 dark:border-zinc-800 p-2 md:rounded-3xl md:p-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98] will-change-transform"
                 style={{ 
                     boxShadow: `0 0 40px ${glowColor.replace('0.5', '0.1')}`,
                 }}

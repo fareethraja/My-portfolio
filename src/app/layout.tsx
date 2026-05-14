@@ -7,6 +7,8 @@ import ProceduralGroundBackground from "@/components/ui/procedural-ground-backgr
 import { MouseTrail } from "@/components/ui/mouse-trail";
 import { DebugButton } from "@/components/ui/debug-button";
 import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
+import { CommandPalette } from "@/components/ui/command-palette";
+import { CommandPaletteHint } from "@/components/ui/command-palette-hint";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -203,6 +205,8 @@ export default function RootLayout({
           <AnalyticsTracker />
           {/* <DebugButton /> */}
           {children}
+          <CommandPalette />
+          <CommandPaletteHint />
           <div className="hidden md:block">
             <ClientNavBar />
           </div>

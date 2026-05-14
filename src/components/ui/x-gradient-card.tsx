@@ -62,16 +62,34 @@ function XCard({
             >
                 <div className="flex gap-3">
                     <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200">
-                            {/* Use a default avatar if image load fails or is empty */}
-                            <img
-                                src={authorImage}
-                                alt={authorName}
-                                className="h-full w-full object-cover"
-                                onError={(e) => {
-                                    e.currentTarget.src = "https://ui.shadcn.com/avatars/02.png"; // Fallback
-                                }}
-                            />
+                        <div
+                            className="h-10 w-10 rounded-full overflow-hidden flex items-center justify-center text-white font-semibold text-sm"
+                            style={{
+                                background:
+                                    "linear-gradient(135deg, #a78bfa 0%, #38bdf8 100%)",
+                                boxShadow: "0 0 18px rgba(167,139,250,0.45)",
+                            }}
+                        >
+                            {authorImage ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={authorImage}
+                                    alt={authorName}
+                                    className="h-full w-full object-cover"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = "none";
+                                    }}
+                                />
+                            ) : (
+                                <span aria-hidden>
+                                    {authorName
+                                        .split(" ")
+                                        .map((n) => n[0])
+                                        .slice(0, 2)
+                                        .join("")
+                                        .toUpperCase()}
+                                </span>
+                            )}
                         </div>
                     </div>
 

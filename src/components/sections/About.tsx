@@ -82,8 +82,7 @@ export function About() {
 
                         {/* Download Resume Button - Interactive Hover Button */}
                         <a
-                            href="/resume/fareeth-raja-resume-2026.pdf"
-                            download
+                            href="/api/resume"
                             aria-label="Download Fareeth Raja resume"
                             title="Download Fareeth Raja resume"
                             className="inline-block mt-4"
@@ -109,9 +108,8 @@ export function About() {
                                     <XCard
                                         authorName="Fareeth Raja"
                                         authorHandle="fareeth"
-                                        authorImage="https://github.com/shadcn.png"
+                                        authorImage=""
                                         timestamp="Product, AI, FinTech"
-                                        link="https://finverse.trade/"
                                     >
                                         <h3 className="text-xl font-bold text-foreground mb-5">What I Bring</h3>
                                         <div className="grid grid-cols-2 gap-3">

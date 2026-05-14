@@ -65,7 +65,7 @@ export function Hero() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pt-32 pb-12 sm:px-6 sm:pt-36 md:px-10 md:pt-32 md:pb-16 lg:pt-36">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pt-10 pb-12 sm:px-6 sm:pt-36 md:px-10 md:pt-32 md:pb-16 lg:pt-36">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:gap-8 lg:gap-12">
           {/* LEFT : headline column */}
           <div className="md:col-span-7">
@@ -135,22 +135,25 @@ export function Hero() {
                 href="https://finverse.trade/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition hover:border-white/30 hover:bg-white/[0.06]"
+                className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition hover:border-white/30 hover:bg-white/[0.06] active:scale-95 active:border-white/40"
               >
                 <Sparkles className="h-4 w-4 text-violet-400" />
                 See Finverse live
                 <ArrowUpRight className="h-4 w-4 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </Link>
               <motion.a
-                href="/resume/fareeth-raja-resume-2026.pdf"
-                download
+                href="/api/resume"
                 whileHover={{
                   rotate: [0, -2, 2, -1, 1, 0],
                   scale: 1.03,
                   transition: { duration: 0.5, ease: "easeInOut" },
                 }}
-                whileTap={{ scale: 0.97 }}
-                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition hover:border-white/25"
+                whileTap={{
+                  scale: 0.96,
+                  rotate: [0, -3, 3, 0],
+                  transition: { duration: 0.4, ease: "easeInOut" },
+                }}
+                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition hover:border-white/25 active:border-white/40"
               >
                 {/* soft gradient orb glow on hover, matching stat cards */}
                 <span
@@ -225,7 +228,12 @@ export function Hero() {
                     scale: 1.02,
                     transition: { type: "spring", stiffness: 300, damping: 12 },
                   }}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 backdrop-blur-sm transition hover:border-white/20"
+                  whileTap={{
+                    scale: 0.97,
+                    rotate: i % 2 === 0 ? -2.5 : 2.5,
+                    transition: { type: "spring", stiffness: 400, damping: 14 },
+                  }}
+                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 backdrop-blur-sm transition active:border-white/30 hover:border-white/20"
                 >
                   <div
                     className={`absolute -top-12 -right-12 h-32 w-32 rounded-full bg-gradient-to-br ${stat.accent} opacity-20 blur-2xl transition-opacity group-hover:opacity-50`}
