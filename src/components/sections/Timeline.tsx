@@ -2,19 +2,19 @@
 
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import { Award } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import TiltedCard from "@/components/ui/tilted-card";
 
 const TIMELINE_DATA = [
     {
         year: "Feb 2026 - Present",
-        title: "Product Manager - Finverse Client Engagement",
+        title: "Product Manager - Finverse Innovations Private Limited",
         description:
-            "Owning product planning and execution for an AI-powered stock market super app through Bermer Software Limited, spanning Zeno AI, screeners, strategies, backtesting, paper trading, courses, checkout, and admin flows.",
+            "Owning product planning and execution for an AI-powered stock market super app, spanning Zeno AI, screeners, strategies, backtesting, paper trading, courses, checkout, and admin flows.",
     },
     {
         year: "Jan 2026 - Present",
-        title: "Product Intern - Bermer Software / Niyantha",
+        title: "Product Intern - Niyantha",
         description:
             "Supported product positioning, business communication, stakeholder presentation work, and hardware/IoT product storytelling before transitioning into active Finverse product ownership.",
     },
@@ -49,10 +49,10 @@ export function Timeline() {
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
-        offset: ["start end", "end start"],
+        offset: ["start 85%", "end 20%"],
     });
 
-    const height = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+    const height = useTransform(scrollYProgress, [0, 0.96], ["0%", "100%"]);
 
     return (
         <section
@@ -93,10 +93,10 @@ export function Timeline() {
                         {TIMELINE_DATA.map((item, index) => (
                             <motion.div
                                 key={index}
-                                initial={{ opacity: 0, y: 50 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-40% 0px -40% 0px" }}
-                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                                initial={{ opacity: 0, y: 24, scale: 0.98 }}
+                                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                                viewport={{ once: true, amount: 0.18, margin: "0px 0px -12% 0px" }}
+                                transition={{ duration: 0.42, delay: 0.03, ease: [0.32, 0.72, 0, 1] }}
                                 className={`flex flex-col md:flex-row items-start ${index % 2 !== 0 ? "md:flex-row-reverse" : ""
                                     } relative pl-12 md:pl-0`}
                             >
@@ -158,15 +158,21 @@ function GoldenCard({ year, title, description }: GoldenCardProps) {
     const [active, setActive] = useState(false);
     const [unlocked, setUnlocked] = useState(false);
 
-    useEffect(() => {
-        if (active && !unlocked) setUnlocked(true);
-    }, [active, unlocked]);
+    const reveal = () => {
+        setActive(true);
+        setUnlocked(true);
+    };
+
+    const toggle = () => {
+        if (!active) setUnlocked(true);
+        setActive((value) => !value);
+    };
 
     return (
         <motion.div
-            onHoverStart={() => setActive(true)}
+            onHoverStart={reveal}
             onHoverEnd={() => setActive(false)}
-            onClick={() => setActive((v) => !v)}
+            onClick={toggle}
             whileTap={{ scale: 0.98 }}
             animate={
                 active

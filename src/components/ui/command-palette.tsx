@@ -37,6 +37,10 @@ const ITEMS: PaletteItem[] = [
     { id: "about", label: "About", hint: "Who I am", icon: User, keywords: ["about", "bio", "who"], action: { type: "scroll", id: "about" } },
     { id: "timeline", label: "Experience", hint: "Career timeline", icon: Briefcase, keywords: ["experience", "timeline", "career", "work"], action: { type: "scroll", id: "timeline" } },
     { id: "projects", label: "Projects", hint: "Selected work", icon: Briefcase, keywords: ["projects", "work", "portfolio", "finverse"], action: { type: "scroll", id: "projects" } },
+    { id: "work", label: "Case Studies", hint: "All case studies", icon: FileText, keywords: ["case", "studies", "writeup", "work"], action: { type: "navigate", href: "/work" } },
+    { id: "case-finverse", label: "Finverse Case Study", hint: "/work/finverse", icon: FileText, keywords: ["finverse", "case", "study", "ai", "fintech"], action: { type: "navigate", href: "/work/finverse" } },
+    { id: "case-smartslot", label: "SmartSlot Case Study", hint: "/work/smartslot", icon: FileText, keywords: ["smartslot", "case", "dental", "pwa"], action: { type: "navigate", href: "/work/smartslot" } },
+    { id: "case-roomspace", label: "RoomSpace Case Study", hint: "/work/roomspace", icon: FileText, keywords: ["roomspace", "case", "key", "tracker"], action: { type: "navigate", href: "/work/roomspace" } },
     { id: "tools", label: "Skills & Tools", hint: "Stack", icon: Cpu, keywords: ["skills", "tools", "stack", "tech"], action: { type: "scroll", id: "tools" } },
     { id: "contact", label: "Contact", hint: "Say hello", icon: Mail, keywords: ["contact", "email", "connect", "hello"], action: { type: "scroll", id: "contact" } },
     { id: "now", label: "Now", hint: "What I'm doing right now", icon: Sparkles, keywords: ["now", "current", "focus", "today"], action: { type: "navigate", href: "/now" } },
@@ -80,15 +84,13 @@ export function CommandPalette() {
 
     useEffect(() => {
         if (open) {
-            setQuery("");
-            setActive(0);
-            requestAnimationFrame(() => inputRef.current?.focus());
+            requestAnimationFrame(() => {
+                setQuery("");
+                setActive(0);
+                inputRef.current?.focus();
+            });
         }
     }, [open]);
-
-    useEffect(() => {
-        setActive(0);
-    }, [query]);
 
     const runAction = useCallback(
         (item: PaletteItem) => {
@@ -177,7 +179,10 @@ export function CommandPalette() {
                                 <input
                                     ref={inputRef}
                                     value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
+                                    onChange={(e) => {
+                                        setQuery(e.target.value);
+                                        setActive(0);
+                                    }}
                                     placeholder="Jump to a section, link, or action…"
                                     className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 focus:outline-none"
                                 />

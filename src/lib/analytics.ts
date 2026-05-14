@@ -5,10 +5,14 @@ export type EventType =
     | 'project_demo_click'
     | 'visitor_session';
 
-interface AnalyticsEvent {
+export type AnalyticsEventData = Record<string, string | number | boolean | null | undefined>;
+
+export interface AnalyticsEvent {
     event_name: EventType;
-    event_data?: any;
+    event_data?: AnalyticsEventData;
     device_type: 'mobile' | 'desktop' | 'tablet';
+    timestamp?: string;
+    path?: string;
 }
 
 const isMobile = () => {
@@ -17,13 +21,18 @@ const isMobile = () => {
 };
 
 // Mock storage for demo purposes (would be Supabase in prod)
-const getLocalEvents = () => {
+const getLocalEvents = (): AnalyticsEvent[] => {
     if (typeof window === 'undefined') return [];
     const stored = localStorage.getItem('analytics_events');
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    try {
+        return JSON.parse(stored) as AnalyticsEvent[];
+    } catch {
+        return [];
+    }
 };
 
-export const trackEvent = async (event_name: EventType, event_data?: any) => {
+export const trackEvent = async (event_name: EventType, event_data?: AnalyticsEventData) => {
     if (typeof window === 'undefined') return;
 
     const event = {

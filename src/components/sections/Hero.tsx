@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowUpRight, FileText, Github, Linkedin, Mail, Sparkles, Zap } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import AnimatedAvailabilityButton from "@/components/ui/animated-availability-button";
 
 const ROLES = [
@@ -32,14 +31,10 @@ const fadeUp = {
 };
 
 function useAvailabilityLabel() {
-  const [label, setLabel] = useState("Available");
-  useEffect(() => {
-    const now = new Date();
-    const month = now.toLocaleString("en-US", { month: "short" });
-    const year = now.getFullYear();
-    setLabel(`Available · ${month} ${year}`);
-  }, []);
-  return label;
+  const now = new Date();
+  const month = now.toLocaleString("en-US", { month: "short" });
+  const year = now.getFullYear();
+  return `Available · ${month} ${year}`;
 }
 
 export function Hero() {

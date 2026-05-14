@@ -163,7 +163,7 @@ export default function RootLayout({
                 jobTitle: "Product Manager & Full-Stack Product Engineer",
                 worksFor: {
                   "@type": "Organization",
-                  name: "Bermer Software Limited",
+                  name: "Finverse Innovations Private Limited",
                 },
                 knowsAbout: [
                   "Product Management",

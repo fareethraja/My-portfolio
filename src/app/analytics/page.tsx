@@ -1,26 +1,55 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAnalyticsData, EventType } from "@/lib/analytics";
+import { getAnalyticsData, type AnalyticsEvent } from "@/lib/analytics";
 import { AuthGuard } from "@/components/analytics/auth-guard";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+
+type Metrics = {
+    totalVisitors: number;
+    mobile: number;
+    desktop: number;
+    scrollDepth: number;
+    connectClicks: Record<string, number>;
+    projectClicks: Record<string, number>;
+};
+
+const emptyMetrics: Metrics = {
+    totalVisitors: 0,
+    mobile: 0,
+    desktop: 0,
+    scrollDepth: 0,
+    connectClicks: {},
+    projectClicks: {},
+};
+
+const countByEventDataKey = (data: AnalyticsEvent[], eventName: AnalyticsEvent["event_name"], key: string) => {
+    return data
+        .filter((event) => event.event_name === eventName)
+        .reduce<Record<string, number>>((acc, event) => {
+            const rawValue = event.event_data?.[key];
+            const name = typeof rawValue === "string" && rawValue.trim() ? rawValue : "Unknown";
+            acc[name] = (acc[name] || 0) + 1;
+            return acc;
+        }, {});
+};
+
+const buildMetrics = (data: AnalyticsEvent[]): Metrics => ({
+    totalVisitors: data.filter((event) => event.event_name === "page_view").length,
+    mobile: data.filter((event) => event.device_type === "mobile").length,
+    desktop: data.filter((event) => event.device_type === "desktop").length,
+    scrollDepth: data.filter((event) => event.event_name === "scroll_depth").length,
+    connectClicks: countByEventDataKey(data, "connect_click", "platform"),
+    projectClicks: countByEventDataKey(data, "project_demo_click", "project"),
+});
 
 export default function AnalyticsPage() {
-    const [events, setEvents] = useState<any[]>([]);
-    const [metrics, setMetrics] = useState({
-        totalVisitors: 0,
-        mobile: 0,
-        desktop: 0,
-        scrollDepth: 0,
-        connectClicks: {},
-        projectClicks: {},
-    });
+    const [metrics, setMetrics] = useState<Metrics>(emptyMetrics);
 
     useEffect(() => {
         const fetchData = async () => {
             const data = await getAnalyticsData();
-            setEvents(data);
-            processMetrics(data);
+            setMetrics(buildMetrics(data));
         };
 
         fetchData();
@@ -28,42 +57,6 @@ export default function AnalyticsPage() {
         const interval = setInterval(fetchData, 5000);
         return () => clearInterval(interval);
     }, []);
-
-    const processMetrics = (data: any[]) => {
-        // Unique visitors (mock logic based on separate sessions/timestamps for now)
-        // For real app, would use session_id
-        const totalVisitors = data.filter(e => e.event_name === 'page_view').length;
-
-        const mobile = data.filter(e => e.device_type === 'mobile').length;
-        const desktop = data.filter(e => e.device_type === 'desktop').length;
-
-        const scrollDepth = data.filter(e => e.event_name === 'scroll_depth').length;
-
-        const connectClicks = data
-            .filter(e => e.event_name === 'connect_click')
-            .reduce((acc: any, curr) => {
-                const platform = curr.event_data?.platform || 'Unknown';
-                acc[platform] = (acc[platform] || 0) + 1;
-                return acc;
-            }, {});
-
-        const projectClicks = data
-            .filter(e => e.event_name === 'project_demo_click')
-            .reduce((acc: any, curr) => {
-                const project = curr.event_data?.project || 'Unknown';
-                acc[project] = (acc[project] || 0) + 1;
-                return acc;
-            }, {});
-
-        setMetrics({
-            totalVisitors,
-            mobile,
-            desktop,
-            scrollDepth,
-            connectClicks,
-            projectClicks
-        });
-    };
 
     // Prepare chart data
     const connectChartData = Object.entries(metrics.connectClicks).map(([name, count]) => ({ name, count }));
@@ -76,7 +69,7 @@ export default function AnalyticsPage() {
 
                     <header>
                         <h1 className="text-4xl font-bold mb-2">Analytics Dashboard</h1>
-                        <p className="text-zinc-400">Real-time insights for Fareeth's Portfolio</p>
+                        <p className="text-zinc-400">Real-time insights for Fareeth&apos;s Portfolio</p>
                     </header>
 
                     {/* Overview Stats */}

@@ -1,10 +1,9 @@
 "use client";
 
-import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { ArrowUpRight, Calendar, Key, TrendingUp, Zap } from "lucide-react";
 import Link from "next/link";
-import React, { useRef, useState } from "react";
+import React from "react";
 import { useAnalytics } from "@/hooks/use-analytics";
 
 const PROJECTS_DATA = [
@@ -16,6 +15,7 @@ const PROJECTS_DATA = [
         tags: ["Product Management", "FinTech", "AI Chat", "Next.js", "Go", "Razorpay"],
         icon: <TrendingUp className="h-4 w-4" />,
         link: "https://finverse.trade/",
+        caseStudySlug: "finverse",
         hasDemo: true,
     },
     {
@@ -26,6 +26,7 @@ const PROJECTS_DATA = [
         tags: ["React", "Tailwind CSS", "Supabase", "Vercel", "Clinic Workflow"],
         icon: <Calendar className="h-4 w-4" />,
         link: "https://smartslot-lilac.vercel.app/",
+        caseStudySlug: "smartslot",
         hasDemo: true,
     },
     {
@@ -36,6 +37,7 @@ const PROJECTS_DATA = [
         tags: ["React", "Node.js", "Firebase", "Offline Sync", "UX Thinking"],
         icon: <Key className="h-4 w-4" />,
         link: "https://roommate-key-tracker.vercel.app/",
+        caseStudySlug: "roomspace",
         hasDemo: true,
     },
     {
@@ -75,9 +77,20 @@ export function Projects() {
                             tags={project.tags}
                             icon={project.icon}
                             link={project.link}
+                            caseStudySlug={project.caseStudySlug}
                             hasDemo={project.hasDemo}
                         />
                     ))}
+                </div>
+
+                <div className="mt-12 flex justify-center">
+                    <Link
+                        href="/work"
+                        className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-zinc-950/70 px-5 py-2.5 text-sm text-foreground backdrop-blur-md transition hover:border-white/30 hover:bg-zinc-950/90 active:scale-[0.97]"
+                    >
+                        Read all case studies
+                        <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </Link>
                 </div>
             </div>
         </section>
@@ -91,37 +104,16 @@ interface GridItemProps {
     description: string;
     tags: string[];
     link?: string;
+    caseStudySlug?: string;
     hasDemo?: boolean;
 }
 
-const GridItem = ({ icon, title, subtitle, description, tags, link, hasDemo }: GridItemProps) => {
-    const [isHovering, setIsHovering] = useState(false);
-    const cardRef = useRef<HTMLDivElement>(null);
+const GridItem = ({ icon, title, subtitle, description, tags, link, caseStudySlug, hasDemo }: GridItemProps) => {
     const { trackProjectClick } = useAnalytics();
-
-    // Mouse tracking for custom tooltip
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!cardRef.current) return;
-        const rect = cardRef.current.getBoundingClientRect();
-        mouseX.set(e.clientX - rect.left);
-        mouseY.set(e.clientY - rect.top);
-    };
-
-    // Smooth spring animation for the tooltip
-    const springConfig = { damping: 20, stiffness: 300 };
-    const springX = useSpring(mouseX, springConfig);
-    const springY = useSpring(mouseY, springConfig);
 
     const CardContent = (
         <div
-            ref={cardRef}
-            className="relative h-full rounded-[1.25rem] border-[0.75px] border-zinc-200 dark:border-zinc-800 p-2 md:rounded-[1.5rem] md:p-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-zinc-500/20 dark:hover:shadow-zinc-900/40 active:scale-[0.98] active:shadow-xl will-change-transform cursor-pointer"
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-            onMouseMove={handleMouseMove}
+            className="relative h-full rounded-[1.25rem] border-[0.75px] border-zinc-200 p-2 transition-colors duration-300 dark:border-zinc-800 md:rounded-[1.5rem] md:p-3"
         >
             <GlowingEffect
                 spread={80}
@@ -160,75 +152,39 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, hasDemo }: G
                         </span>
                     ))}
                 </div>
-            </div>
 
-            {/* Float Tooltip */}
-            <AnimatePresence>
-                {hasDemo && isHovering && (
-                    <motion.div
-                        key="demo-tooltip"
-                        style={{
-                            left: springX,
-                            top: springY,
-                            position: 'absolute',
-                            zIndex: 50,
-                            pointerEvents: 'none',
-                        }}
-                        initial={{ opacity: 0, y: 6, scale: 0.92 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{
-                            opacity: 0,
-                            y: 4,
-                            scale: 0.94,
-                            transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] },
-                        }}
-                        transition={{ type: "spring", damping: 22, stiffness: 320, mass: 0.6 }}
-                        className="-translate-x-1/2 -translate-y-[160%]"
-                    >
-                        <div className="relative">
-                            {/* glow halo */}
-                            <div
-                                aria-hidden
-                                className="pointer-events-none absolute -inset-2 rounded-full bg-gradient-to-br from-violet-500/30 to-sky-500/30 opacity-70 blur-xl"
-                            />
-                            <div className="relative inline-flex items-center gap-2 rounded-full border border-white/15 bg-zinc-950/85 px-3 py-1.5 backdrop-blur-md shadow-[0_8px_24px_rgba(139,92,246,0.25)]">
-                                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-sky-500">
-                                    <ArrowUpRight className="h-2.5 w-2.5 text-white" strokeWidth={2.5} />
-                                </span>
-                                <span className="font-jetbrains text-[10px] uppercase tracking-[0.18em] text-white/85">
-                                    View live demo
-                                </span>
-                                <span className="relative flex h-1.5 w-1.5">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                                </span>
-                                {/* tail */}
-                                <span
-                                    aria-hidden
-                                    className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 rounded-[2px] border-r border-b border-white/15 bg-zinc-950/85"
-                                />
-                            </div>
-                        </div>
-                    </motion.div>
+                {(caseStudySlug || (hasDemo && link)) && (
+                    <div className="relative z-20 mt-5 flex flex-wrap gap-2">
+                        {caseStudySlug && (
+                            <Link
+                                href={`/work/${caseStudySlug}`}
+                                className="liquid-glass inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 font-jetbrains text-[10px] uppercase tracking-[0.18em] text-white/90 shadow-[0_10px_30px_rgba(139,92,246,0.22)] transition hover:border-white/35 hover:text-white active:scale-[0.97]"
+                            >
+                                Case study
+                                <ArrowUpRight className="h-3 w-3" />
+                            </Link>
+                        )}
+                        {hasDemo && link && (
+                            <a
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => trackProjectClick(title)}
+                                className="liquid-glass inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 font-jetbrains text-[10px] uppercase tracking-[0.18em] text-white/75 shadow-[0_10px_30px_rgba(56,189,248,0.16)] transition hover:border-white/35 hover:text-white active:scale-[0.97]"
+                            >
+                                Live demo
+                                <ArrowUpRight className="h-3 w-3" />
+                            </a>
+                        )}
+                    </div>
                 )}
-            </AnimatePresence>
+            </div>
         </div>
     );
 
     return (
-        <div className="min-h-[14rem] list-none group/item">
-            {link ? (
-                <Link
-                    href={link}
-                    target="_blank"
-                    className="block h-full"
-                    onClick={() => trackProjectClick(title)} // Tracking click
-                >
-                    {CardContent}
-                </Link>
-            ) : (
-                CardContent
-            )}
+        <div className="relative min-h-[14rem] list-none rounded-[1.5rem] transition-all duration-300 will-change-transform hover:scale-[1.02] hover:shadow-2xl hover:shadow-zinc-500/20 active:scale-[0.98] active:shadow-xl dark:hover:shadow-zinc-900/40 group/item">
+            {CardContent}
         </div>
     );
 };

@@ -1,19 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 
 const ACCESS_CODE = "admin123"; // Simple client-side protection for demo
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(
+        () => typeof window !== "undefined" && localStorage.getItem("analytics_auth") === "true",
+    );
     const [inputCode, setInputCode] = useState("");
     const [error, setError] = useState(false);
-
-    useEffect(() => {
-        const auth = localStorage.getItem("analytics_auth");
-        if (auth === "true") setIsAuthenticated(true);
-    }, []);
 
     const handleLogin = () => {
         if (inputCode === ACCESS_CODE) {

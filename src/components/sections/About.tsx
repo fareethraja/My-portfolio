@@ -73,7 +73,7 @@ export function About() {
                                 I&apos;m an MBA Finance and Marketing candidate who works at the intersection of product management, full-stack execution, and fintech.
                             </p>
                             <p>
-                                Right now, I work on Finverse through a Bermer Software Limited client engagement, owning product planning while shipping across Next.js, React, Go, MySQL, Azure OpenAI, Razorpay, and market-data workflows.
+                                Right now, I work as Product Manager at Finverse Innovations Private Limited, owning product planning while shipping across Next.js, React, Go, MySQL, Azure OpenAI, Razorpay, and market-data workflows.
                             </p>
                             <p>
                                 I care about products that move from idea to usable systems: clear user flows, reliable payments, AI chat experiences, admin tooling, analytics, and trading workflows that can survive real users.

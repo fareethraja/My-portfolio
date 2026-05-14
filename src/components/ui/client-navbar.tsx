@@ -6,7 +6,7 @@ import { NavBar } from "@/components/ui/tubelight-navbar";
 export function ClientNavBar() {
     const pathname = usePathname();
 
-    if (pathname === "/analytics") {
+    if (pathname === "/analytics" || pathname === "/now" || pathname.startsWith("/work")) {
         return null;
     }
 

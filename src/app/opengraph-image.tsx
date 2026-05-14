@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Fareeth Raja — Product Manager & Full-Stack Product Engineer";
+export const alt = "Fareeth Raja | Product Manager & Full-Stack Product Engineer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -69,7 +69,7 @@ export default function OpengraphImage() {
                         </span>
                     </div>
                     <div style={{ fontSize: 28, color: "rgba(255,255,255,0.7)", maxWidth: 920 }}>
-                        Product Manager & full-stack product engineer shipping Finverse — AI chat,
+                        Product Manager & full-stack product engineer shipping Finverse AI chat,
                         screeners, strategy backtesting, paper trading, payments.
                     </div>
                 </div>

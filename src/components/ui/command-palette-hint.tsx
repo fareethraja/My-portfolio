@@ -16,11 +16,10 @@ function isLikelyDesktop() {
 
 export function CommandPaletteHint() {
     const [show, setShow] = useState(false);
-    const [mac, setMac] = useState(false);
+    const mac = isMacLike();
 
     useEffect(() => {
         if (!isLikelyDesktop()) return;
-        setMac(isMacLike());
         const showTimer = window.setTimeout(() => setShow(true), 1200);
         return () => window.clearTimeout(showTimer);
     }, []);

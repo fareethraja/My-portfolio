@@ -28,6 +28,12 @@ interface TextBox {
     h?: number;
 }
 
+interface PixelPoint {
+    x: number;
+    y: number;
+    rgb: number[];
+}
+
 export interface ParticleTextEffectProps {
     text?: string;
     colors?: string[];
@@ -136,17 +142,20 @@ const ParticleTextEffect: React.FC<ParticleTextEffectProps> = ({
         const canvas = canvasRef.current;
         if (!ctx || !canvas || !textBox.x || !textBox.y || !textBox.w || !textBox.h) return;
 
-        const data = ctx.getImageData(textBox.x, textBox.y, textBox.w, textBox.h).data;
-        const pixels = data.reduce((arr: any[], _, i, d) => {
-            if (i % 4 === 0) {
-                arr.push({
-                    x: (i / 4) % textBox.w!,
-                    y: Math.floor((i / 4) / textBox.w!),
-                    rgb: d.slice(i, i + 4),
-                });
+        const width = textBox.w;
+        const height = textBox.h;
+        const data = ctx.getImageData(textBox.x, textBox.y, width, height).data;
+        const pixels: PixelPoint[] = [];
+
+        for (let i = 0; i < data.length; i += 4) {
+            const pixelIndex = i / 4;
+            const x = pixelIndex % width;
+            const y = Math.floor(pixelIndex / width);
+            const rgb = Array.from(data.slice(i, i + 4));
+            if (rgb[3] && !(x % particleDensity) && !(y % particleDensity)) {
+                pixels.push({ x, y, rgb });
             }
-            return arr;
-        }, []).filter(p => p.rgb[3] && !(p.x % particleDensity) && !(p.y % particleDensity));
+        }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 

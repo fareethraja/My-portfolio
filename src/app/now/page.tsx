@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 export const metadata: Metadata = {
     title: "Now",
     description:
-        "What Fareeth Raja is focused on right now — current product work, study, and side projects.",
+        "What Fareeth Raja is focused on right now: current product work, study, and side projects.",
     alternates: { canonical: "/now" },
 };
 
@@ -13,13 +13,13 @@ const LAST_UPDATED = "May 2026";
 
 const FOCUS = [
     {
-        title: "Finverse — AI super app",
-        body: "Owning product planning and execution across Zeno AI, screeners, strategy backtesting, paper trading, courses, checkout, and admin tooling at Bermer Software Limited.",
+        title: "Finverse AI super app",
+        body: "Owning product planning and execution across Zeno AI, screeners, strategy backtesting, paper trading, courses, checkout, and admin tooling at Finverse Innovations Private Limited.",
         tag: "Day-to-day",
     },
     {
         title: "MBA in Finance & Marketing",
-        body: "Building finance, marketing, and analytics depth at Krupanidhi College — current CGPA 8.38/10.",
+        body: "Building finance, marketing, and analytics depth at Krupanidhi College. Current CGPA: 8.38/10.",
         tag: "Studying",
     },
     {
@@ -48,16 +48,16 @@ const STACK = [
 
 export default function NowPage() {
     return (
-        <main className="relative z-30 mx-auto w-full max-w-3xl px-6 pt-32 pb-24 sm:pt-36">
+        <main className="relative z-30 mx-auto w-full max-w-3xl px-6 pt-14 pb-20 sm:pt-16 sm:pb-24">
             <Link
                 href="/"
-                className="inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
+                className="liquid-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
             >
                 <ArrowLeft className="h-4 w-4" />
                 Back home
             </Link>
 
-            <header className="mt-8">
+            <header className="mt-6">
                 <span className="eyebrow mb-5">Now</span>
                 <h1 className="font-display mt-5 text-4xl md:text-5xl font-bold tracking-[-0.03em] text-foreground">
                     What I&apos;m focused on{" "}
