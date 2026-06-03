@@ -31,10 +31,10 @@ export const CASE_STUDIES: CaseStudy[] = [
         slug: "finverse",
         title: "Finverse",
         tagline: "AI-powered stock market super app",
-        role: "Product Manager · Finverse Innovations Private Limited",
+        role: "Product Manager · Technical Product Builder",
         timeline: "Feb 2026 - Present",
         summary:
-            "Owning product planning and execution across Zeno AI, screeners, strategy backtesting, paper trading, courses, checkout, admin tooling, and real-time market data for a fast-moving fintech audience in India.",
+            "Translating founder goals into product requirements, feature logic, user flows, QA checks, and release-ready fintech/AI workflows across Zeno AI, screeners, strategy backtesting, paper trading, courses, checkout, admin tooling, and market data.",
         stack: [
             "Next.js 15",
             "TypeScript",
@@ -46,8 +46,9 @@ export const CASE_STUDIES: CaseStudy[] = [
             "Vercel · Render",
         ],
         problem:
-            "Retail traders in India often bounce between a broker, screener, news source, learning platform, and chat app before making one decision. Finverse needed one place to research, learn, simulate, and act, with AI that stays grounded in real product and market data.",
+            "Retail traders in India often bounce between a broker, screener, news source, learning platform, and chat app before making one decision. Finverse needed one place to research, learn, simulate, and act, while the product team needed feature requirements clear enough for fast AI-assisted frontend, backend, payment, and market-data execution.",
         constraints: [
+            "Founder requirements often start broad and need to become clear scopes, flows, edge cases, and acceptance criteria",
             "Indian market hours, instruments, and charge rules need to be handled carefully",
             "AI answers must be grounded in real Finverse data, not free-form LLM output",
             "Screeners and chat need to feel fast on mobile-first user journeys",
@@ -55,6 +56,10 @@ export const CASE_STUDIES: CaseStudy[] = [
             "Product discovery, specs, QA, and launches need to move in tight cycles",
         ],
         approach: [
+            {
+                title: "Founder intent to implementation-ready specs",
+                body: "Converted high-level product requests into requirement lists, feature logic, user journeys, expected results, bug lists, and QA checks so frontend, backend, AI, payment, and admin work could move without losing the original business intent.",
+            },
             {
                 title: "Tool-first AI architecture for Zeno",
                 body: "Designed Zeno to call typed Finverse tools for market, course, portfolio, and strategy data before falling back to Azure OpenAI. Data queries can return directly from `finverse-tools-v1`; multilingual or open-ended prompts go through the LLM while still using tool summaries.",
@@ -77,13 +82,14 @@ export const CASE_STUDIES: CaseStudy[] = [
             },
         ],
         impact: [
-            { value: "2026", label: "Active Finverse product ownership" },
+            { value: "Core", label: "Feature flows shaped from founder asks to release checks" },
             { value: "Tool-first", label: "Market, course, portfolio, and strategy data before AI narration" },
             { value: "Verified", label: "Razorpay confirmation before course access" },
             { value: "5/day", label: "Guest Zeno replies per device for landing-page trials" },
         ],
         learnings: [
             "Tool-first beats prompt engineering for fintech accuracy. Let the LLM narrate, not compute.",
+            "Clear acceptance criteria matter more when the team is moving fast with AI-assisted implementation.",
             "Reconciliation logic belongs on the server before the user sees a success state.",
             "A single PM can move fast if the tooling, AI guardrails, and admin surface are treated as first-class product, not afterthoughts.",
         ],

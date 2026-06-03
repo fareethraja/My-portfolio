@@ -7,17 +7,18 @@ import AnimatedAvailabilityButton from "@/components/ui/animated-availability-bu
 
 const ROLES = [
   "Product Manager",
-  "Full-Stack Engineer",
+  "Technical Product Builder",
   "FinTech Builder",
   "AI Product Thinker",
+  "Requirements to Release",
   "Trading Tools",
   "Payments & Checkout",
-  "Next.js · Go · MySQL",
+  "APIs · AI · Payments",
 ];
 
 const STATS = [
-  { value: "Finverse", label: "Live FinTech super app", accent: "from-violet-500 to-fuchsia-500" },
-  { value: "AI · Pay · Markets", label: "Stack I ship across", accent: "from-sky-500 to-cyan-400" },
+  { value: "Finverse", label: "Feature ownership across AI, payments and markets", accent: "from-violet-500 to-fuchsia-500" },
+  { value: "Specs · QA · Ship", label: "Founder asks turned into release-ready flows", accent: "from-sky-500 to-cyan-400" },
   { value: "MBA + Economics", label: "Finance, marketing and product mind", accent: "from-emerald-500 to-teal-400" },
 ];
 
@@ -106,10 +107,11 @@ export function Hero() {
               className="mt-6 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed text-muted-foreground"
             >
               I&apos;m{" "}
-              <span className="font-semibold text-foreground">Fareeth Raja</span>, a Product
-              Manager and full-stack product engineer shipping{" "}
+              <span className="font-semibold text-foreground">Fareeth Raja</span>, a technical
+              product builder who turns founder goals into requirements, user flows, QA checks,
+              and shipped{" "}
               <span className="text-foreground">FinTech, AI chat, trading, payments,</span>{" "}
-              and automation experiences that survive real users.
+              and automation workflows.
             </motion.p>
 
             {/* CTAs */}
@@ -127,13 +129,11 @@ export function Hero() {
                 navigateTo="#contact"
               />
               <Link
-                href="https://finverse.trade/"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/work"
                 className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition hover:border-white/30 hover:bg-white/[0.06] active:scale-95 active:border-white/40"
               >
                 <Sparkles className="h-4 w-4 text-violet-400" />
-                See Finverse live
+                Product case studies
                 <ArrowUpRight className="h-4 w-4 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </Link>
               <motion.a

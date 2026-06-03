@@ -51,11 +51,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://fareeth.vercel.app"),
   title: {
-    default: "Fareeth Raja | Product Manager & Full-Stack Product Engineer",
+    default: "Fareeth Raja | Technical Product Builder",
     template: "%s | Fareeth Raja",
   },
   description:
-    "Official portfolio of Fareeth Raja, a Product Manager and full-stack product engineer building FinTech, AI chat, trading, payments, and automation products.",
+    "Official portfolio of Fareeth Raja, a technical product builder translating founder goals into FinTech, AI chat, trading, payments, and automation workflows.",
   keywords: [
     "Fareeth Raja",
     "Fareeth Raja Portfolio",
@@ -65,12 +65,12 @@ export const metadata: Metadata = {
     "Fareeth",
     "Raja Fareeth",
     "Product Manager Fareeth Raja",
-    "Full-Stack Product Engineer Fareeth Raja",
+    "Technical Product Builder Fareeth Raja",
     "FinTech Product Manager",
     "Fareeth Raja Projects",
     "Product Manager",
     "Product Management",
-    "Full-Stack Product Engineer",
+    "Technical Product Builder",
     "FinTech",
     "AI Products",
     "Trading Tools",
@@ -92,9 +92,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://fareeth.vercel.app",
-    title: "Fareeth Raja | Product Manager & Full-Stack Product Engineer",
+    title: "Fareeth Raja | Technical Product Builder",
     description:
-      "Explore the portfolio of Fareeth Raja, building FinTech, AI chat, trading, payments, and automation products.",
+      "Explore the portfolio of Fareeth Raja, translating product requirements into FinTech, AI chat, trading, payments, and automation workflows.",
     siteName: "Fareeth Raja Portfolio",
     images: [
       {
@@ -107,9 +107,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fareeth Raja | Product Manager & Full-Stack Product Engineer",
+    title: "Fareeth Raja | Technical Product Builder",
     description:
-      "Product Manager building FinTech, AI chat, trading, payments, and automation products.",
+      "Technical product builder shaping FinTech, AI chat, trading, payments, and automation workflows.",
     creator: "@fareeth", // Replace with actual handle if different
     images: ["/og-image.png"],
   },
@@ -160,7 +160,7 @@ export default function RootLayout({
                   "https://www.linkedin.com/in/fareethraja/",
                   "https://github.com/fareethraja",
                 ],
-                jobTitle: "Product Manager & Full-Stack Product Engineer",
+                jobTitle: "Technical Product Builder",
                 worksFor: {
                   "@type": "Organization",
                   name: "Finverse Innovations Private Limited",
@@ -179,7 +179,7 @@ export default function RootLayout({
                   "MySQL",
                 ],
                 description:
-                  "Fareeth Raja is a Product Manager and full-stack product engineer building FinTech, AI chat, trading, payments, and automation products.",
+                  "Fareeth Raja is a technical product builder translating founder goals into FinTech, AI chat, trading, payments, and automation workflows.",
               }),
             }}
           />

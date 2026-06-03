@@ -11,7 +11,7 @@ const PROJECTS_DATA = [
         title: "Finverse",
         subtitle: "AI-powered Stock Market Super App",
         description:
-            "Own product planning and execution across Zeno AI, screeners, strategy builder, backtesting, paper trading, courses, checkout, admin workflows, and real-time market tools.",
+            "Translate founder goals into feature specs, user flows, implementation logic, QA checks, and shipped workflows across Zeno AI, screeners, strategy builder, backtesting, paper trading, courses, checkout, admin, and market tools.",
         tags: ["Product Management", "FinTech", "AI Chat", "Next.js", "Go", "Razorpay"],
         icon: <TrendingUp className="h-4 w-4" />,
         link: "https://finverse.trade/",
@@ -60,10 +60,10 @@ export function Projects() {
                 <div className="flex flex-col items-center mb-16 text-center">
                     <span className="eyebrow mb-5">Selected Work</span>
                     <h2 className="font-display text-4xl md:text-6xl font-bold tracking-[-0.03em] text-foreground">
-                        <span className="text-gradient-accent">Projects</span> I&apos;ve shipped
+                        <span className="text-gradient-accent">Product work</span> I&apos;ve shipped
                     </h2>
                     <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground">
-                        FinTech super apps, mobile-first PWAs, and product experiments built end to end.
+                        Case studies across fintech, AI, payments, user flows, QA, and mobile-first product experiments.
                     </p>
                 </div>
 

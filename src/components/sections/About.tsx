@@ -9,13 +9,13 @@ import { Cpu, LineChart, Rocket, Target } from "lucide-react";
 const SKILLS_DATA = [
     {
         title: "Product Ownership",
-        description: "Turning messy requirements into roadmaps, user flows, and shipped product decisions",
+        description: "Turning founder asks into requirements, user flows, acceptance criteria, and launch checks",
         icon: Target,
         gradient: "from-blue-500 to-cyan-500",
     },
     {
         title: "Technical Execution",
-        description: "Moving between product specs, frontend, backend, integrations, and QA",
+        description: "Explaining APIs, auth, payments, AI guardrails, backend logic, and QA tradeoffs",
         icon: Rocket,
         gradient: "from-pink-500 to-rose-500",
     },
@@ -70,13 +70,13 @@ export function About() {
 
                         <div className="space-y-4 text-muted-foreground leading-relaxed">
                             <p>
-                                I&apos;m an MBA Finance and Marketing candidate who works at the intersection of product management, full-stack execution, and fintech.
+                                I&apos;m an MBA Finance and Marketing candidate working at the intersection of product management, technical execution, and fintech.
                             </p>
                             <p>
-                                Right now, I work as Product Manager at Finverse Innovations Private Limited, owning product planning while shipping across Next.js, React, Go, MySQL, Azure OpenAI, Razorpay, and market-data workflows.
+                                Right now, I work on Finverse as a Product Manager, translating broad founder requirements into feature specs, implementation logic, user journeys, bug lists, QA checks, and release-ready AI/fintech workflows.
                             </p>
                             <p>
-                                I care about products that move from idea to usable systems: clear user flows, reliable payments, AI chat experiences, admin tooling, analytics, and trading workflows that can survive real users.
+                                I care about products that move from idea to usable systems: clear user flows, reliable payments, grounded AI chat, admin tooling, analytics, and trading workflows that can survive real users.
                             </p>
                         </div>
 
