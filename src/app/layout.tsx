@@ -2,13 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display, Orbitron, Cormorant_Garamond, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ClientNavBar } from "@/components/ui/client-navbar";
-import ProceduralGroundBackground from "@/components/ui/procedural-ground-background";
-import { MouseTrail } from "@/components/ui/mouse-trail";
-import { DebugButton } from "@/components/ui/debug-button";
 import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
-import { CommandPalette } from "@/components/ui/command-palette";
-import { CommandPaletteHint } from "@/components/ui/command-palette-hint";
+import { ClientSiteChrome } from "@/components/navigation/client-site-chrome";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -200,16 +195,9 @@ export default function RootLayout({
               }),
             }}
           />
-          <ProceduralGroundBackground />
-          <MouseTrail />
+          <ClientSiteChrome />
           <AnalyticsTracker />
-          {/* <DebugButton /> */}
           {children}
-          <CommandPalette />
-          <CommandPaletteHint />
-          <div className="hidden md:block">
-            <ClientNavBar />
-          </div>
         </ThemeProvider>
       </body>
     </html>

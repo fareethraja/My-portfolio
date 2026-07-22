@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fareeth Raja Portfolio + Placement Desk
 
-## Getting Started
+This repository contains Fareeth Raja's public portfolio and Placement Desk, an unlisted, local-first job search workspace built for Indian students and early-career candidates.
 
-First, run the development server:
+Placement Desk supports:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Evidence-based role discovery with transparent fit scoring
+- Bengaluru, Chennai, and other city-level job search through LinkedIn public listings plus supplementary feeds
+- Protected job-link fallback that prevents stale job data from tailoring the wrong resume
+- Complete ATS resume tailoring and DOCX/PDF output
+- Aptitude and interview plans with lessons, practice questions, sources, and downloadable study guides
+- Seven-day skill roadmaps that require evidence before adding a skill to a resume
+- Detailed application-stage tracking and round-specific coaching
+- Tracked and standalone offer-letter analysis
+- India FY 2026-27 take-home estimates, clause review, and optional negotiation guidance
+- Browser-local storage with JSON backup and restore
+
+## Local Development
+
+Requirements:
+
+- Node.js 22 or newer
+- npm
+
+Install and start the app:
+
+```powershell
+npm install
+npm run dev -- --webpack
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open the portfolio at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Private workspaces use `http://localhost:3000/job-assistant/{username}`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Passwords are stored as salted scrypt hashes in server-only code. Do not add plaintext credentials to source, documentation, issues, or commits.
 
-## Learn More
+## Environment
 
-To learn more about Next.js, take a look at the following resources:
+Copy `.env.example` to `.env.local` for local production-mode testing. Development mode has a local-only signing fallback, but deployed login intentionally refuses to start without a configured secret.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Generate a strong signing secret:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```powershell
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
 
-## Deploy on Vercel
+Set the output as `JOB_ASSISTANT_SESSION_SECRET`. Never commit the generated value.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Vercel Auto-Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The repository remote is `https://github.com/fareethraja/My-portfolio.git`, and the production branch is `master`.
+
+Before the first deployment containing Placement Desk:
+
+1. Open the Vercel project.
+2. Go to `Settings` -> `Environment Variables`.
+3. Add `JOB_ASSISTANT_SESSION_SECRET` with the generated 96-character hexadecimal value.
+4. Enable it for `Production` and `Preview`. Development is optional.
+5. Go to `Settings` -> `Git` and confirm `master` is the Production Branch.
+6. Keep the framework preset as `Next.js`, install command as `npm install`, and build command as `next build` or the Vercel default.
+7. Push a tested commit to `origin/master`. Vercel will deploy automatically.
+8. If the variable was added after a deployment started, trigger one redeploy from the Vercel Deployments screen.
+
+Production login returns HTTP `503` if the session secret is missing or shorter than 32 characters.
+
+## Privacy and Data
+
+- Jobs, profiles, plans, resumes, and analyses are stored in browser `localStorage`, namespaced by username.
+- The same username on different browser profiles does not share job data.
+- Users should download a JSON backup before clearing browser storage or moving devices.
+- DOCX/TXT resume parsing happens locally in the browser.
+- Offer PDF parsing is local-first. If PDF.js stalls, the authenticated fallback processes the PDF in server memory and returns extracted text without saving the file.
+- Public job extraction validates external URLs and blocks private-network targets.
+- Placement Desk routes are excluded from indexing and send `noindex`, `nofollow`, and `no-referrer` headers.
+
+## Validation
+
+Run before deployment:
+
+```powershell
+npx tsc --noEmit
+npx eslint src/components/job-assistant src/lib/job-assistant src/app/api/job-assistant "src/app/job-assistant/[inviteId]" src/components/navigation/client-site-chrome.tsx next.config.ts src/app/robots.ts
+npm run build
+```
+
+## Contributing
+
+Contributions are welcome, especially for Indian city and fresher job sources, regional-language guidance, accessibility, mobile usability, sanitized parser fixtures, hiring-round knowledge, and automated tests.
+
+Do not commit real resumes, offer letters, phone numbers, access credentials, or other personal documents. Use sanitized fixtures and preserve the project's core principles: truthful resumes, explicit assumptions, candidate privacy, and no exploitative shortcuts.
+
+Placement Desk was built by Fareeth Raja, with the GB maker's mark as a nod to GajendraBoys.
