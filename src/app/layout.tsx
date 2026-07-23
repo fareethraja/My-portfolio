@@ -46,11 +46,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://fareeth.vercel.app"),
   title: {
-    default: "Fareeth Raja | Technical Product Builder",
+    default: "Fareeth Raja | Product Manager & Technical Product Builder",
     template: "%s | Fareeth Raja",
   },
   description:
-    "Official portfolio of Fareeth Raja, a technical product builder translating founder goals into FinTech, AI chat, trading, payments, and automation workflows.",
+    "Fareeth Raja is a Product Manager and technical product builder specializing in FinTech, AI products, trading platforms, payments, and automation.",
   keywords: [
     "Fareeth Raja",
     "Fareeth Raja Portfolio",
@@ -80,6 +80,9 @@ export const metadata: Metadata = {
   authors: [{ name: "Fareeth Raja", url: "https://fareeth.vercel.app" }],
   creator: "Fareeth Raja",
   publisher: "Fareeth Raja",
+  verification: {
+    google: "OOUnZPRjy-j-x9lR5xvB8FliXjQlQpPQdLfDhmKO5G0",
+  },
   alternates: {
     canonical: "https://fareeth.vercel.app",
   },
@@ -87,26 +90,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://fareeth.vercel.app",
-    title: "Fareeth Raja | Technical Product Builder",
+    title: "Fareeth Raja | Product Manager & Technical Product Builder",
     description:
-      "Explore the portfolio of Fareeth Raja, translating product requirements into FinTech, AI chat, trading, payments, and automation workflows.",
+      "Explore Fareeth Raja's product management portfolio across FinTech, AI products, trading platforms, payments, and automation.",
     siteName: "Fareeth Raja Portfolio",
-    images: [
-      {
-        url: "/og-image.png", // Ensure this image exists or is added later
-        width: 1200,
-        height: 630,
-        alt: "Fareeth Raja Portfolio",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fareeth Raja | Technical Product Builder",
+    title: "Fareeth Raja | Product Manager & Technical Product Builder",
     description:
-      "Technical product builder shaping FinTech, AI chat, trading, payments, and automation workflows.",
-    creator: "@fareeth", // Replace with actual handle if different
-    images: ["/og-image.png"],
+      "Fareeth Raja's product management portfolio across FinTech, AI products, trading platforms, payments, and automation.",
   },
   robots: {
     index: true,
@@ -150,12 +143,15 @@ export default function RootLayout({
                 familyName: "Raja",
                 alternateName: ["Fareeth", "Raja Fareeth", "F. Raja"],
                 url: "https://fareeth.vercel.app",
-                image: "https://fareeth.vercel.app/og-image.png",
+                image: "https://fareeth.vercel.app/images/fareeth-v8.png",
+                mainEntityOfPage: {
+                  "@id": "https://fareeth.vercel.app/#profilepage",
+                },
                 sameAs: [
                   "https://www.linkedin.com/in/fareethraja/",
                   "https://github.com/fareethraja",
                 ],
-                jobTitle: "Technical Product Builder",
+                jobTitle: "Product Manager and Technical Product Builder",
                 worksFor: {
                   "@type": "Organization",
                   name: "Finverse Innovations Private Limited",
@@ -190,6 +186,27 @@ export default function RootLayout({
                 description: "Official portfolio website of Fareeth Raja",
                 publisher: {
                   "@id": "https://fareeth.vercel.app/#person"
+                },
+                inLanguage: "en-US",
+              }),
+            }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "ProfilePage",
+                "@id": "https://fareeth.vercel.app/#profilepage",
+                url: "https://fareeth.vercel.app",
+                name: "Fareeth Raja | Product Manager Portfolio",
+                description:
+                  "The official portfolio of Fareeth Raja, a Product Manager and technical product builder specializing in FinTech and AI products.",
+                mainEntity: {
+                  "@id": "https://fareeth.vercel.app/#person",
+                },
+                isPartOf: {
+                  "@id": "https://fareeth.vercel.app/#website",
                 },
                 inLanguage: "en-US",
               }),

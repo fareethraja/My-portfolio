@@ -78,7 +78,7 @@ export function Hero() {
               custom={1}
               className="font-display mt-5 text-[clamp(2rem,7vw,5rem)] leading-[1.05] tracking-[-0.04em] font-bold text-foreground text-balance"
             >
-              Building the{" "}
+              Fareeth Raja builds the{" "}
               <span className="text-gradient-primary whitespace-nowrap">future</span> of{" "}
               <span className="relative inline-block whitespace-nowrap">
                 <span className="text-gradient-accent">digital products.</span>
@@ -106,10 +106,9 @@ export function Hero() {
               custom={2}
               className="mt-6 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed text-muted-foreground"
             >
-              I&apos;m{" "}
-              <span className="font-semibold text-foreground">Fareeth Raja</span>, a technical
-              product builder who turns founder goals into requirements, user flows, QA checks,
-              and shipped{" "}
+              I&apos;m a <span className="font-semibold text-foreground">Product Manager</span> and
+              technical product builder who turns founder goals into requirements, user flows,
+              QA checks, and shipped{" "}
               <span className="text-foreground">FinTech, AI chat, trading, payments,</span>{" "}
               and automation workflows.
             </motion.p>
