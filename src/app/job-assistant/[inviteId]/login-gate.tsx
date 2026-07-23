@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import { GBLogo } from "@/components/job-assistant/gb-logo";
+import { useButtonFeedback } from "@/hooks/use-button-feedback";
+import { useMotionTier } from "@/hooks/use-motion-tier";
 
 type LoginGateProps = {
     inviteId: string;
@@ -13,6 +15,8 @@ type LoginGateProps = {
 
 export function LoginGate({ inviteId, inviteLabel }: LoginGateProps) {
     const router = useRouter();
+    const motionTier = useMotionTier();
+    useButtonFeedback();
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -43,9 +47,9 @@ export function LoginGate({ inviteId, inviteLabel }: LoginGateProps) {
     }
 
     return (
-        <main className="placement-desk-ui relative z-[70] grid min-h-screen place-items-center overflow-hidden bg-[#f3f1ea] px-5 py-10 text-[#18201c]">
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(24,32,28,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(24,32,28,0.055)_1px,transparent_1px)] bg-[size:28px_28px]" />
-            <section className="relative w-full max-w-[420px] border border-[#18201c]/15 bg-[#fbfaf6] p-7 shadow-[12px_12px_0_#18201c] sm:p-9">
+        <main className="placement-desk-ui relative z-[70] grid min-h-screen place-items-center overflow-hidden bg-[#f3f1ea] px-5 py-10 text-[#18201c]" data-motion={motionTier}>
+            <div className="pd-backdrop pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(24,32,28,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(24,32,28,0.055)_1px,transparent_1px)] bg-[size:28px_28px]" />
+            <section className="pd-login-card relative w-full max-w-[420px] border border-[#18201c]/15 bg-[#fbfaf6] p-7 shadow-[12px_12px_0_#18201c] sm:p-9">
                 <div className="mb-9 flex items-center justify-between">
                     <GBLogo />
                     <span className="flex items-center gap-1.5 font-jetbrains text-[10px] uppercase tracking-[0.16em] text-[#526058]">
@@ -115,6 +119,7 @@ export function LoginGate({ inviteId, inviteLabel }: LoginGateProps) {
 export function LogoutButton() {
     const router = useRouter();
     const [submitting, setSubmitting] = useState(false);
+    useButtonFeedback();
 
     async function logout() {
         setSubmitting(true);

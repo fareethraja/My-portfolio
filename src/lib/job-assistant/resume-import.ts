@@ -9,12 +9,14 @@ const SECTION_NAMES = [
     "core skills",
     "technical skills",
     "product skills",
+    "core product skills",
     "experience",
     "work experience",
     "professional experience",
     "employment history",
     "projects",
     "product projects",
+    "product case studies / projects",
     "education",
     "certifications",
     "achievements",
@@ -64,6 +66,10 @@ function hasBulletMarker(line: string): boolean {
     return /^[\s]*[•●▪◦*\-–—]\s+/.test(line);
 }
 
+function isPageArtifact(line: string): boolean {
+    return /\b(?:resume|curriculum vitae|cv)\s+(?:page\s*)?\d+$/i.test(cleanLine(line)) || /^page\s+\d+(?:\s+of\s+\d+)?$/i.test(cleanLine(line));
+}
+
 function parseDatedEntries(lines: string[], kind: "experience" | "project"): Array<ExperienceEntry | ProjectEntry> {
     const entries: Array<ExperienceEntry | ProjectEntry> = [];
     let heading = "";
@@ -99,13 +105,21 @@ function parseDatedEntries(lines: string[], kind: "experience" | "project"): Arr
 
     for (const rawLine of lines) {
         const line = cleanLine(rawLine);
-        if (!line) continue;
-        if (hasBulletMarker(rawLine) || (bullets.length > 0 && line.length > 55)) {
+        if (!line || isPageArtifact(line)) continue;
+        if (hasBulletMarker(rawLine)) {
             bullets.push(bulletText(line));
             continue;
         }
-        if (heading || bullets.length) flush();
-        heading = line;
+        if (bullets.length) {
+            if (line.includes("|")) {
+                flush();
+                heading = line;
+            } else {
+                bullets[bullets.length - 1] = `${bullets[bullets.length - 1]} ${line}`;
+            }
+            continue;
+        }
+        heading = heading ? `${heading} ${line}` : line;
     }
     flush();
     return entries;
@@ -113,17 +127,20 @@ function parseDatedEntries(lines: string[], kind: "experience" | "project"): Arr
 
 function parseSkills(lines: string[]): SkillGroup[] {
     const groups: SkillGroup[] = [];
-    lines.forEach((line, index) => {
+    lines.forEach((rawLine) => {
+        const line = bulletText(rawLine);
         const [possibleName, ...rest] = line.split(":");
         const hasNamedGroup = rest.length > 0;
         const value = hasNamedGroup ? rest.join(":") : possibleName;
         const items = value.split(/[,;|•]/).map(cleanLine).filter(Boolean);
-        if (items.length) {
+        if (hasBulletMarker(rawLine) || hasNamedGroup || !groups.length) {
             groups.push({
-                id: `imported-skills-${index + 1}`,
+                id: `imported-skills-${groups.length + 1}`,
                 name: hasNamedGroup ? cleanLine(possibleName) : "Core Skills",
                 items,
             });
+        } else if (items.length) {
+            groups[groups.length - 1].items.push(...items);
         }
     });
     if (!groups.length) return [{ id: "skills-core", name: "Core Skills", items: [] }];
@@ -131,9 +148,15 @@ function parseSkills(lines: string[]): SkillGroup[] {
 }
 
 function parseEducation(lines: string[]): EducationEntry[] {
-    return lines
-        .map(cleanLine)
-        .filter(Boolean)
+    const entries: string[] = [];
+    const usesBullets = lines.some(hasBulletMarker);
+    for (const rawLine of lines) {
+        const line = bulletText(rawLine);
+        if (!line || isPageArtifact(line)) continue;
+        if (!usesBullets || hasBulletMarker(rawLine) || !entries.length) entries.push(line);
+        else entries[entries.length - 1] = `${entries[entries.length - 1]} ${line}`;
+    }
+    return entries
         .map((line, index) => {
             const parts = line.split(/\s*[|·]\s*/).map(cleanLine).filter(Boolean);
             return {
@@ -151,32 +174,44 @@ function extractUrl(text: string, host: string): string {
 }
 
 export function importProfileFromText(text: string, current: CandidateProfile): CandidateProfile {
-    const lines = text.split(/\r?\n/).map(cleanLine).filter(Boolean);
+    const lines = text.split(/\r?\n/).map(cleanLine).filter((line) => line && !isPageArtifact(line));
     const sections = sectionMap(lines);
     const header = sections.get("header") ?? [];
     const firstLine = header.find((line) => !/@|https?:|\+?\d[\d\s()-]{7}/.test(line));
+    const fullName = firstLine?.replace(/\s+([A-Z])$/, (suffix, initial: string) => firstLine.charAt(0).toUpperCase() === initial ? "" : suffix).trim();
     const email = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] ?? "";
     const phone = text.match(/(?:\+?\d[\d\s()-]{8,}\d)/)?.[0]?.trim() ?? "";
     const summaryLines = findSection(sections, ["professional summary", "summary", "profile", "objective"]);
-    const skillLines = findSection(sections, ["product skills", "technical skills", "core skills", "skills"]);
+    const skillLines = findSection(sections, ["core product skills", "product skills", "technical skills", "core skills", "skills"]);
     const experienceLines = findSection(sections, ["professional experience", "work experience", "experience", "employment history"]);
-    const projectLines = findSection(sections, ["product projects", "projects"]);
+    const projectLines = findSection(sections, ["product case studies / projects", "product projects", "projects"]);
     const educationLines = findSection(sections, ["education"]);
     const certifications = findSection(sections, ["certifications"]).map(bulletText).filter(Boolean);
     const achievements = findSection(sections, ["achievements", "awards"]).map(bulletText).filter(Boolean);
     const parsedExperiences = parseDatedEntries(experienceLines, "experience") as ExperienceEntry[];
     const parsedProjects = parseDatedEntries(projectLines, "project") as ProjectEntry[];
+    const contactLine = header.find((line) => line.includes("|") && (line.includes("@") || /\+?\d[\d\s()-]{7}/.test(line))) ?? "";
+    const inferredLocation = contactLine.split("|").map(cleanLine).find((part) => part && !/@|\+?\d/.test(part)) ?? "";
+    const headlineIndex = header.findIndex((line) => line !== firstLine && line.length >= 12 && line.length < 100 && !/@|https?:/.test(line));
+    const headlineParts = headlineIndex >= 0 ? [header[headlineIndex]] : [];
+    if (headlineIndex >= 0 && header[headlineIndex + 1]?.length < 50 && !/[.!?]$/.test(header[headlineIndex + 1]) && !/@|https?:/.test(header[headlineIndex + 1])) {
+        headlineParts.push(header[headlineIndex + 1]);
+    }
+    const inferredSummary = headlineIndex >= 0
+        ? header.slice(headlineIndex + headlineParts.length).filter((line) => !/@|https?:/.test(line)).join(" ")
+        : "";
 
     return {
         ...current,
-        fullName: firstLine || current.fullName,
+        fullName: fullName || current.fullName,
         email: email || current.email,
         phone: phone || current.phone,
         linkedin: extractUrl(text, "linkedin.com") || current.linkedin,
         github: extractUrl(text, "github.com") || current.github,
         portfolio: extractUrl(text, "vercel.app") || current.portfolio,
-        headline: header.find((line) => line !== firstLine && line.length >= 12 && !line.includes("@") && !line.includes("http")) || current.headline,
-        summary: summaryLines.join(" ") || current.summary,
+        location: inferredLocation || current.location,
+        headline: headlineParts.join(" ") || current.headline,
+        summary: summaryLines.join(" ") || inferredSummary || current.summary,
         sourceText: text.slice(0, 80_000),
         skillGroups: skillLines.length ? parseSkills(skillLines) : current.skillGroups,
         experiences: parsedExperiences.length ? parsedExperiences : current.experiences,

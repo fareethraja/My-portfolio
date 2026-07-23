@@ -211,16 +211,19 @@ function findWorkMode(text: string): string {
 }
 
 function compensationFromText(text: string): OfferCompensation {
+    const tableCtc = findAnnualTableAmount(text, ["total cost to company", "annual ctc", "total ctc", "cost to company"]);
     const tableBasic = findAnnualTableAmount(text, ["basic"]);
     const tableGross = findAnnualTableAmount(text, ["total earnings (a)", "total earnings"]);
+    const tableVariablePay = findAnnualTableAmount(text, ["variable pay", "annual incentive", "target bonus"]);
     const tableEmployeePf = findAnnualTableAmount(text, ["pf employee", "employee pf"]);
     const tableEmployerPf = findAnnualTableAmount(text, ["pf - employer", "pf employer", "employer pf"]);
+    const tableGratuity = findAnnualTableAmount(text, ["gratuity"]);
     const compensation: OfferCompensation = {
         ...EMPTY_OFFER_COMPENSATION,
-        statedCtcAnnual: findAmount(text, ["total cost to company", "annual ctc", "total ctc", "cost to company"]),
+        statedCtcAnnual: tableCtc || findAmount(text, ["total cost to company", "annual ctc", "total ctc", "cost to company"]),
         basicAnnual: tableBasic || findAmount(text, ["basic salary", "basic pay", "annual basic"]),
         annualGrossSalary: tableGross || findAmount(text, ["annual gross salary", "gross annual salary", "gross salary", "annual fixed pay", "fixed compensation", "total fixed pay", "fixed pay"]),
-        annualVariablePay: findAmount(text, ["variable pay", "annual incentive", "target bonus"]),
+        annualVariablePay: tableVariablePay || findAmount(text, ["variable pay", "annual incentive", "target bonus"]),
         performanceBonusAnnual: findAmount(text, ["performance bonus"]),
         performanceBonusPayoutPercent: 0,
         joiningBonus: findAmount(text, ["joining bonus", "sign on bonus", "sign-on bonus"]),
@@ -228,10 +231,24 @@ function compensationFromText(text: string): OfferCompensation {
         retentionPayoutPercent: 100,
         employerPfAnnual: tableEmployerPf || findAmount(text, ["employer pf", "employer provident fund", "company contribution to pf"]),
         employeePfAnnual: tableEmployeePf || findAmount(text, ["employee pf", "employee provident fund", "employee contribution to pf"]),
-        gratuityAnnual: findAmount(text, ["gratuity"]),
+        gratuityAnnual: tableGratuity || findAmount(text, ["gratuity"]),
         insuranceBenefitsAnnual: findAmount(text, ["insurance premium", "medical insurance", "health insurance", "insurance benefit"]),
         variablePayoutPercent: findPercentage(text, ["variable pay", "performance bonus", "target bonus"]),
     };
+
+    if (compensation.statedCtcAnnual) {
+        const componentTotal =
+            compensation.annualGrossSalary +
+            compensation.annualVariablePay +
+            compensation.joiningBonus +
+            compensation.retentionBonus +
+            compensation.employerPfAnnual +
+            compensation.gratuityAnnual +
+            compensation.insuranceBenefitsAnnual;
+        if (componentTotal > compensation.statedCtcAnnual * 1.05) {
+            compensation.annualGrossSalary = 0;
+        }
+    }
 
     if (!compensation.employeePfAnnual && compensation.basicAnnual) {
         compensation.employeePfAnnual = roundCurrency(compensation.basicAnnual * 0.12);

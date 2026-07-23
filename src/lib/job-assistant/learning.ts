@@ -186,13 +186,13 @@ function selectSkillKit(skill: string): SkillKit {
     return SKILL_KITS.find((kit) => kit.aliases.some((alias) => normalized.includes(alias) || alias.includes(normalized))) ?? BUSINESS_KIT;
 }
 
-export function createLearningRoadmap(skill: string, job: JobRecord, roleLabel: string): LearningRoadmap {
+export function createLearningRoadmap(skill: string, job: JobRecord | undefined, roleLabel: string): LearningRoadmap {
     const kit = selectSkillKit(skill);
     const roadmapId = `learning-${Date.now()}`;
 
     return {
         id: roadmapId,
-        jobId: job.id,
+        jobId: job?.id ?? "",
         skill,
         roleLabel,
         createdAt: new Date().toISOString(),

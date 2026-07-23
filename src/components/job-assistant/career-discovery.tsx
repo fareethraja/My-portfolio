@@ -261,7 +261,7 @@ export function CareerDiscoveryView({
                         {suggestions.map((role, index) => {
                             const selected = preferences.selectedRoleTitles.includes(role.title);
                             return (
-                                <article className={`border bg-[#fbfaf6] ${selected ? "border-[#a84708] shadow-[4px_4px_0_#ff7a1a]" : "border-[#23372f]/15"}`} key={role.id}>
+                                <article className={`pd-hover-lift border bg-[#fbfaf6] ${selected ? "border-[#a84708] shadow-[4px_4px_0_#ff7a1a]" : "border-[#23372f]/15"}`} key={role.id}>
                                     <div className="p-5">
                                         <div className="flex items-start justify-between gap-4">
                                             <div className="flex min-w-0 gap-3"><span className="font-jetbrains text-[10px] text-[#718079]">{String(index + 1).padStart(2, "0")}</span><div><h3 className="text-base font-semibold">{role.title}</h3><p className="mt-2 text-sm leading-6 text-[#66736c]">{role.summary}</p></div></div>
@@ -307,6 +307,7 @@ export function JobHuntView({
     updatePreferences,
     completeSearch,
     saveResult,
+    savedJobUrls,
     notify,
     backToDiscovery,
 }: {
@@ -317,10 +318,12 @@ export function JobHuntView({
     updatePreferences: (patch: Partial<CareerPreferences>) => void;
     completeSearch: (results: JobSearchResult[], searchedAt: string) => void;
     saveResult: (result: JobSearchResult, tailorNow: boolean) => void;
+    savedJobUrls: string[];
     notify: (message: string) => void;
     backToDiscovery: () => void;
 }) {
     const [searching, setSearching] = useState(false);
+    const [recentlySavedId, setRecentlySavedId] = useState("");
     const [customRole, setCustomRole] = useState("");
     const [customCompany, setCustomCompany] = useState("");
     const launchers = useMemo(() => buildSearchLaunchers(preferences), [preferences]);
@@ -344,6 +347,11 @@ export function JobHuntView({
         if (preferences.targetCompanies.length >= 10) return;
         updatePreferences({ targetCompanies: [...preferences.targetCompanies, company] });
         setCustomCompany("");
+    }
+
+    function saveOpening(result: JobSearchResult) {
+        setRecentlySavedId(result.id);
+        saveResult(result, false);
     }
 
     async function runLiveSearch() {
@@ -418,14 +426,17 @@ export function JobHuntView({
                 <div className="mb-3 flex flex-col justify-between gap-2 sm:flex-row sm:items-end"><div><div className="flex items-center gap-2"><Radar className="h-4 w-4 text-[#2f7453]" /><h2 className="text-sm font-semibold">Live public-feed matches</h2></div>{lastSearchAt ? <p className="mt-1 text-xs text-[#718079]">Last searched {new Date(lastSearchAt).toLocaleString("en-IN")}</p> : null}</div><span className="font-jetbrains text-[10px] uppercase tracking-[0.1em] text-[#718079]">{results.length} openings</span></div>
                 {results.length ? (
                     <div className="grid gap-3 xl:grid-cols-2">
-                        {results.map((job) => (
-                            <article className={`border bg-[#fbfaf6] p-4 ${job.isTargetCompany ? "border-[#a84708] shadow-[3px_3px_0_#ff7a1a]" : "border-[#23372f]/15"}`} key={job.id}>
+                        {results.map((job) => {
+                            const isSaved = savedJobUrls.includes(job.url);
+                            return (
+                            <article className={`pd-hover-lift border bg-[#fbfaf6] p-4 ${job.isTargetCompany ? "border-[#a84708] shadow-[3px_3px_0_#ff7a1a]" : "border-[#23372f]/15"}`} key={job.id}>
                                 <div className="flex items-start justify-between gap-4"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2">{job.isTargetCompany ? <span className="bg-[#ff7a1a] px-2 py-1 font-jetbrains text-[8px] font-semibold uppercase tracking-[0.08em] text-[#19372d]">Target company</span> : null}<span className="bg-[#eef0ed] px-2 py-1 font-jetbrains text-[8px] uppercase tracking-[0.08em] text-[#58665f]">{job.source}</span></div><h3 className="mt-2 text-base font-semibold">{job.title}</h3><p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-[#58665f]"><Building2 className="h-3.5 w-3.5" /> {job.company}</p></div><a aria-label={`Open ${job.title}`} className="grid h-9 w-9 shrink-0 place-items-center border border-[#23372f]/15 bg-white hover:bg-[#edf3ee]" href={job.url} rel="noreferrer" target="_blank" title="Open listing"><ExternalLink className="h-4 w-4" /></a></div>
                                 <div className="mt-3 flex flex-wrap gap-3 text-[10px] text-[#718079]"><span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {job.location || "Not listed"}</span><span className="flex items-center gap-1"><Clock3 className="h-3 w-3" /> {job.postedAt ? new Date(job.postedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : "Date not listed"}</span>{job.employmentType ? <span>{job.employmentType.replaceAll("_", " ")}</span> : null}</div>
                                 {job.description ? <p className="mt-3 line-clamp-3 text-xs leading-5 text-[#68756f]">{job.description}</p> : null}
-                                <div className="mt-4 flex flex-wrap gap-2"><button className={BUTTON_SECONDARY} onClick={() => saveResult(job, false)} type="button"><BriefcaseBusiness className="h-4 w-4" /> Save</button><button className={BUTTON_PRIMARY} onClick={() => saveResult(job, true)} type="button"><Sparkles className="h-4 w-4" /> Save + tailor</button></div>
+                                <div className="mt-4 flex flex-wrap gap-2"><button aria-live="polite" className={`${BUTTON_SECONDARY} ${recentlySavedId === job.id ? "pd-save-confirm" : ""} ${isSaved ? "pd-save-success" : ""}`} onClick={() => saveOpening(job)} type="button">{isSaved ? <Check className="h-4 w-4" /> : <BriefcaseBusiness className="h-4 w-4" />} {isSaved ? "Saved" : "Save"}</button><button className={BUTTON_PRIMARY} onClick={() => saveResult(job, true)} type="button"><Sparkles className="h-4 w-4" /> {isSaved ? "Open + tailor" : "Save + tailor"}</button></div>
                             </article>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="pd-surface border border-dashed border-[#23372f]/25 bg-[#f8f7f2] px-6 py-10 text-center"><Search className="mx-auto h-7 w-7 text-[#718079]" /><h3 className="mt-3 text-base font-semibold">No live search run yet</h3><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[#66736c]">Run the live search above. If remote feeds are sparse for your location, use the direct board searches below.</p></div>

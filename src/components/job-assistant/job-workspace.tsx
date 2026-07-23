@@ -55,6 +55,7 @@ import { CareerDiscoveryView, JobHuntView } from "@/components/job-assistant/car
 import { GBLogo } from "@/components/job-assistant/gb-logo";
 import { OfferAnalyzerView } from "@/components/job-assistant/offer-analyzer";
 import { getRoundGuidance, suggestRoles } from "@/lib/job-assistant/career";
+import { extractDocumentFileText } from "@/lib/job-assistant/document-import";
 import { analyzeJob, createPreparationPlan, tailorResume } from "@/lib/job-assistant/engine";
 import { createLearningRoadmap } from "@/lib/job-assistant/learning";
 import { composePreferredLocation, inferStructuredLocation } from "@/lib/job-assistant/locations";
@@ -63,6 +64,8 @@ import { buildPreparationGuideDocx } from "@/lib/job-assistant/prep-export";
 import { createInitialWorkspace } from "@/lib/job-assistant/profile";
 import { buildResumeDocx, downloadBlob, openResumePrintView } from "@/lib/job-assistant/resume-export";
 import { importProfileFromText } from "@/lib/job-assistant/resume-import";
+import { useButtonFeedback } from "@/hooks/use-button-feedback";
+import { useMotionTier } from "@/hooks/use-motion-tier";
 import type {
     CandidateProfile,
     CareerPreferences,
@@ -325,6 +328,8 @@ function KeywordList({ values, tone = "match", empty }: { values: string[]; tone
 
 export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps) {
     const router = useRouter();
+    const motionTier = useMotionTier();
+    useButtonFeedback();
     const storageKey = `placement-desk:v1:${inviteId}`;
     const [workspace, setWorkspace] = useState<WorkspaceState>(() => createInitialWorkspace(isOwner));
     const [storageReady, setStorageReady] = useState(false);
@@ -332,6 +337,8 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [draftJob, setDraftJob] = useState<JobRecord>(blankJob);
     const [notice, setNotice] = useState("");
+    const [noticeSequence, setNoticeSequence] = useState(0);
+    const [loggingOut, setLoggingOut] = useState(false);
     const [importingUrl, setImportingUrl] = useState(false);
     const [exportingResume, setExportingResume] = useState(false);
     const [plannerDuration, setPlannerDuration] = useState<7 | 14>(7);
@@ -376,6 +383,12 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
     }, [storageKey, storageReady, workspace]);
 
     useEffect(() => {
+        if (!notice) return;
+        const timer = window.setTimeout(() => setNotice(""), 4_500);
+        return () => window.clearTimeout(timer);
+    }, [notice, noticeSequence]);
+
+    useEffect(() => {
         if (!makerStoryOpen) return;
         const previousOverflow = document.body.style.overflow;
         const closeOnEscape = (event: KeyboardEvent) => {
@@ -396,8 +409,8 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
     const activeRoadmap = workspace.learningRoadmaps.find((roadmap) => roadmap.id === workspace.activeLearningRoadmapId) ?? workspace.learningRoadmaps[0];
     const analyzedJobs = workspace.jobs.filter((job) => Boolean(workspace.analyses[job.id]));
     const selectedPlanJobId = planJobId || workspace.latestJobId;
-    const selectedLearningJobId = learningJobId || workspace.latestJobId;
-    const selectedLearningAnalysis = selectedLearningJobId ? workspace.analyses[selectedLearningJobId] : undefined;
+    const selectedLearningJobId = learningJobId || workspace.latestJobId || "__standalone__";
+    const selectedLearningAnalysis = selectedLearningJobId !== "__standalone__" ? workspace.analyses[selectedLearningJobId] : undefined;
     const selectedOfferId =
         workspace.activeOfferJobId ||
         workspace.jobs.find((job) => job.status === "offer")?.id ||
@@ -409,6 +422,7 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
 
     function showNotice(message: string) {
         setNotice(message);
+        setNoticeSequence((current) => current + 1);
     }
 
     function navigate(nextView: ViewId) {
@@ -418,8 +432,16 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
     }
 
     async function logout() {
-        await fetch("/api/job-assistant/auth", { method: "DELETE" });
-        router.refresh();
+        if (loggingOut) return;
+        setLoggingOut(true);
+        try {
+            const response = await fetch("/api/job-assistant/auth", { method: "DELETE" });
+            if (!response.ok) throw new Error();
+            router.refresh();
+        } catch {
+            setLoggingOut(false);
+            showNotice("Unable to sign out. Check the connection and try again.");
+        }
     }
 
     function updateDraft<K extends keyof JobRecord>(key: K, value: JobRecord[K]) {
@@ -507,13 +529,14 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
         }
     }
 
-    function saveForLater() {
+    function saveForLater(): boolean {
         if (!draftJob.title.trim() && !draftJob.company.trim() && !draftJob.url.trim()) {
             showNotice("Add a title, company, or link before saving this job.");
-            return;
+            return false;
         }
         persistJob(draftJob);
         showNotice("Job saved in this browser.");
+        return true;
     }
 
     function handleAnalyze(event?: FormEvent) {
@@ -556,6 +579,7 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
 
     function updateJobStatus(jobId: string, status: JobStatus) {
         const label = JOB_STATUSES.find((option) => option.value === status)?.label ?? status;
+        const jobTitle = workspace.jobs.find((job) => job.id === jobId)?.title || "This job";
         setWorkspace((current) => ({
             ...current,
             jobs: current.jobs.map((job) => job.id === jobId ? {
@@ -568,6 +592,7 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                 ],
             } : job),
         }));
+        showNotice(`${jobTitle} moved to ${label}.`);
     }
 
     function updateJobDetails(jobId: string, patch: Partial<Pick<JobRecord, "customStage" | "nextRoundAt" | "notes">>) {
@@ -600,6 +625,7 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
             };
         });
         if (draftJob.id === jobId) setDraftJob(blankJob());
+        showNotice("Job and its generated material deleted from this browser.");
     }
 
     function startNewJob() {
@@ -679,21 +705,20 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
             plans: current.plans.filter((plan) => plan.id !== planId),
             activePlanId: current.activePlanId === planId ? "" : current.activePlanId,
         }));
+        showNotice("Preparation plan deleted.");
     }
 
-    function generateLearningRoadmap(skillValue?: string) {
+    function generateLearningRoadmap(skillValue?: string, jobIdValue?: string) {
         const skill = (skillValue || customSkill).trim();
-        const job = workspace.jobs.find((candidate) => candidate.id === selectedLearningJobId);
-        const analysis = selectedLearningJobId ? workspace.analyses[selectedLearningJobId] : undefined;
-        if (!job || !analysis) {
-            showNotice("Analyze a job before creating a skill roadmap.");
-            return;
-        }
         if (!skill) {
             showNotice("Choose or enter a skill to learn.");
             return;
         }
-        const roadmap = createLearningRoadmap(skill, job, analysis.roleLabel);
+        const roadmapJobId = jobIdValue || selectedLearningJobId;
+        const job = workspace.jobs.find((candidate) => candidate.id === roadmapJobId);
+        const analysis = job ? workspace.analyses[job.id] ?? analyzeJob(workspace.profile, job) : undefined;
+        const roleLabel = analysis?.roleLabel || job?.title || "Standalone skill development";
+        const roadmap = createLearningRoadmap(skill, job, roleLabel);
         setWorkspace((current) => ({
             ...current,
             learningRoadmaps: [roadmap, ...current.learningRoadmaps],
@@ -730,7 +755,6 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
             return;
         }
         const job = workspace.jobs.find((candidate) => candidate.id === roadmap.jobId);
-        if (!job) return;
 
         const profile = workspace.profile;
         const alreadyListed = profile.skillGroups.some((group) => group.items.some((item) => item.toLowerCase() === roadmap.skill.toLowerCase()));
@@ -738,17 +762,20 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
             ? profile.skillGroups
             : profile.skillGroups.map((group, index) => index === 0 ? { ...group, items: [...group.items, roadmap.skill] } : group);
         const nextProfile = { ...profile, skillGroups };
-        const analysis = analyzeJob(nextProfile, job);
-        const resume = tailorResume(nextProfile, job, analysis);
 
         setWorkspace((current) => ({
             ...current,
             profile: nextProfile,
-            analyses: { ...current.analyses, [job.id]: analysis },
-            resumes: { ...current.resumes, [job.id]: resume },
+            analyses: job ? { ...current.analyses, [job.id]: analyzeJob(nextProfile, job) } : current.analyses,
+            resumes: job ? {
+                ...current.resumes,
+                [job.id]: tailorResume(nextProfile, job, analyzeJob(nextProfile, job)),
+            } : current.resumes,
             learningRoadmaps: current.learningRoadmaps.map((candidate) => candidate.id === roadmap.id ? { ...candidate, verified: true } : candidate),
         }));
-        showNotice(`${roadmap.skill} added to your skills and the tailored resume was regenerated.`);
+        showNotice(job
+            ? `${roadmap.skill} added to your skills and the tailored resume was regenerated.`
+            : `${roadmap.skill} added to your profile skills with its evidence note.`);
     }
 
     function updateProfile(patch: Partial<CandidateProfile>) {
@@ -824,24 +851,20 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
         const file = event.target.files?.[0];
         event.target.value = "";
         if (!file) return;
-        if (file.size > 5_000_000) {
-            showNotice("Choose a resume file smaller than 5 MB.");
+        if (file.size > 10_000_000) {
+            showNotice("Choose a resume file smaller than 10 MB.");
             return;
         }
         setImportingResume(true);
         try {
-            let text = "";
-            if (file.name.toLowerCase().endsWith(".docx")) {
-                const mammoth = await import("mammoth");
-                const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
-                text = result.value;
-            } else {
-                text = await file.text();
-            }
+            const text = await extractDocumentFileText(file, {
+                documentName: "resume",
+                pasteFallback: "Paste the resume text instead.",
+            });
             setResumeSource(text);
             showNotice("Resume text extracted locally. Review it, then choose Import into profile.");
-        } catch {
-            showNotice("That file could not be read. Upload DOCX/TXT or paste the resume text.");
+        } catch (error) {
+            showNotice(error instanceof Error ? error.message : "That resume file could not be read.");
         } finally {
             setImportingResume(false);
         }
@@ -931,8 +954,8 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
     });
 
     return (
-        <main className="placement-desk-ui relative z-[110] min-h-screen bg-[#f3f1ea] text-[#17211c] [color-scheme:light]">
-            <div className="pointer-events-none fixed inset-0 bg-[linear-gradient(rgba(35,55,47,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(35,55,47,0.035)_1px,transparent_1px)] bg-[size:32px_32px]" />
+        <main className="placement-desk-ui relative z-[110] min-h-screen bg-[#f3f1ea] text-[#17211c] [color-scheme:light]" data-motion={motionTier}>
+            <div className="pd-backdrop pointer-events-none fixed inset-0 bg-[linear-gradient(rgba(35,55,47,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(35,55,47,0.035)_1px,transparent_1px)] bg-[size:32px_32px]" />
 
             <aside className="fixed inset-y-0 left-0 z-20 hidden w-[236px] flex-col border-r border-[#23372f]/15 bg-[#17271f] text-white lg:flex">
                 <div className="border-b border-white/10 px-5 py-5">
@@ -990,8 +1013,8 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                             <p className="truncate text-xs font-semibold">{inviteLabel}</p>
                             <p className="truncate font-jetbrains text-[8px] uppercase tracking-[0.1em] text-white/40">{inviteId}</p>
                         </div>
-                        <button aria-label="Sign out" className="grid h-8 w-8 shrink-0 place-items-center border border-white/15 text-white/65 hover:border-white/35 hover:text-white" onClick={logout} title="Sign out" type="button">
-                            <LogOut className="h-3.5 w-3.5" />
+                        <button aria-label={loggingOut ? "Signing out" : "Sign out"} className="grid h-8 w-8 shrink-0 place-items-center border border-white/15 text-white/65 hover:border-white/35 hover:text-white" disabled={loggingOut} onClick={logout} title="Sign out" type="button">
+                            {loggingOut ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
                         </button>
                     </div>
                 </div>
@@ -1024,8 +1047,8 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                         <button className={BUTTON_SECONDARY} onClick={startNewJob} type="button">
                             <Plus className="h-4 w-4" /> <span className="hidden sm:inline">New job</span>
                         </button>
-                        <button aria-label="Sign out" className="grid h-10 w-10 place-items-center border border-[#23372f]/20 bg-white lg:hidden" onClick={logout} title="Sign out" type="button">
-                            <LogOut className="h-4 w-4" />
+                        <button aria-label={loggingOut ? "Signing out" : "Sign out"} className="grid h-10 w-10 place-items-center border border-[#23372f]/20 bg-white lg:hidden" disabled={loggingOut} onClick={logout} title="Sign out" type="button">
+                            {loggingOut ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
                         </button>
                     </div>
                 </header>
@@ -1043,9 +1066,9 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                     </nav>
                 ) : null}
 
-                <div className="mx-auto w-full max-w-[1380px] px-4 py-7 sm:px-6 lg:px-8 lg:py-9">
+                <div className="pd-view mx-auto w-full max-w-[1380px] px-4 py-7 sm:px-6 lg:px-8 lg:py-9">
                     {notice ? (
-                        <div className="mb-6 flex items-start justify-between gap-4 border-l-4 border-[#2f7453] bg-[#e5f1e8] px-4 py-3 text-sm text-[#275840]" role="status">
+                        <div className="pd-notice mb-6 flex items-start justify-between gap-4 border-l-4 border-[#2f7453] bg-[#e5f1e8] px-4 py-3 text-sm text-[#275840]" key={noticeSequence} role="status">
                             <span>{notice}</span>
                             <button aria-label="Dismiss message" className="shrink-0" onClick={() => setNotice("")} type="button"><X className="h-4 w-4" /></button>
                         </div>
@@ -1083,6 +1106,7 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                             preferences={workspace.careerPreferences}
                             results={workspace.jobSearchResults}
                             saveResult={saveSearchResult}
+                            savedJobUrls={workspace.jobs.map((job) => job.url).filter(Boolean)}
                             updatePreferences={updateCareerPreferences}
                         />
                     ) : null}
@@ -1111,7 +1135,7 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                             startRoadmap={(skill) => {
                                 if (currentJobId) setLearningJobId(currentJobId);
                                 navigate("learn");
-                                window.setTimeout(() => generateLearningRoadmap(skill), 0);
+                                window.setTimeout(() => generateLearningRoadmap(skill, currentJobId), 0);
                             }}
                             createPlan={() => {
                                 if (currentJobId) setPlanJobId(currentJobId);
@@ -1143,15 +1167,18 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
 
                     {view === "offer" ? (
                         <OfferAnalyzerView
-                            deleteOffer={(offerKey) => setWorkspace((current) => {
-                                const offerAnalyses = { ...current.offerAnalyses };
-                                delete offerAnalyses[offerKey];
-                                return {
-                                    ...current,
-                                    activeOfferJobId: "__standalone_new__",
-                                    offerAnalyses,
-                                };
-                            })}
+                            deleteOffer={(offerKey) => {
+                                setWorkspace((current) => {
+                                    const offerAnalyses = { ...current.offerAnalyses };
+                                    delete offerAnalyses[offerKey];
+                                    return {
+                                        ...current,
+                                        activeOfferJobId: "__standalone_new__",
+                                        offerAnalyses,
+                                    };
+                                });
+                                showNotice("Standalone offer analysis deleted.");
+                            }}
                             inviteId={inviteId}
                             jobs={workspace.jobs}
                             markOfferReceived={(jobId) => {
@@ -1178,6 +1205,7 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                             plannerDuration={plannerDuration}
                             plans={workspace.plans}
                             removePlan={removePlan}
+                            notify={showNotice}
                             selectedJobId={selectedPlanJobId}
                             setActivePlan={(planId) => setWorkspace((current) => ({ ...current, activePlanId: planId }))}
                             setDuration={setPlannerDuration}
@@ -1189,7 +1217,8 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                     {view === "learn" ? (
                         <LearningView
                             activeRoadmap={activeRoadmap}
-                            analyzedJobs={analyzedJobs}
+                            analyzedJobIds={new Set(Object.keys(workspace.analyses))}
+                            availableJobs={workspace.jobs}
                             analysis={selectedLearningAnalysis}
                             customSkill={customSkill}
                             generateRoadmap={generateLearningRoadmap}
@@ -1249,13 +1278,13 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
 
             {makerStoryOpen ? (
                 <div
-                    className="fixed inset-0 z-[200] flex items-center justify-center bg-[#0e1813]/80 px-4 py-6 backdrop-blur-sm"
+                    className="pd-backdrop pd-dialog-backdrop fixed inset-0 z-[200] flex items-center justify-center bg-[#0e1813]/80 px-4 py-6 backdrop-blur-sm"
                     onMouseDown={() => setMakerStoryOpen(false)}
                 >
                     <section
                         aria-labelledby="maker-story-title"
                         aria-modal="true"
-                        className="max-h-[90vh] w-full max-w-3xl overflow-y-auto border border-[#ff7a1a]/60 bg-[#fbfaf6] shadow-[10px_10px_0_#ff7a1a]"
+                        className="pd-dialog-panel max-h-[90vh] w-full max-w-3xl overflow-y-auto border border-[#ff7a1a]/60 bg-[#fbfaf6] shadow-[10px_10px_0_#ff7a1a]"
                         onMouseDown={(event) => event.stopPropagation()}
                         role="dialog"
                     >
@@ -1436,7 +1465,7 @@ function TailorView({ draftJob, analysis, currentResume, profile, importingUrl, 
     updateJobUrl: (value: string) => void;
     importJobUrl: () => void;
     closeImportDialog: () => void;
-    saveForLater: () => void;
+    saveForLater: () => boolean;
     onAnalyze: (event?: FormEvent) => void;
     onDownload: () => void;
     onPrint: () => void;
@@ -1446,6 +1475,7 @@ function TailorView({ draftJob, analysis, currentResume, profile, importingUrl, 
     startRoadmap: (skill: string) => void;
     createPlan: () => void;
 }) {
+    const [saveState, setSaveState] = useState<"idle" | "saved">("idle");
     const detailsReady = Boolean(
         draftJob.title.trim() &&
         draftJob.company.trim() &&
@@ -1460,6 +1490,20 @@ function TailorView({ draftJob, analysis, currentResume, profile, importingUrl, 
         });
     }
 
+    function changeDraft<K extends keyof JobRecord>(key: K, value: JobRecord[K]) {
+        setSaveState("idle");
+        updateDraft(key, value);
+    }
+
+    function changeJobUrl(value: string) {
+        setSaveState("idle");
+        updateJobUrl(value);
+    }
+
+    function saveDraft() {
+        if (saveForLater()) setSaveState("saved");
+    }
+
     return (
         <>
             <SectionHeader eyebrow="Application lab" title="Tailor a truthful resume" copy="Import or paste the role, then match only requirements supported by evidence in your profile." />
@@ -1471,7 +1515,7 @@ function TailorView({ draftJob, analysis, currentResume, profile, importingUrl, 
                     </div>
                     <div className="flex flex-col gap-3 p-4 sm:flex-row sm:p-5">
                         <label className="sr-only" htmlFor="job-url">Job URL</label>
-                        <input className={`${INPUT_CLASS} flex-1`} id="job-url" onChange={(event) => updateJobUrl(event.target.value)} placeholder="https://company.com/careers/job..." type="url" value={draftJob.url} />
+                        <input className={`${INPUT_CLASS} flex-1`} id="job-url" onChange={(event) => changeJobUrl(event.target.value)} placeholder="https://company.com/careers/job..." type="url" value={draftJob.url} />
                         <button className={`${BUTTON_SECONDARY} shrink-0`} disabled={importingUrl} onClick={importJobUrl} type="button">
                             {importingUrl ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Import className="h-4 w-4" />} {importingUrl ? "Reading page" : "Fetch details"}
                         </button>
@@ -1486,21 +1530,21 @@ function TailorView({ draftJob, analysis, currentResume, profile, importingUrl, 
 
                 <section className="mt-5 border border-[#23372f]/15 bg-[#fbfaf6] p-4 sm:p-5">
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                        <label><span className={LABEL_CLASS}>Role title *</span><input className={INPUT_CLASS} onChange={(event) => updateDraft("title", event.target.value)} placeholder="Business Analyst" value={draftJob.title} /></label>
-                        <label><span className={LABEL_CLASS}>Company *</span><input className={INPUT_CLASS} onChange={(event) => updateDraft("company", event.target.value)} placeholder="Company name" value={draftJob.company} /></label>
-                        <label><span className={LABEL_CLASS}>Location</span><input className={INPUT_CLASS} onChange={(event) => updateDraft("location", event.target.value)} placeholder="Bengaluru / Remote" value={draftJob.location} /></label>
-                        <label><span className={LABEL_CLASS}>Employment type</span><input className={INPUT_CLASS} onChange={(event) => updateDraft("employmentType", event.target.value)} placeholder="Full-time" value={draftJob.employmentType} /></label>
+                        <label><span className={LABEL_CLASS}>Role title *</span><input className={INPUT_CLASS} onChange={(event) => changeDraft("title", event.target.value)} placeholder="Business Analyst" value={draftJob.title} /></label>
+                        <label><span className={LABEL_CLASS}>Company *</span><input className={INPUT_CLASS} onChange={(event) => changeDraft("company", event.target.value)} placeholder="Company name" value={draftJob.company} /></label>
+                        <label><span className={LABEL_CLASS}>Location</span><input className={INPUT_CLASS} onChange={(event) => changeDraft("location", event.target.value)} placeholder="Bengaluru / Remote" value={draftJob.location} /></label>
+                        <label><span className={LABEL_CLASS}>Employment type</span><input className={INPUT_CLASS} onChange={(event) => changeDraft("employmentType", event.target.value)} placeholder="Full-time" value={draftJob.employmentType} /></label>
                     </div>
                     <label className="mt-4 block">
                         <span className={LABEL_CLASS}>Job description *</span>
-                        <textarea className={`${INPUT_CLASS} min-h-[260px] resize-y leading-6`} id="job-description" onChange={(event) => updateDraft("description", event.target.value)} placeholder="Paste responsibilities, requirements, qualifications, and preferred skills..." value={draftJob.description} />
+                        <textarea className={`${INPUT_CLASS} min-h-[260px] resize-y leading-6`} id="job-description" onChange={(event) => changeDraft("description", event.target.value)} placeholder="Paste responsibilities, requirements, qualifications, and preferred skills..." value={draftJob.description} />
                     </label>
                     <label className="mt-4 block">
                         <span className={LABEL_CLASS}>Private notes</span>
-                        <textarea className={`${INPUT_CLASS} min-h-20 resize-y`} onChange={(event) => updateDraft("notes", event.target.value)} placeholder="Recruiter name, referral, deadline, or application notes" value={draftJob.notes} />
+                        <textarea className={`${INPUT_CLASS} min-h-20 resize-y`} onChange={(event) => changeDraft("notes", event.target.value)} placeholder="Recruiter name, referral, deadline, or application notes" value={draftJob.notes} />
                     </label>
                     <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                        <button className={BUTTON_SECONDARY} onClick={saveForLater} type="button"><Save className="h-4 w-4" /> Save for later</button>
+                        <button aria-live="polite" className={`${BUTTON_SECONDARY} ${saveState === "saved" ? "pd-save-confirm pd-save-success" : ""}`} onClick={saveDraft} type="button">{saveState === "saved" ? <CheckCircle2 className="h-4 w-4" /> : <Save className="h-4 w-4" />} {saveState === "saved" ? "Saved" : "Save for later"}</button>
                         <button className={BUTTON_PRIMARY} disabled={importingUrl || !detailsReady} type="submit"><Sparkles className="h-4 w-4" /> Analyze + tailor resume</button>
                     </div>
                 </section>
@@ -1602,8 +1646,8 @@ function TailorView({ draftJob, analysis, currentResume, profile, importingUrl, 
             )}
 
             {importDialogOpen && importIssue ? (
-                <div className="fixed inset-0 z-[210] flex items-center justify-center bg-[#0e1813]/80 px-4 py-6 backdrop-blur-sm" onMouseDown={closeImportDialog}>
-                    <section aria-labelledby="import-blocked-title" aria-modal="true" className="w-full max-w-lg border border-[#ff7a1a]/60 bg-[#fbfaf6] p-5 shadow-[8px_8px_0_#ff7a1a] sm:p-6" onMouseDown={(event) => event.stopPropagation()} role="alertdialog">
+                <div className="pd-backdrop pd-dialog-backdrop fixed inset-0 z-[210] flex items-center justify-center bg-[#0e1813]/80 px-4 py-6 backdrop-blur-sm" onMouseDown={closeImportDialog}>
+                    <section aria-labelledby="import-blocked-title" aria-modal="true" className="pd-dialog-panel w-full max-w-lg border border-[#ff7a1a]/60 bg-[#fbfaf6] p-5 shadow-[8px_8px_0_#ff7a1a] sm:p-6" onMouseDown={(event) => event.stopPropagation()} role="alertdialog">
                         <div className="flex items-start gap-3"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#fff0e4] text-[#a84708]"><AlertTriangle className="h-5 w-5" /></div><div><p className="font-jetbrains text-[9px] uppercase tracking-[0.12em] text-[#a84708]">New link needs manual details</p><h2 className="mt-1 text-xl font-semibold" id="import-blocked-title">This job site blocked automatic reading</h2></div></div>
                         <p className="mt-4 text-sm leading-6 text-[#58665f]">{importIssue}</p>
                         <div className="mt-4 rounded-lg bg-[#e8eee8] px-4 py-3 text-xs leading-5 text-[#355d4c]"><strong>Your saved old job is safe in Saved jobs.</strong> It is no longer connected to this draft, so the wrong resume cannot be generated accidentally.</div>
@@ -1676,10 +1720,36 @@ function SavedJobsView({ filteredJobs, analyses, jobSearch, statusFilter, setJob
             <SectionHeader eyebrow="Application pipeline" title="Saved jobs" copy="Keep links, application state, tailored material, and preparation in one browser-local tracker." action={<button className={BUTTON_PRIMARY} onClick={startNewJob} type="button"><Plus className="h-4 w-4" /> Add job</button>} />
             <div className="mb-5 flex flex-col gap-3 sm:flex-row">
                 <label className="relative flex-1"><span className="sr-only">Search jobs</span><Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-[#718079]" /><input className={`${INPUT_CLASS} pl-10`} onChange={(event) => setJobSearch(event.target.value)} placeholder="Search title, company, or location" value={jobSearch} /></label>
-                <label><span className="sr-only">Filter by status</span><select className={`${INPUT_CLASS} min-w-44`} onChange={(event) => setStatusFilter(event.target.value as "all" | JobStatus)} value={statusFilter}><option value="all">All statuses</option>{JOB_STATUSES.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}</select></label>
+                <label className="w-full sm:w-auto"><span className="sr-only">Filter by status</span><select className={`${INPUT_CLASS} min-w-0 sm:min-w-44`} onChange={(event) => setStatusFilter(event.target.value as "all" | JobStatus)} value={statusFilter}><option value="all">All statuses</option>{JOB_STATUSES.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}</select></label>
             </div>
             {filteredJobs.length ? (
-                <div className="pd-surface overflow-x-auto border border-[#23372f]/15 bg-[#fbfaf6]">
+                <>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:hidden">
+                        {filteredJobs.map((job) => (
+                            <article className="border border-[#23372f]/15 bg-[#fbfaf6] p-4" key={job.id}>
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <h2 className="break-words text-sm font-semibold">{job.title || "Untitled role"}</h2>
+                                        <p className="mt-1 flex items-start gap-1.5 text-xs text-[#68756f]"><Building2 className="mt-0.5 h-3 w-3 shrink-0" /><span className="break-words">{job.company || "Company not set"}</span></p>
+                                    </div>
+                                    {analyses[job.id] ? <span className="shrink-0 font-jetbrains text-xs font-semibold text-[#2f7453]">{analyses[job.id].score}%</span> : null}
+                                </div>
+                                <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+                                    <div><span className={LABEL_CLASS}>Location</span><p className="break-words text-[#58665f]">{job.location || "Not listed"}</p></div>
+                                    <div><span className={LABEL_CLASS}>Updated</span><p className="text-[#58665f]">{formatDate(job.updatedAt)}</p></div>
+                                </div>
+                                <label className="mt-4 block"><span className={LABEL_CLASS}>Application status</span><select aria-label={`Update status for ${job.title || "untitled role"}`} className={`${INPUT_CLASS} min-h-11 font-semibold ${statusTone(job.status)}`} onChange={(event) => changeStatus(job.id, event.target.value as JobStatus)} value={job.status}>{JOB_STATUSES.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}</select></label>
+                                <div className="mt-4 grid grid-cols-2 gap-2 border-t border-[#23372f]/10 pt-4 sm:grid-cols-3">
+                                    <button className="inline-flex min-h-11 items-center justify-center gap-2 border border-[#23372f]/15 bg-white px-3 text-xs font-semibold text-[#2f7453]" onClick={() => setCoachJobId(job.id)} type="button"><BookOpenCheck className="h-4 w-4" /> Round help</button>
+                                    <button className="inline-flex min-h-11 items-center justify-center gap-2 border border-[#23372f]/15 bg-white px-3 text-xs font-semibold text-[#94611d]" onClick={() => analyzeOfferJob(job.id)} type="button"><BadgeIndianRupee className="h-4 w-4" /> Offer</button>
+                                    <button className="inline-flex min-h-11 items-center justify-center gap-2 border border-[#23372f]/15 bg-white px-3 text-xs font-semibold" onClick={() => loadJob(job)} type="button"><Sparkles className="h-4 w-4" /> Tailor</button>
+                                    {job.url ? <a className="inline-flex min-h-11 items-center justify-center gap-2 border border-[#23372f]/15 bg-white px-3 text-xs font-semibold" href={job.url} rel="noreferrer" target="_blank"><ExternalLink className="h-4 w-4" /> Listing</a> : null}
+                                    <button className="inline-flex min-h-11 items-center justify-center gap-2 border border-[#a4493d]/15 bg-white px-3 text-xs font-semibold text-[#a4493d]" onClick={() => removeJob(job.id)} type="button"><Trash2 className="h-4 w-4" /> Delete</button>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                    <div className="pd-surface hidden overflow-x-auto border border-[#23372f]/15 bg-[#fbfaf6] lg:block">
                     <table className="w-full min-w-[850px] border-collapse text-left">
                         <thead className="bg-[#e8eee8] font-jetbrains text-[9px] uppercase tracking-[0.1em] text-[#58665f]"><tr><th className="px-4 py-3 font-semibold">Role</th><th className="px-4 py-3 font-semibold">Location</th><th className="px-4 py-3 font-semibold">Fit</th><th className="px-4 py-3 font-semibold">Status</th><th className="px-4 py-3 font-semibold">Updated</th><th className="px-4 py-3 text-right font-semibold">Actions</th></tr></thead>
                         <tbody className="divide-y divide-[#23372f]/10">
@@ -1695,7 +1765,8 @@ function SavedJobsView({ filteredJobs, analyses, jobSearch, statusFilter, setJob
                             ))}
                         </tbody>
                     </table>
-                </div>
+                    </div>
+                </>
             ) : <EmptyState icon={BriefcaseBusiness} title="No jobs match" copy="Adjust the search or add a role to start the application pipeline." action={<button className={BUTTON_PRIMARY} onClick={startNewJob} type="button">Add job</button>} />}
 
             {coachJob && guidance ? (
@@ -1738,7 +1809,7 @@ function SavedJobsView({ filteredJobs, analyses, jobSearch, statusFilter, setJob
     );
 }
 
-function PlannerView({ analyzedJobs, selectedJobId, setJobId, plannerDuration, setDuration, generatePlan, plans, activePlan, setActivePlan, toggleTask, removePlan }: {
+function PlannerView({ analyzedJobs, selectedJobId, setJobId, plannerDuration, setDuration, generatePlan, plans, activePlan, setActivePlan, toggleTask, removePlan, notify }: {
     analyzedJobs: JobRecord[];
     selectedJobId: string;
     setJobId: (jobId: string) => void;
@@ -1750,6 +1821,7 @@ function PlannerView({ analyzedJobs, selectedJobId, setJobId, plannerDuration, s
     setActivePlan: (planId: string) => void;
     toggleTask: (planId: string, taskId: string) => void;
     removePlan: (planId: string) => void;
+    notify: (message: string) => void;
 }) {
     const [exportingGuide, setExportingGuide] = useState(false);
     const completed = activePlan?.tasks.filter((task) => task.completed).length ?? 0;
@@ -1762,6 +1834,9 @@ function PlannerView({ analyzedJobs, selectedJobId, setJobId, plannerDuration, s
         try {
             const { blob, filename } = await buildPreparationGuideDocx(activePlan);
             downloadBlob(blob, filename);
+            notify("Offline study guide downloaded.");
+        } catch {
+            notify("The study guide could not be generated. Try again.");
         } finally {
             setExportingGuide(false);
         }
@@ -1843,8 +1918,9 @@ function PlannerView({ analyzedJobs, selectedJobId, setJobId, plannerDuration, s
     );
 }
 
-function LearningView({ analyzedJobs, selectedJobId, setJobId, analysis, customSkill, setCustomSkill, generateRoadmap, roadmaps, activeRoadmap, setActiveRoadmap, toggleDay, updateEvidence, verifySkill }: {
-    analyzedJobs: JobRecord[];
+function LearningView({ availableJobs, analyzedJobIds, selectedJobId, setJobId, analysis, customSkill, setCustomSkill, generateRoadmap, roadmaps, activeRoadmap, setActiveRoadmap, toggleDay, updateEvidence, verifySkill }: {
+    availableJobs: JobRecord[];
+    analyzedJobIds: Set<string>;
     selectedJobId: string;
     setJobId: (jobId: string) => void;
     analysis?: JobAnalysis;
@@ -1864,7 +1940,7 @@ function LearningView({ analyzedJobs, selectedJobId, setJobId, analysis, customS
             <SectionHeader eyebrow="Gap to evidence" title="Seven-day skill roadmaps" copy="Turn a missing requirement into knowledge, practice, and a proof artifact before adding it to your resume." />
             <section className="border border-[#23372f]/15 bg-[#fbfaf6] p-4 sm:p-5">
                 <div className="grid gap-4 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
-                    <label><span className={LABEL_CLASS}>Analyzed job</span><select className={INPUT_CLASS} onChange={(event) => setJobId(event.target.value)} value={selectedJobId}><option value="">Choose a job</option>{analyzedJobs.map((job) => <option key={job.id} value={job.id}>{job.title} · {job.company}</option>)}</select></label>
+                    <label><span className={LABEL_CLASS}>Roadmap context</span><select className={INPUT_CLASS} onChange={(event) => setJobId(event.target.value)} value={selectedJobId}><option value="__standalone__">Standalone skill roadmap</option>{availableJobs.map((job) => <option key={job.id} value={job.id}>{job.title || "Untitled role"} · {job.company || "Company not set"}{analyzedJobIds.has(job.id) ? " · Analyzed" : " · Saved"}</option>)}</select></label>
                     <label><span className={LABEL_CLASS}>Other skill</span><input className={INPUT_CLASS} onChange={(event) => setCustomSkill(event.target.value)} placeholder="SQL, Jira, Power BI..." value={customSkill} /></label>
                     <button className={BUTTON_PRIMARY} onClick={() => generateRoadmap()} type="button"><GraduationCap className="h-4 w-4" /> Build roadmap</button>
                 </div>
@@ -1931,7 +2007,7 @@ function ProfileView({ profile, isOwner, resumeSource, setResumeSource, importin
             <SectionHeader eyebrow="Source of truth" title="Candidate profile" copy="Tailoring can reorder and emphasize this evidence, but it never invents experience outside this profile." action={isProfileReady(profile) ? <span className="inline-flex items-center gap-2 border border-[#2f7453]/25 bg-[#e5f2e8] px-3 py-2 text-xs font-semibold text-[#275f43]"><CheckCircle2 className="h-4 w-4" /> Ready to tailor</span> : <span className="inline-flex items-center gap-2 border border-[#a66d20]/25 bg-[#fbefd8] px-3 py-2 text-xs font-semibold text-[#80571d]"><Circle className="h-4 w-4" /> Profile incomplete</span>} />
 
             <section className="border border-[#23372f]/15 bg-[#fbfaf6]">
-                <div className="flex flex-col justify-between gap-3 border-b border-[#23372f]/12 bg-[#e8eee8] px-5 py-4 sm:flex-row sm:items-center"><div><h2 className="text-sm font-semibold">Import main resume</h2><p className="mt-1 text-xs text-[#68756f]">DOCX, TXT, or pasted text. Parsing happens in this browser.</p></div><label className={`${BUTTON_SECONDARY} cursor-pointer`}><Upload className="h-4 w-4" /> {importingResume ? "Reading file" : "Choose resume"}<input accept=".docx,.txt,.md,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" disabled={importingResume} onChange={handleResumeFile} type="file" /></label></div>
+                <div className="flex flex-col justify-between gap-3 border-b border-[#23372f]/12 bg-[#e8eee8] px-5 py-4 sm:flex-row sm:items-center"><div><h2 className="text-sm font-semibold">Import main resume</h2><p className="mt-1 text-xs text-[#68756f]">PDF, DOCX, TXT, Markdown, or pasted text. Files are read only in this browser.</p></div><label className={`${BUTTON_SECONDARY} cursor-pointer`}><Upload className="h-4 w-4" /> {importingResume ? "Reading file" : "Choose resume"}<input accept=".pdf,.docx,.txt,.md,application/pdf,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" disabled={importingResume} onChange={handleResumeFile} type="file" /></label></div>
                 <div className="p-4 sm:p-5"><label><span className={LABEL_CLASS}>Resume text</span><textarea className={`${INPUT_CLASS} min-h-48 resize-y text-xs leading-5`} onChange={(event) => setResumeSource(event.target.value)} placeholder="Paste your full current resume here..." value={resumeSource} /></label><div className="mt-3 flex justify-end"><button className={BUTTON_PRIMARY} onClick={applyResumeImport} type="button"><Import className="h-4 w-4" /> Import into profile</button></div></div>
             </section>
 

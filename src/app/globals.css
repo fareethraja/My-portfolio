@@ -106,6 +106,182 @@
   overflow: hidden;
 }
 
+/* Motion uses opacity/transform only. The data tier is selected from reduced-motion,
+   viewport size, memory/CPU hints, and data-saver connection hints. */
+.placement-desk-ui {
+  --pd-motion-duration: 280ms;
+  --pd-motion-distance: 8px;
+  --pd-motion-stagger: 36ms;
+  --pd-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.placement-desk-ui[data-motion="lite"] {
+  --pd-motion-duration: 170ms;
+  --pd-motion-distance: 4px;
+  --pd-motion-stagger: 0ms;
+}
+
+.placement-desk-ui[data-motion="reduced"] {
+  --pd-motion-duration: 0ms;
+  --pd-motion-distance: 0px;
+  --pd-motion-stagger: 0ms;
+}
+
+.placement-desk-ui .pd-view > * {
+  animation: pd-view-enter var(--pd-motion-duration) var(--pd-motion-ease) both;
+}
+
+.placement-desk-ui[data-motion="full"] .pd-view > *:nth-child(2) { animation-delay: var(--pd-motion-stagger); }
+.placement-desk-ui[data-motion="full"] .pd-view > *:nth-child(3) { animation-delay: calc(var(--pd-motion-stagger) * 2); }
+.placement-desk-ui[data-motion="full"] .pd-view > *:nth-child(4) { animation-delay: calc(var(--pd-motion-stagger) * 3); }
+.placement-desk-ui[data-motion="full"] .pd-view > *:nth-child(n + 5) { animation-delay: calc(var(--pd-motion-stagger) * 4); }
+
+.placement-desk-ui .pd-login-card {
+  animation: pd-login-enter var(--pd-motion-duration) var(--pd-motion-ease) both;
+}
+
+.placement-desk-ui .pd-dialog-backdrop {
+  animation: pd-backdrop-enter var(--pd-motion-duration) ease-out both;
+}
+
+.placement-desk-ui .pd-dialog-panel {
+  animation: pd-dialog-enter var(--pd-motion-duration) var(--pd-motion-ease) both;
+}
+
+.placement-desk-ui .pd-notice {
+  position: fixed;
+  right: clamp(1rem, 2vw, 1.5rem);
+  bottom: clamp(1rem, 2vw, 1.5rem);
+  z-index: 190;
+  width: min(calc(100vw - 2rem), 28rem);
+  margin: 0;
+  box-shadow: 0 12px 30px rgba(23, 39, 31, 0.18);
+  animation: pd-notice-enter var(--pd-motion-duration) var(--pd-motion-ease) both;
+}
+
+.placement-desk-ui button.pd-click-ack {
+  position: relative;
+  isolation: isolate;
+}
+
+.placement-desk-ui button.pd-click-ack::after {
+  position: absolute;
+  inset: 2px;
+  z-index: 2;
+  border: 1.5px solid currentColor;
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+  animation: pd-click-ack var(--pd-motion-duration) var(--pd-motion-ease) both;
+}
+
+.placement-desk-ui .pd-save-confirm {
+  animation: pd-save-confirm var(--pd-motion-duration) var(--pd-motion-ease) both;
+}
+
+.placement-desk-ui .pd-save-success {
+  border-color: #2f7453;
+  background: #e5f1e8;
+  color: #275840;
+}
+
+.placement-desk-ui details[open] > :not(summary) {
+  animation: pd-details-enter var(--pd-motion-duration) var(--pd-motion-ease) both;
+}
+
+.placement-desk-ui button,
+.placement-desk-ui a[class*="transition"] {
+  transition-duration: 160ms;
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-timing-function: ease-out;
+}
+
+.placement-desk-ui button:not(:disabled):active,
+.placement-desk-ui a[class*="transition"]:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.placement-desk-ui [class*="transition-[width]"] {
+  transition-duration: 420ms;
+  transition-timing-function: var(--pd-motion-ease);
+}
+
+.placement-desk-ui[data-motion="full"] .pd-hover-lift {
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .placement-desk-ui[data-motion="full"] .pd-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(23, 39, 31, 0.08);
+  }
+}
+
+.placement-desk-ui[data-motion="lite"] .gb-logo,
+.placement-desk-ui[data-motion="lite"] .gb-logo::before,
+.placement-desk-ui[data-motion="lite"] .gb-logo__slash,
+.placement-desk-ui[data-motion="reduced"] .gb-logo,
+.placement-desk-ui[data-motion="reduced"] .gb-logo::before,
+.placement-desk-ui[data-motion="reduced"] .gb-logo__slash {
+  animation: none !important;
+}
+
+.placement-desk-ui[data-motion="lite"] .pd-backdrop,
+.placement-desk-ui[data-motion="reduced"] .pd-backdrop {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.placement-desk-ui[data-motion="reduced"] *,
+.placement-desk-ui[data-motion="reduced"] *::before,
+.placement-desk-ui[data-motion="reduced"] *::after {
+  animation: none !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.001ms !important;
+}
+
+@keyframes pd-view-enter {
+  from { opacity: 0; transform: translate3d(0, var(--pd-motion-distance), 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes pd-login-enter {
+  from { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.99); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes pd-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pd-dialog-enter {
+  from { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.985); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes pd-notice-enter {
+  from { opacity: 0; transform: translate3d(8px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes pd-click-ack {
+  0% { opacity: 0.55; transform: scale(0.82); }
+  70% { opacity: 0.3; }
+  100% { opacity: 0; transform: scale(1.08); }
+}
+
+@keyframes pd-save-confirm {
+  0% { transform: scale(0.97); }
+  55% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pd-details-enter {
+  from { opacity: 0; transform: translate3d(0, -3px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
 .gb-logo {
   --gb-size: 2.5rem;
   position: relative;
