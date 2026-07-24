@@ -30,6 +30,12 @@ export type EducationEntry = {
     detail: string;
 };
 
+export type AdditionalProfileSection = {
+    id: string;
+    name: string;
+    items: string[];
+};
+
 export type CandidateProfile = {
     fullName: string;
     headline: string;
@@ -46,7 +52,9 @@ export type CandidateProfile = {
     projects: ProjectEntry[];
     education: EducationEntry[];
     certifications: string[];
+    courses: string[];
     achievements: string[];
+    additionalSections: AdditionalProfileSection[];
 };
 
 export type JobStatus =
@@ -128,8 +136,22 @@ export type TailoredResume = {
     projects: ProjectEntry[];
     education: EducationEntry[];
     certifications: string[];
+    courses: string[];
     achievements: string[];
+    additionalSections: AdditionalProfileSection[];
     selectedKeywords: string[];
+    generatedAt: string;
+};
+
+export type CoverLetterDraft = {
+    jobId: string;
+    targetTitle: string;
+    targetCompany: string;
+    recipient: string;
+    subject: string;
+    salutation: string;
+    body: string;
+    signOff: string;
     generatedAt: string;
 };
 
@@ -195,6 +217,7 @@ export type RemotePreference = "any" | "onsite" | "hybrid" | "remote";
 export type CareerPreferences = {
     educationContext: string;
     interests: string;
+    interestAreas: string[];
     workStyles: string[];
     industries: string[];
     targetLevel: CareerLevel;
@@ -370,6 +393,7 @@ export type WorkspaceState = {
     latestJobId: string;
     analyses: Record<string, JobAnalysis>;
     resumes: Record<string, TailoredResume>;
+    coverLetters: Record<string, CoverLetterDraft>;
     plans: PreparationPlan[];
     activePlanId: string;
     learningRoadmaps: LearningRoadmap[];

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node -e \"require('node:fs').rmSync('.test-dist',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node --test .test-dist/src/lib/job-assistant/__tests__/*.test.js && node -e \"require('node:fs').rmSync('.test-dist',{recursive:true,force:true})\""
   },
   "dependencies": {
     "@fontsource/signika": "^5.2.8",

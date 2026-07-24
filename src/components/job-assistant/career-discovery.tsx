@@ -21,7 +21,8 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { buildSearchLaunchers } from "@/lib/job-assistant/career";
+import { buildSearchLaunchers, ROLE_CATALOG_TITLES } from "@/lib/job-assistant/career";
+import { INDUSTRY_OPTIONS, INTEREST_AREAS, WORK_STYLE_OPTIONS } from "@/lib/job-assistant/discovery-options";
 import { composePreferredLocation, LOCATION_CATALOG } from "@/lib/job-assistant/locations";
 import type {
     CareerLevel,
@@ -39,8 +40,6 @@ const BUTTON_PRIMARY =
 const BUTTON_SECONDARY =
     "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#23372f]/25 bg-white px-4 py-2.5 text-sm font-semibold text-[#23372f] transition hover:border-[#ff7a1a] hover:bg-[#fff5ec] disabled:cursor-not-allowed disabled:opacity-50";
 
-const WORK_STYLES = ["Analytical", "Problem solving", "Cross-functional", "Building", "Customer-facing", "Independent research", "Structured execution", "Creative", "Fast-paced"];
-const INDUSTRIES = ["FinTech", "SaaS", "AI", "E-commerce", "Banking", "Consulting", "Consumer apps", "Healthcare", "Education", "Logistics"];
 const RECENCY_OPTIONS = [1, 3, 7, 14, 30] as const;
 
 function PageHeader({ eyebrow, title, copy, action }: { eyebrow: string; title: string; copy: string; action?: React.ReactNode }) {
@@ -169,23 +168,20 @@ export function CareerDiscoveryView({
     generateSuggestions: () => void;
     continueToSearch: () => void;
 }) {
-    const [customIndustry, setCustomIndustry] = useState("");
-    const industryOptions = [
-        ...INDUSTRIES,
-        ...preferences.industries.filter((industry) => !INDUSTRIES.includes(industry)),
-    ];
+    const [showAllRoles, setShowAllRoles] = useState(false);
+    const visibleSuggestions = showAllRoles ? suggestions : suggestions.slice(0, 6);
 
     function toggleArrayValue(key: "workStyles" | "industries", value: string) {
         const values = preferences[key];
         updatePreferences({ [key]: values.includes(value) ? values.filter((item) => item !== value) : [...values, value] });
     }
 
-    function addCustomIndustry() {
-        const industry = customIndustry.trim();
-        if (!industry || preferences.industries.some((item) => item.toLowerCase() === industry.toLowerCase())) return;
-        if (preferences.industries.length >= 12) return;
-        updatePreferences({ industries: [...preferences.industries, industry] });
-        setCustomIndustry("");
+    function toggleInterest(area: string) {
+        const selected = preferences.interestAreas;
+        const next = selected.includes(area)
+            ? selected.filter((item) => item !== area)
+            : selected.length < 8 ? [...selected, area] : selected;
+        updatePreferences({ interestAreas: next, interests: next.join("; ") });
     }
 
     function toggleRole(title: string) {
@@ -213,26 +209,24 @@ export function CareerDiscoveryView({
                         <span className={LABEL_CLASS}>Education + current context</span>
                         <textarea className={`${INPUT_CLASS} min-h-28 resize-y leading-6`} onChange={(event) => updatePreferences({ educationContext: event.target.value })} placeholder="MBA Finance and Marketing, BA Economics, final year..." value={preferences.educationContext} />
                     </label>
-                    <label className="mt-4 block">
-                        <span className={LABEL_CLASS}>What do you enjoy or want to explore?</span>
-                        <textarea className={`${INPUT_CLASS} min-h-32 resize-y leading-6`} onChange={(event) => updatePreferences({ interests: event.target.value })} placeholder="I like solving business problems, talking to users, working with data, building products..." value={preferences.interests} />
-                    </label>
                     <label className="mt-4 block"><span className={LABEL_CLASS}>Career level</span><select className={INPUT_CLASS} onChange={(event) => updatePreferences({ targetLevel: event.target.value as CareerLevel })} value={preferences.targetLevel}><option value="any">Open to suitable level</option><option value="internship">Internship</option><option value="entry">Entry level / fresher</option><option value="associate">Associate</option></select></label>
-                    <div className="mt-4"><StructuredLocationPicker preferences={preferences} updatePreferences={updatePreferences} /></div>
+                    <div className="mt-5">
+                        <div className="flex items-end justify-between gap-3"><span className={LABEL_CLASS}>What do you want to explore?</span><span className="text-[10px] text-[#718079]">{preferences.interestAreas.length}/8</span></div>
+                        <div className="flex flex-wrap gap-2">{INTEREST_AREAS.map((area) => { const active = preferences.interestAreas.includes(area); return <button className={`border px-2.5 py-1.5 text-left text-xs transition ${active ? "border-[#2f7453] bg-[#e4f1e7] font-semibold text-[#275f43]" : "border-[#23372f]/18 bg-white text-[#66736c] hover:border-[#2f7453]"}`} disabled={!active && preferences.interestAreas.length >= 8} key={area} onClick={() => toggleInterest(area)} type="button">{active ? <Check className="mr-1 inline h-3 w-3" /> : null}{area}</button>; })}</div>
+                        <p className="mt-2 text-[10px] leading-4 text-[#718079]">Choose the problems and domains you would genuinely enjoy working on. These signals directly change the shortlist.</p>
+                    </div>
                 </div>
 
                 <div className="bg-[#fbfaf6] p-4 sm:p-5">
                     <div>
                         <span className={LABEL_CLASS}>Work that feels natural</span>
-                        <div className="flex flex-wrap gap-2">{WORK_STYLES.map((style) => { const active = preferences.workStyles.includes(style); return <button className={`border px-2.5 py-1.5 text-xs transition ${active ? "border-[#2f7453] bg-[#e4f1e7] font-semibold text-[#275f43]" : "border-[#23372f]/18 bg-white text-[#66736c] hover:border-[#2f7453]"}`} key={style} onClick={() => toggleArrayValue("workStyles", style)} type="button">{active ? <Check className="mr-1 inline h-3 w-3" /> : null}{style}</button>; })}</div>
+                        <div className="flex flex-wrap gap-2">{WORK_STYLE_OPTIONS.map((style) => { const active = preferences.workStyles.includes(style); return <button className={`border px-2.5 py-1.5 text-xs transition ${active ? "border-[#2f7453] bg-[#e4f1e7] font-semibold text-[#275f43]" : "border-[#23372f]/18 bg-white text-[#66736c] hover:border-[#2f7453]"}`} disabled={!active && preferences.workStyles.length >= 8} key={style} onClick={() => toggleArrayValue("workStyles", style)} type="button">{active ? <Check className="mr-1 inline h-3 w-3" /> : null}{style}</button>; })}</div>
+                        <p className="mt-2 text-[10px] text-[#718079]">Choose up to eight patterns you can sustain, not every task you can perform.</p>
                     </div>
                     <div className="mt-5">
-                        <span className={LABEL_CLASS}>Industries to prioritize</span>
-                        <div className="flex flex-wrap gap-2">{industryOptions.map((industry) => { const active = preferences.industries.includes(industry); return <button className={`border px-2.5 py-1.5 text-xs transition ${active ? "border-[#2f7453] bg-[#e4f1e7] font-semibold text-[#275f43]" : "border-[#23372f]/18 bg-white text-[#66736c] hover:border-[#ff7a1a]"}`} key={industry} onClick={() => toggleArrayValue("industries", industry)} type="button">{active ? <Check className="mr-1 inline h-3 w-3" /> : null}{industry}</button>; })}</div>
-                        <div className="mt-3 flex max-w-sm rounded-lg border border-[#23372f]/18 bg-white p-1">
-                            <input className="min-w-0 flex-1 bg-transparent px-2 text-xs outline-none" onChange={(event) => setCustomIndustry(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addCustomIndustry(); } }} placeholder="Add another industry or domain" value={customIndustry} />
-                            <button aria-label="Add custom industry" className="grid h-8 w-8 place-items-center text-[#a84708]" disabled={!customIndustry.trim() || preferences.industries.length >= 12} onClick={addCustomIndustry} title="Add industry" type="button"><Plus className="h-4 w-4" /></button>
-                        </div>
+                        <div className="flex items-end justify-between gap-3"><span className={LABEL_CLASS}>Industries to prioritize</span><span className="text-[10px] text-[#718079]">{preferences.industries.length}/12</span></div>
+                        <select aria-label="Add industry" className={INPUT_CLASS} disabled={preferences.industries.length >= 12} onChange={(event) => { if (event.target.value) toggleArrayValue("industries", event.target.value); event.target.value = ""; }} value=""><option value="">Add an industry</option>{INDUSTRY_OPTIONS.filter((industry) => !preferences.industries.includes(industry)).map((industry) => <option key={industry} value={industry}>{industry}</option>)}</select>
+                        {preferences.industries.length ? <div className="mt-3 flex flex-wrap gap-2">{preferences.industries.map((industry) => <span className="inline-flex items-center gap-1.5 border border-[#2f7453]/20 bg-[#e4f1e7] px-2.5 py-1.5 text-xs font-semibold text-[#275f43]" key={industry}>{industry}<button aria-label={`Remove ${industry}`} onClick={() => toggleArrayValue("industries", industry)} title={`Remove ${industry}`} type="button"><X className="h-3 w-3" /></button></span>)}</div> : null}
                     </div>
                     <div className="mt-6 border-l-2 border-[#ff7a1a] bg-[#19372d] px-4 py-3 text-xs leading-5 text-white/70">
                         Recommendations use the evidence in <strong className="text-white">My profile</strong>. Missing evidence lowers fit and appears as a bridge skill.
@@ -241,7 +235,7 @@ export function CareerDiscoveryView({
             </section>
 
             <div className="mt-5 flex justify-end">
-                <button className={BUTTON_PRIMARY} disabled={!preferences.educationContext.trim() || !preferences.interests.trim()} onClick={generateSuggestions} type="button"><Compass className="h-4 w-4" /> Generate role shortlist</button>
+                <button className={BUTTON_PRIMARY} disabled={!preferences.interestAreas.length && !preferences.interests.trim()} onClick={() => { setShowAllRoles(false); generateSuggestions(); }} type="button"><Compass className="h-4 w-4" /> Generate role shortlist</button>
             </div>
 
             <details className="mt-5 border border-[#23372f]/15 bg-[#fbfaf6]">
@@ -258,7 +252,7 @@ export function CareerDiscoveryView({
                 <section className="mt-9">
                     <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-end"><div><p className="font-jetbrains text-[9px] font-semibold uppercase tracking-[0.12em] text-[#2f7453]">Recommended directions</p><h2 className="mt-1 text-lg font-semibold">Choose up to six roles to search</h2></div><p className="text-xs text-[#718079]">{preferences.selectedRoleTitles.length}/6 selected</p></div>
                     <div className="grid gap-4 xl:grid-cols-2">
-                        {suggestions.map((role, index) => {
+                        {visibleSuggestions.map((role, index) => {
                             const selected = preferences.selectedRoleTitles.includes(role.title);
                             return (
                                 <article className={`pd-hover-lift border bg-[#fbfaf6] ${selected ? "border-[#a84708] shadow-[4px_4px_0_#ff7a1a]" : "border-[#23372f]/15"}`} key={role.id}>
@@ -290,6 +284,7 @@ export function CareerDiscoveryView({
                             );
                         })}
                     </div>
+                    {suggestions.length > 6 ? <div className="mt-5 flex justify-center"><button className={BUTTON_SECONDARY} onClick={() => setShowAllRoles((visible) => !visible)} type="button">{showAllRoles ? "Show strongest six" : `Explore ${suggestions.length - 6} more roles`} <ChevronDown className={`h-4 w-4 transition ${showAllRoles ? "rotate-180" : ""}`} /></button></div> : null}
                     <div className="mt-6 flex justify-end"><button className={BUTTON_PRIMARY} disabled={!preferences.selectedRoleTitles.length} onClick={continueToSearch} type="button">Lock direction + find jobs <ArrowRight className="h-4 w-4" /></button></div>
                 </section>
             ) : (
@@ -324,21 +319,21 @@ export function JobHuntView({
 }) {
     const [searching, setSearching] = useState(false);
     const [recentlySavedId, setRecentlySavedId] = useState("");
-    const [customRole, setCustomRole] = useState("");
+    const [catalogRole, setCatalogRole] = useState("");
     const [customCompany, setCustomCompany] = useState("");
     const launchers = useMemo(() => buildSearchLaunchers(preferences), [preferences]);
     const targetLaunchers = launchers.filter((launcher) => launcher.kind === "target");
     const boardLaunchers = launchers.filter((launcher) => launcher.kind === "board");
 
     function addCustomRole() {
-        const role = customRole.trim();
+        const role = catalogRole.trim();
         if (!role || preferences.selectedRoleTitles.some((item) => item.toLowerCase() === role.toLowerCase())) return;
         if (preferences.selectedRoleTitles.length >= 6) {
             notify("Choose no more than six target roles for a focused search.");
             return;
         }
         updatePreferences({ selectedRoleTitles: [...preferences.selectedRoleTitles, role] });
-        setCustomRole("");
+        setCatalogRole("");
     }
 
     function addTargetCompany() {
@@ -402,7 +397,7 @@ export function JobHuntView({
                         <span className={LABEL_CLASS}>Target roles · up to 6</span>
                         <div className="flex min-h-12 flex-wrap items-center gap-2 rounded-lg border border-[#23372f]/20 bg-white p-2">
                             {preferences.selectedRoleTitles.map((role) => <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#e5f1e8] px-2.5 py-1.5 text-xs font-semibold text-[#275f43]" key={role}>{role}<button aria-label={`Remove ${role}`} onClick={() => updatePreferences({ selectedRoleTitles: preferences.selectedRoleTitles.filter((item) => item !== role) })} title={`Remove ${role}`} type="button"><X className="h-3 w-3" /></button></span>)}
-                            <div className="flex min-w-[190px] flex-1"><input className="min-w-0 flex-1 bg-transparent px-2 text-xs outline-none" onChange={(event) => setCustomRole(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addCustomRole(); } }} placeholder="Add another role" value={customRole} /><button aria-label="Add custom role" className="grid h-8 w-8 place-items-center text-[#2f7453]" onClick={addCustomRole} title="Add role" type="button"><Plus className="h-4 w-4" /></button></div>
+                            <div className="flex min-w-[220px] flex-1"><select aria-label="Add catalog role" className="min-w-0 flex-1 bg-transparent px-2 text-xs outline-none" disabled={preferences.selectedRoleTitles.length >= 6} onChange={(event) => setCatalogRole(event.target.value)} value={catalogRole}><option value="">Add another catalog role</option>{ROLE_CATALOG_TITLES.filter((role) => !preferences.selectedRoleTitles.includes(role)).map((role) => <option key={role} value={role}>{role}</option>)}</select><button aria-label="Add selected role" className="grid h-8 w-8 place-items-center text-[#2f7453]" disabled={!catalogRole || preferences.selectedRoleTitles.length >= 6} onClick={addCustomRole} title="Add role" type="button"><Plus className="h-4 w-4" /></button></div>
                         </div>
                     </div>
                     <div><span className={LABEL_CLASS}>Target companies · up to 10</span><div className="flex min-h-12 flex-wrap items-center gap-2 rounded-lg border border-[#23372f]/20 bg-white p-2">{preferences.targetCompanies.map((company) => <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#fff0e4] px-2.5 py-1.5 text-xs font-semibold text-[#8f3d08]" key={company}>{company}<button aria-label={`Remove ${company}`} onClick={() => updatePreferences({ targetCompanies: preferences.targetCompanies.filter((item) => item !== company) })} title={`Remove ${company}`} type="button"><X className="h-3 w-3" /></button></span>)}<div className="flex min-w-[180px] flex-1"><input className="min-w-0 flex-1 bg-transparent px-2 text-xs outline-none" onChange={(event) => setCustomCompany(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addTargetCompany(); } }} placeholder="Add company" value={customCompany} /><button aria-label="Add target company" className="grid h-8 w-8 place-items-center text-[#a84708]" disabled={!customCompany.trim() || preferences.targetCompanies.length >= 10} onClick={addTargetCompany} title="Add company" type="button"><Plus className="h-4 w-4" /></button></div></div></div>

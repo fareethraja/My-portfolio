@@ -8,15 +8,17 @@ import type {
     RoundGuidance,
     SearchLauncher,
 } from "./types";
+import { EXTENDED_ROLES } from "./extended-roles";
 import { canonicalSearchLocation } from "./locations";
 
-type RoleDefinition = {
+export type RoleDefinition = {
     id: string;
     title: string;
     track: RoleTrack;
     levels: Array<CareerPreferences["targetLevel"]>;
     summary: string;
     interestTerms: string[];
+    industryTerms?: string[];
     evidenceTerms: string[];
     educationTerms: string[];
     workStyles: string[];
@@ -243,6 +245,21 @@ const ROLE_CATALOG: RoleDefinition[] = [
     },
 ];
 
+const ALL_ROLES = [...ROLE_CATALOG, ...EXTENDED_ROLES];
+
+export const ROLE_CATALOG_TITLES = ALL_ROLES.map((role) => role.title).sort((left, right) => left.localeCompare(right));
+
+const TRACK_INDUSTRY_TERMS: Record<RoleTrack, string[]> = {
+    product: ["saas", "software", "consumer", "e-commerce", "fintech", "technology"],
+    analytics: ["analytics", "consulting", "financial", "retail", "healthcare", "technology"],
+    finance: ["banking", "financial", "fintech", "insurance", "investment", "capital markets"],
+    marketing: ["advertising", "consumer", "retail", "media", "e-commerce", "saas"],
+    operations: ["logistics", "manufacturing", "consulting", "retail", "professional services"],
+    people: ["hr", "professional services", "consulting", "technology", "healthcare"],
+    technology: ["software", "saas", "cloud", "cybersecurity", "ai", "technology"],
+    general: ["consulting", "professional services", "saas", "consumer", "fintech"],
+};
+
 function normalize(value: string): string {
     return value.toLowerCase().replace(/[^a-z0-9+#.]+/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -257,12 +274,14 @@ function profileText(profile: CandidateProfile): string {
     return [
         profile.headline,
         profile.summary,
-        profile.sourceText,
         ...profile.skillGroups.flatMap((group) => [group.name, ...group.items]),
         ...profile.experiences.flatMap((experience) => [experience.role, experience.company, ...experience.bullets]),
         ...profile.projects.flatMap((project) => [project.name, project.subtitle, ...project.bullets]),
         ...profile.education.flatMap((education) => [education.qualification, education.institution, education.detail]),
         ...profile.certifications,
+        ...profile.courses,
+        ...profile.achievements,
+        ...profile.additionalSections.flatMap((section) => [section.name, ...section.items]),
     ].join(" ");
 }
 
@@ -272,22 +291,26 @@ function titleCase(value: string): string {
 
 export function suggestRoles(profile: CandidateProfile, preferences: CareerPreferences): RoleSuggestion[] {
     const evidence = profileText(profile);
-    const interests = `${preferences.interests} ${preferences.industries.join(" ")}`;
     const education = `${preferences.educationContext} ${profile.education.map((item) => `${item.qualification} ${item.institution}`).join(" ")}`;
 
-    return ROLE_CATALOG
+    return ALL_ROLES
         .filter((role) => preferences.targetLevel === "any" || role.levels.includes(preferences.targetLevel))
         .map((role) => {
             const supportedSkills = role.skills.filter((skill) => hasTerm(evidence, skill));
             const bridgeSkills = role.skills.filter((skill) => !hasTerm(evidence, skill));
-            const interestMatches = role.interestTerms.filter((term) => hasTerm(interests, term));
+            const selectedInterestSignals = preferences.interestAreas.length ? preferences.interestAreas : [preferences.interests].filter(Boolean);
+            const interestMatches = selectedInterestSignals.filter((signal) => role.interestTerms.some((term) => hasTerm(signal, term)));
+            const industryTerms = role.industryTerms ?? TRACK_INDUSTRY_TERMS[role.track];
+            const industryMatches = preferences.industries.filter((industry) => industryTerms.some((term) => hasTerm(industry, term) || hasTerm(term, industry)));
             const evidenceMatches = role.evidenceTerms.filter((term) => hasTerm(evidence, term));
             const educationMatches = role.educationTerms.filter((term) => hasTerm(education, term));
             const styleMatches = role.workStyles.filter((style) => preferences.workStyles.includes(style));
-            const interestsAndIndustryScore = Math.round((interestMatches.length / Math.max(1, role.interestTerms.length)) * 25);
+            const interestScore = Math.round((interestMatches.length / Math.max(1, selectedInterestSignals.length)) * 18);
+            const industryScore = preferences.industries.length ? Math.min(7, industryMatches.length * 4) : 0;
+            const interestsAndIndustryScore = Math.min(25, interestScore + industryScore);
             const profileEvidenceScore = Math.round((evidenceMatches.length / Math.max(1, role.evidenceTerms.length)) * 38);
             const educationScore = Math.min(12, educationMatches.length * 6);
-            const workStyleScore = Math.round((styleMatches.length / Math.max(1, role.workStyles.length)) * 10);
+            const workStyleScore = Math.round((styleMatches.length / Math.max(1, preferences.workStyles.length)) * 10);
             const score = Math.min(
                 96,
                 15 + interestsAndIndustryScore + profileEvidenceScore + educationScore + workStyleScore,
@@ -295,7 +318,8 @@ export function suggestRoles(profile: CandidateProfile, preferences: CareerPrefe
             const fitReasons = [
                 educationMatches.length ? `Education aligns through ${educationMatches.slice(0, 2).map(titleCase).join(" and ")}.` : "The degree is transferable, but this path needs role-specific proof.",
                 evidenceMatches.length ? `Existing evidence includes ${evidenceMatches.slice(0, 4).map(titleCase).join(", ")}.` : "No direct work evidence was detected yet; begin with a small proof project.",
-                interestMatches.length ? `Stated interests match ${interestMatches.slice(0, 3).join(", ")}.` : "Interest alignment is unclear; watch the role preview before choosing it.",
+                interestMatches.length ? `Selected interests align through ${interestMatches.slice(0, 2).join(" and ")}.` : "Interest alignment is unclear; review the day-to-day work before choosing it.",
+                industryMatches.length ? `Industry preference aligns through ${industryMatches.slice(0, 2).join(" and ")}.` : "No selected industry directly favors this role; the skills may still transfer.",
             ];
 
             return {
@@ -319,7 +343,7 @@ export function suggestRoles(profile: CandidateProfile, preferences: CareerPrefe
             };
         })
         .sort((left, right) => right.fitScore - left.fitScore)
-        .slice(0, 6);
+        .slice(0, 12);
 }
 
 export function buildSearchLaunchers(preferences: CareerPreferences): SearchLauncher[] {

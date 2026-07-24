@@ -216,12 +216,14 @@ export const FAREETH_PROFILE: CandidateProfile = {
         "Power BI: Data import, transformation, DAX, dashboards, publishing, and insight sharing",
         "Agile, Scrum, and PMP fundamentals",
     ],
+    courses: [],
     achievements: [
         "Gold Medalist in Bachelor of Economics, University of Madras (The New College).",
         "Won first prize for presenting the brand story of Apple among MBA batch 2024-2026 students.",
         "Won first prize for presenting Hybrid 2.0.",
         "Led a team to the finale of the SDG Championship 2022.",
     ],
+    additionalSections: [],
 };
 
 export const EMPTY_PROFILE: CandidateProfile = {
@@ -243,7 +245,9 @@ export const EMPTY_PROFILE: CandidateProfile = {
     projects: [],
     education: [],
     certifications: [],
+    courses: [],
     achievements: [],
+    additionalSections: [],
 };
 
 function cloneProfile(profile: CandidateProfile): CandidateProfile {
@@ -259,6 +263,7 @@ export function createInitialWorkspace(isOwner: boolean): WorkspaceState {
         latestJobId: "",
         analyses: {},
         resumes: {},
+        coverLetters: {},
         plans: [],
         activePlanId: "",
         learningRoadmaps: [],
@@ -266,6 +271,7 @@ export function createInitialWorkspace(isOwner: boolean): WorkspaceState {
         careerPreferences: {
             educationContext: profile.education.map((item) => `${item.qualification}, ${item.institution}`).join("; "),
             interests: isOwner ? "Building useful digital products, AI, fintech, analytics, user experience, and solving business problems" : "",
+            interestAreas: isOwner ? ["Building digital products", "Working with data and dashboards", "Finance, investing, and markets", "Technology, software, and systems"] : [],
             workStyles: isOwner ? ["Problem solving", "Cross-functional", "Analytical", "Building"] : [],
             industries: isOwner ? ["FinTech", "SaaS", "AI"] : [],
             targetLevel: "any",

@@ -120,13 +120,14 @@ function profileAsText(profile: CandidateProfile): string {
     return [
         profile.headline,
         profile.summary,
-        profile.sourceText,
         ...profile.skillGroups.flatMap((group) => group.items),
         ...profile.experiences.flatMap((experience) => [experience.role, experience.company, ...experience.bullets]),
         ...profile.projects.flatMap((project) => [project.name, project.subtitle, ...project.bullets]),
         ...profile.education.flatMap((education) => [education.qualification, education.institution, education.detail]),
         ...profile.certifications,
+        ...profile.courses,
         ...profile.achievements,
+        ...profile.additionalSections.flatMap((section) => [section.name, ...section.items]),
     ].join(" ");
 }
 
@@ -363,7 +364,9 @@ export function tailorResume(profile: CandidateProfile, job: JobRecord, analysis
             .map(({ project }) => project),
         education: profile.education,
         certifications: profile.certifications,
+        courses: profile.courses,
         achievements: profile.achievements,
+        additionalSections: profile.additionalSections,
         selectedKeywords: analysis.matchedKeywords,
         generatedAt: new Date().toISOString(),
     };

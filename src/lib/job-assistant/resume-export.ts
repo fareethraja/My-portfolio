@@ -13,6 +13,7 @@ import {
 } from "docx";
 
 import type { CandidateProfile, TailoredResume } from "./types";
+import { escapeHtml, openPrintDocument, type PrintWindowFactory } from "./print-export";
 
 const NAVY = "18302A";
 const GRAY = "4B5563";
@@ -134,9 +135,15 @@ export async function buildResumeDocx(profile: CandidateProfile, resume: Tailore
     if (resume.certifications.length) {
         children.push(sectionTitle("Certifications"), ...resume.certifications.map(bullet));
     }
+    if (resume.courses.length) {
+        children.push(sectionTitle("Courses"), ...resume.courses.map(bullet));
+    }
     if (resume.achievements.length) {
         children.push(sectionTitle("Achievements"), ...resume.achievements.map(bullet));
     }
+    resume.additionalSections.filter((section) => section.items.length).forEach((section) => {
+        children.push(sectionTitle(section.name), ...section.items.map(bullet));
+    });
 
     const document = new Document({
         numbering: {
@@ -173,20 +180,11 @@ export async function buildResumeDocx(profile: CandidateProfile, resume: Tailore
     };
 }
 
-function escapeHtml(value: string): string {
-    return value.replace(/[&<>'"]/g, (character) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        "'": "&#39;",
-        '"': "&quot;",
-    })[character] ?? character);
-}
-
-export function openResumePrintView(profile: CandidateProfile, resume: TailoredResume): boolean {
-    const popup = window.open("", "_blank", "noopener,noreferrer");
-    if (!popup) return false;
-
+export function openResumePrintView(
+    profile: CandidateProfile,
+    resume: TailoredResume,
+    openWindow: PrintWindowFactory = window.open.bind(window),
+): boolean {
     const section = (title: string, content: string) => `<section><h2>${escapeHtml(title)}</h2>${content}</section>`;
     const bullets = (values: string[]) => `<ul>${values.map((value) => `<li>${escapeHtml(value)}</li>`).join("")}</ul>`;
     const experiences = resume.experiences.map((experience) => `
@@ -199,7 +197,7 @@ export function openResumePrintView(profile: CandidateProfile, resume: TailoredR
         <div class="entry"><div class="entry-head"><strong>${escapeHtml(item.qualification)} | ${escapeHtml(item.institution)}</strong><span>${escapeHtml(item.dates)}</span></div><p>${escapeHtml(item.detail)}</p></div>
     `).join("");
 
-    popup.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(profile.fullName)} Resume</title><style>
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(profile.fullName)} Resume</title><style>
         @page{size:A4;margin:12mm 14mm}*{box-sizing:border-box}body{margin:0;color:#17211c;font:10.2pt/1.34 Arial,sans-serif}header{text-align:center}h1{margin:0;font-size:20pt;letter-spacing:0}header h3{margin:3px 0;color:#245d47;font-size:10.5pt}header p{margin:3px 0;color:#4b5563;font-size:9pt}a{color:#245d47}section{break-inside:auto}h2{margin:9px 0 4px;border-bottom:1px solid #7f8c86;color:#18302a;font-size:10.5pt;letter-spacing:.05em;text-transform:uppercase}p{margin:3px 0}.entry{break-inside:avoid;margin:4px 0}.entry-head{display:flex;justify-content:space-between;gap:12px}.entry-head span{white-space:nowrap;color:#4b5563}ul{margin:2px 0 4px;padding-left:18px}li{margin:1.5px 0}.skills p{margin:2px 0}@media screen{body{max-width:210mm;margin:24px auto;padding:14mm;box-shadow:0 2px 24px #0002}}
     </style></head><body><header><h1>${escapeHtml(profile.fullName)}</h1><h3>${escapeHtml(resume.headline)}</h3><p>${escapeHtml([profile.location, profile.phone, profile.email].filter(Boolean).join(" | "))}</p><p>${[profile.portfolio, profile.linkedin, profile.github].filter(Boolean).map((url) => `<a href="${escapeHtml(url)}">${escapeHtml(url)}</a>`).join(" | ")}</p></header>
     ${section("Professional Summary", `<p>${escapeHtml(resume.summary)}</p>`)}
@@ -208,10 +206,11 @@ export function openResumePrintView(profile: CandidateProfile, resume: TailoredR
     ${resume.projects.length ? section("Selected Projects", projects) : ""}
     ${resume.education.length ? section("Education", education) : ""}
     ${resume.certifications.length ? section("Certifications", bullets(resume.certifications)) : ""}
+    ${resume.courses.length ? section("Courses", bullets(resume.courses)) : ""}
     ${resume.achievements.length ? section("Achievements", bullets(resume.achievements)) : ""}
-    <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250));<\/script></body></html>`);
-    popup.document.close();
-    return true;
+    ${resume.additionalSections.filter((item) => item.items.length).map((item) => section(item.name, bullets(item.items))).join("")}
+    <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250));<\/script></body></html>`;
+    return openPrintDocument(html, openWindow);
 }
 
 export function downloadBlob(blob: Blob, filename: string): void {

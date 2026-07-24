@@ -21,6 +21,7 @@ import {
     ExternalLink,
     FileDown,
     Github,
+    GitCompareArrows,
     GraduationCap,
     Heart,
     Import,
@@ -55,7 +56,9 @@ import { CareerDiscoveryView, JobHuntView } from "@/components/job-assistant/car
 import { GBLogo } from "@/components/job-assistant/gb-logo";
 import { OfferAnalyzerView } from "@/components/job-assistant/offer-analyzer";
 import { getRoundGuidance, suggestRoles } from "@/lib/job-assistant/career";
-import { extractDocumentFileText } from "@/lib/job-assistant/document-import";
+import { createCoverLetter } from "@/lib/job-assistant/cover-letter";
+import { buildCoverLetterDocx, openCoverLetterPrintView } from "@/lib/job-assistant/cover-letter-export";
+import { inferInterestAreas } from "@/lib/job-assistant/discovery-options";
 import { analyzeJob, createPreparationPlan, tailorResume } from "@/lib/job-assistant/engine";
 import { createLearningRoadmap } from "@/lib/job-assistant/learning";
 import { composePreferredLocation, inferStructuredLocation } from "@/lib/job-assistant/locations";
@@ -63,12 +66,15 @@ import { getPreparationMaterials } from "@/lib/job-assistant/prep-materials";
 import { buildPreparationGuideDocx } from "@/lib/job-assistant/prep-export";
 import { createInitialWorkspace } from "@/lib/job-assistant/profile";
 import { buildResumeDocx, downloadBlob, openResumePrintView } from "@/lib/job-assistant/resume-export";
+import { compareResume, type ComparedResumeSide, type ComparedText, type ResumeChangeKind } from "@/lib/job-assistant/resume-compare";
+import { compareResumeScores, type ResumeScoreComparison } from "@/lib/job-assistant/resume-score";
 import { importProfileFromText } from "@/lib/job-assistant/resume-import";
 import { useButtonFeedback } from "@/hooks/use-button-feedback";
 import { useMotionTier } from "@/hooks/use-motion-tier";
 import type {
     CandidateProfile,
     CareerPreferences,
+    CoverLetterDraft,
     EducationEntry,
     ExperienceEntry,
     ExtractedJob,
@@ -169,6 +175,7 @@ function mergeStoredWorkspace(stored: unknown, fallback: WorkspaceState): Worksp
 
     const storedPreferences = candidate.careerPreferences;
     const careerPreferences = { ...fallback.careerPreferences, ...storedPreferences };
+    if (!storedPreferences?.interestAreas) careerPreferences.interestAreas = inferInterestAreas(careerPreferences.interests);
     const inferredLocation = inferStructuredLocation(careerPreferences.preferredLocation);
     if (!storedPreferences?.preferredCountry) careerPreferences.preferredCountry = inferredLocation.country;
     if (!storedPreferences?.preferredCities) careerPreferences.preferredCities = inferredLocation.cities;
@@ -194,7 +201,12 @@ function mergeStoredWorkspace(stored: unknown, fallback: WorkspaceState): Worksp
     return {
         ...fallback,
         ...candidate,
-        profile: { ...fallback.profile, ...candidate.profile },
+        profile: {
+            ...fallback.profile,
+            ...candidate.profile,
+            courses: candidate.profile.courses ?? [],
+            additionalSections: candidate.profile.additionalSections ?? [],
+        },
         jobs: candidate.jobs.map((job) => ({
             ...job,
             status: normalizeStoredStatus(job.status),
@@ -203,7 +215,12 @@ function mergeStoredWorkspace(stored: unknown, fallback: WorkspaceState): Worksp
             statusHistory: Array.isArray(job.statusHistory) ? job.statusHistory : [],
         })),
         analyses: candidate.analyses ?? {},
-        resumes: candidate.resumes ?? {},
+        resumes: Object.fromEntries(Object.entries(candidate.resumes ?? {}).map(([jobId, resume]) => [jobId, {
+            ...resume,
+            courses: resume.courses ?? [],
+            additionalSections: resume.additionalSections ?? [],
+        }])),
+        coverLetters: candidate.coverLetters ?? {},
         plans: Array.isArray(candidate.plans) ? candidate.plans.map((plan) => ({
             ...plan,
             tasks: plan.tasks.map((task) => {
@@ -341,12 +358,12 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
     const [loggingOut, setLoggingOut] = useState(false);
     const [importingUrl, setImportingUrl] = useState(false);
     const [exportingResume, setExportingResume] = useState(false);
+    const [exportingCoverLetter, setExportingCoverLetter] = useState(false);
     const [plannerDuration, setPlannerDuration] = useState<7 | 14>(7);
     const [planJobId, setPlanJobId] = useState("");
     const [learningJobId, setLearningJobId] = useState("");
     const [customSkill, setCustomSkill] = useState("");
     const [resumeSource, setResumeSource] = useState("");
-    const [importingResume, setImportingResume] = useState(false);
     const [jobSearch, setJobSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState<"all" | JobStatus>("all");
     const [makerStoryOpen, setMakerStoryOpen] = useState(false);
@@ -405,6 +422,7 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
     const currentJobId = draftJob.id;
     const currentAnalysis = currentJobId ? workspace.analyses[currentJobId] : undefined;
     const currentResume = currentJobId ? workspace.resumes[currentJobId] : undefined;
+    const currentCoverLetter = currentJobId ? workspace.coverLetters[currentJobId] : undefined;
     const activePlan = workspace.plans.find((plan) => plan.id === workspace.activePlanId) ?? workspace.plans[0];
     const activeRoadmap = workspace.learningRoadmaps.find((roadmap) => roadmap.id === workspace.activeLearningRoadmapId) ?? workspace.learningRoadmaps[0];
     const analyzedJobs = workspace.jobs.filter((job) => Boolean(workspace.analyses[job.id]));
@@ -554,6 +572,7 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
         const saved = persistJob(draftJob);
         const analysis = analyzeJob(workspace.profile, saved);
         const resume = tailorResume(workspace.profile, saved, analysis);
+        const coverLetter = createCoverLetter(workspace.profile, saved, analysis);
         setWorkspace((current) => ({
             ...current,
             jobs: current.jobs.some((job) => job.id === saved.id)
@@ -562,8 +581,11 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
             latestJobId: saved.id,
             analyses: { ...current.analyses, [saved.id]: analysis },
             resumes: { ...current.resumes, [saved.id]: resume },
+            coverLetters: current.coverLetters[saved.id]
+                ? current.coverLetters
+                : { ...current.coverLetters, [saved.id]: coverLetter },
         }));
-        showNotice(`Tailored draft ready with ${analysis.score}% supported keyword alignment.`);
+        showNotice(`Resume and cover letter ready with ${analysis.score}% supported keyword alignment.`);
     }
 
     function loadJob(job: JobRecord) {
@@ -608,15 +630,18 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
         setWorkspace((current) => {
             const analyses = { ...current.analyses };
             const resumes = { ...current.resumes };
+            const coverLetters = { ...current.coverLetters };
             const offerAnalyses = { ...current.offerAnalyses };
             delete analyses[jobId];
             delete resumes[jobId];
+            delete coverLetters[jobId];
             delete offerAnalyses[jobId];
             return {
                 ...current,
                 jobs: current.jobs.filter((job) => job.id !== jobId),
                 analyses,
                 resumes,
+                coverLetters,
                 offerAnalyses,
                 plans: current.plans.filter((plan) => plan.jobId !== jobId),
                 learningRoadmaps: current.learningRoadmaps.filter((roadmap) => roadmap.jobId !== jobId),
@@ -653,6 +678,29 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
         updateResume({ experiences });
     }
 
+    function generateCurrentCoverLetter() {
+        if (!currentJobId || !currentAnalysis) return;
+        const job = workspace.jobs.find((candidate) => candidate.id === currentJobId) ?? draftJob;
+        if (currentCoverLetter && !window.confirm("Regenerate this cover letter and replace your edits?")) return;
+        const coverLetter = createCoverLetter(workspace.profile, job, currentAnalysis);
+        setWorkspace((current) => ({
+            ...current,
+            coverLetters: { ...current.coverLetters, [currentJobId]: coverLetter },
+        }));
+        showNotice("Evidence-grounded cover letter regenerated. Review every paragraph before applying.");
+    }
+
+    function updateCoverLetter(patch: Partial<CoverLetterDraft>) {
+        if (!currentJobId || !currentCoverLetter) return;
+        setWorkspace((current) => ({
+            ...current,
+            coverLetters: {
+                ...current.coverLetters,
+                [currentJobId]: { ...current.coverLetters[currentJobId], ...patch },
+            },
+        }));
+    }
+
     async function downloadResume() {
         if (!currentResume) return;
         setExportingResume(true);
@@ -671,6 +719,26 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
         if (!currentResume) return;
         const opened = openResumePrintView(workspace.profile, currentResume);
         if (!opened) showNotice("Allow popups for this page, then try Print / PDF again.");
+    }
+
+    async function downloadCoverLetter() {
+        if (!currentCoverLetter) return;
+        setExportingCoverLetter(true);
+        try {
+            const { blob, filename } = await buildCoverLetterDocx(workspace.profile, currentCoverLetter);
+            downloadBlob(blob, filename);
+            showNotice("Cover letter DOCX downloaded.");
+        } catch {
+            showNotice("The cover letter DOCX could not be generated. Try Print / PDF instead.");
+        } finally {
+            setExportingCoverLetter(false);
+        }
+    }
+
+    function printCoverLetter() {
+        if (!currentCoverLetter) return;
+        const opened = openCoverLetterPrintView(workspace.profile, currentCoverLetter);
+        if (!opened) showNotice("Allow popups for this page, then try cover letter Print / PDF again.");
     }
 
     function generatePlan() {
@@ -847,32 +915,9 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
         }
     }
 
-    async function handleResumeFile(event: ChangeEvent<HTMLInputElement>) {
-        const file = event.target.files?.[0];
-        event.target.value = "";
-        if (!file) return;
-        if (file.size > 10_000_000) {
-            showNotice("Choose a resume file smaller than 10 MB.");
-            return;
-        }
-        setImportingResume(true);
-        try {
-            const text = await extractDocumentFileText(file, {
-                documentName: "resume",
-                pasteFallback: "Paste the resume text instead.",
-            });
-            setResumeSource(text);
-            showNotice("Resume text extracted locally. Review it, then choose Import into profile.");
-        } catch (error) {
-            showNotice(error instanceof Error ? error.message : "That resume file could not be read.");
-        } finally {
-            setImportingResume(false);
-        }
-    }
-
     function applyResumeImport() {
         if (resumeSource.trim().length < 80) {
-            showNotice("Paste or upload a fuller resume before importing.");
+            showNotice("Paste a fuller resume before importing.");
             return;
         }
         updateProfile(importProfileFromText(resumeSource, workspace.profile));
@@ -1114,8 +1159,10 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                     {view === "tailor" ? (
                         <TailorView
                             analysis={currentAnalysis}
+                            currentCoverLetter={currentCoverLetter}
                             currentResume={currentResume}
                             draftJob={draftJob}
+                            exportingCoverLetter={exportingCoverLetter}
                             exportingResume={exportingResume}
                             importDialogOpen={importDialogOpen}
                             importIssue={jobImportIssue}
@@ -1123,12 +1170,16 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                             importingUrl={importingUrl}
                             navigate={navigate}
                             onAnalyze={handleAnalyze}
+                            onCreateCoverLetter={generateCurrentCoverLetter}
+                            onDownloadCoverLetter={downloadCoverLetter}
                             onDownload={downloadResume}
+                            onPrintCoverLetter={printCoverLetter}
                             onPrint={printResume}
                             profile={workspace.profile}
                             saveForLater={saveForLater}
                             closeImportDialog={() => setImportDialogOpen(false)}
                             updateDraft={updateDraft}
+                            updateCoverLetter={updateCoverLetter}
                             updateJobUrl={updateJobUrl}
                             updateResume={updateResume}
                             updateResumeExperience={updateResumeExperience}
@@ -1236,9 +1287,7 @@ export function JobWorkspace({ inviteId, inviteLabel, isOwner }: WorkspaceProps)
                     {view === "profile" ? (
                         <ProfileView
                             exportBackup={exportBackup}
-                            handleResumeFile={handleResumeFile}
                             importBackup={importBackup}
-                            importingResume={importingResume}
                             isOwner={isOwner}
                             profile={workspace.profile}
                             resetWorkspace={resetWorkspace}
@@ -1452,13 +1501,15 @@ function DashboardView({ jobs, learningRoadmaps, activePlan, allPlanTasks, compl
     );
 }
 
-function TailorView({ draftJob, analysis, currentResume, profile, importingUrl, exportingResume, importIssue, importDialogOpen, updateDraft, updateJobUrl, importJobUrl, closeImportDialog, saveForLater, onAnalyze, onDownload, onPrint, updateResume, updateResumeExperience, navigate, startRoadmap, createPlan }: {
+function TailorView({ draftJob, analysis, currentResume, currentCoverLetter, profile, importingUrl, exportingResume, exportingCoverLetter, importIssue, importDialogOpen, updateDraft, updateJobUrl, importJobUrl, closeImportDialog, saveForLater, onAnalyze, onDownload, onPrint, onCreateCoverLetter, onDownloadCoverLetter, onPrintCoverLetter, updateResume, updateResumeExperience, updateCoverLetter, navigate, startRoadmap, createPlan }: {
     draftJob: JobRecord;
     analysis?: JobAnalysis;
     currentResume?: TailoredResume;
+    currentCoverLetter?: CoverLetterDraft;
     profile: CandidateProfile;
     importingUrl: boolean;
     exportingResume: boolean;
+    exportingCoverLetter: boolean;
     importIssue: string;
     importDialogOpen: boolean;
     updateDraft: <K extends keyof JobRecord>(key: K, value: JobRecord[K]) => void;
@@ -1469,18 +1520,26 @@ function TailorView({ draftJob, analysis, currentResume, profile, importingUrl, 
     onAnalyze: (event?: FormEvent) => void;
     onDownload: () => void;
     onPrint: () => void;
+    onCreateCoverLetter: () => void;
+    onDownloadCoverLetter: () => void;
+    onPrintCoverLetter: () => void;
     updateResume: (patch: Partial<TailoredResume>) => void;
     updateResumeExperience: (index: number, bullets: string) => void;
+    updateCoverLetter: (patch: Partial<CoverLetterDraft>) => void;
     navigate: (view: ViewId) => void;
     startRoadmap: (skill: string) => void;
     createPlan: () => void;
 }) {
     const [saveState, setSaveState] = useState<"idle" | "saved">("idle");
+    const [showResumeComparison, setShowResumeComparison] = useState(false);
     const detailsReady = Boolean(
         draftJob.title.trim() &&
         draftJob.company.trim() &&
         draftJob.description.trim().length >= 80,
     );
+    const resumeScores = analysis && currentResume
+        ? compareResumeScores(profile, currentResume, draftJob, analysis)
+        : undefined;
 
     function focusDescription() {
         closeImportDialog();
@@ -1602,8 +1661,10 @@ function TailorView({ draftJob, analysis, currentResume, profile, importingUrl, 
                                 <p className="font-jetbrains text-[9px] font-semibold uppercase tracking-[0.13em] text-[#2f7453]">Generated document</p>
                                 <h2 className="mt-1 text-base font-semibold">Editable ATS resume draft</h2>
                                 <p className="mt-1 text-xs text-[#68756f]">Complete structure: contact, summary, skills, experience, projects, education, certifications, and achievements.</p>
+                                {resumeScores ? <ResumeScoreSummary scores={resumeScores} /> : null}
                             </div>
                             <div className="flex flex-wrap gap-2">
+                                <button className={`${BUTTON_SECONDARY} ${showResumeComparison ? "border-[#2f7453] bg-[#e5f1e8] text-[#275f43]" : ""}`} onClick={() => setShowResumeComparison((visible) => !visible)} type="button"><GitCompareArrows className="h-4 w-4" /> {showResumeComparison ? "Hide comparison" : "Compare changes"}</button>
                                 <button className={BUTTON_SECONDARY} onClick={onPrint} type="button"><Printer className="h-4 w-4" /> Print / PDF</button>
                                 <button className={BUTTON_PRIMARY} disabled={exportingResume} onClick={onDownload} type="button">{exportingResume ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} Download DOCX</button>
                             </div>
@@ -1625,6 +1686,18 @@ function TailorView({ draftJob, analysis, currentResume, profile, importingUrl, 
                             <ResumePreview profile={profile} resume={currentResume} />
                         </div>
                     </section>
+
+                    {showResumeComparison && resumeScores ? <ResumeComparisonPanel analysis={analysis} profile={profile} resume={currentResume} scores={resumeScores} /> : null}
+
+                    <CoverLetterEditor
+                        exporting={exportingCoverLetter}
+                        letter={currentCoverLetter}
+                        onDownload={onDownloadCoverLetter}
+                        onGenerate={onCreateCoverLetter}
+                        onPrint={onPrintCoverLetter}
+                        onUpdate={updateCoverLetter}
+                        profile={profile}
+                    />
 
                     <section className="grid gap-px border border-[#23372f]/15 bg-[#23372f]/15 lg:grid-cols-2">
                         <div className="bg-[#fbfaf6] p-5">
@@ -1679,8 +1752,209 @@ function ResumePreview({ profile, resume }: { profile: CandidateProfile; resume:
                 {resume.projects.length ? <PreviewSection title="Selected projects"><div className="space-y-2">{resume.projects.map((project) => <div key={project.id}><p className="text-[9px]"><strong>{project.name} | {project.subtitle}</strong></p><ul className="mt-1 list-disc pl-4 text-[9px] leading-[1.4]">{project.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul></div>)}</div></PreviewSection> : null}
                 {resume.education.length ? <PreviewSection title="Education"><div className="space-y-2">{resume.education.map((education) => <div key={education.id}><div className="flex justify-between gap-3 text-[9px]"><strong>{education.qualification} | {education.institution}</strong><span className="shrink-0 text-[#718079]">{education.dates}</span></div>{education.detail ? <p className="mt-0.5 text-[8px] text-[#58665f]">{education.detail}</p> : null}</div>)}</div></PreviewSection> : null}
                 {resume.certifications.length ? <PreviewSection title="Certifications"><ul className="list-disc space-y-0.5 pl-4 text-[9px] leading-[1.4]">{resume.certifications.map((certification) => <li key={certification}>{certification}</li>)}</ul></PreviewSection> : null}
+                {resume.courses.length ? <PreviewSection title="Courses"><ul className="list-disc space-y-0.5 pl-4 text-[9px] leading-[1.4]">{resume.courses.map((course) => <li key={course}>{course}</li>)}</ul></PreviewSection> : null}
                 {resume.achievements.length ? <PreviewSection title="Achievements"><ul className="list-disc space-y-0.5 pl-4 text-[9px] leading-[1.4]">{resume.achievements.map((achievement) => <li key={achievement}>{achievement}</li>)}</ul></PreviewSection> : null}
+                {resume.additionalSections.map((section) => section.items.length ? <PreviewSection key={section.id} title={section.name}><ul className="list-disc space-y-0.5 pl-4 text-[9px] leading-[1.4]">{section.items.map((item) => <li key={item}>{item}</li>)}</ul></PreviewSection> : null)}
             </div>
+        </div>
+    );
+}
+
+const RESUME_CHANGE_LABELS: Record<Exclude<ResumeChangeKind, "unchanged">, string> = {
+    edited: "Edited",
+    added: "Added",
+    omitted: "Omitted",
+    reordered: "Reordered",
+};
+
+function resumeChangeStyle(change: ResumeChangeKind): string {
+    if (change === "edited") return "border-[#ff7a1a]/45 bg-[#fff0e4] text-[#7a3b0b]";
+    if (change === "added") return "border-[#2f7453]/35 bg-[#e5f1e8] text-[#275840]";
+    if (change === "omitted") return "border-[#a4493d]/35 bg-[#f7e8e5] text-[#8c3c33]";
+    if (change === "reordered") return "border-[#52728a]/35 bg-[#e8f0f3] text-[#35566a]";
+    return "border-transparent";
+}
+
+function ResumeChangeBadge({ change, original }: { change: ResumeChangeKind; original: boolean }) {
+    if (change === "unchanged") return null;
+    const label = original && change === "edited" ? "Edited in tailored" : RESUME_CHANGE_LABELS[change];
+    return <span className={`inline-flex border px-1.5 py-0.5 font-jetbrains text-[7px] font-semibold uppercase tracking-[0.06em] ${resumeChangeStyle(change)}`}>{label}</span>;
+}
+
+function ComparedTextView({ item, original, listItem = false }: { item: ComparedText; original: boolean; listItem?: boolean }) {
+    const content = (
+        <span
+            className={`block border-l-2 px-2 py-1 ${resumeChangeStyle(item.change)} ${item.change === "omitted" ? "line-through decoration-[#a4493d]/70" : ""}`}
+            data-resume-change={item.change === "unchanged" ? undefined : item.change}
+            title={item.change === "edited" && item.counterpart ? `${original ? "Tailored" : "Original"}: ${item.counterpart}` : undefined}
+        >
+            <span className="flex flex-wrap items-start justify-between gap-1.5"><span>{item.text || "Not provided"}</span><ResumeChangeBadge change={item.change} original={original} /></span>
+        </span>
+    );
+    return listItem ? <li>{content}</li> : content;
+}
+
+function ResumeScoreSummary({ scores }: { scores: ResumeScoreComparison }) {
+    const deltaLabel = scores.delta > 0 ? `+${scores.delta}` : String(scores.delta);
+    return (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            <span className="border border-[#23372f]/15 bg-white px-2.5 py-1.5 text-[#58665f]">Regular <strong className="ml-1 text-[#19372d]">{scores.regular.score}/100</strong></span>
+            <ArrowRight className="h-3.5 w-3.5 text-[#718079]" />
+            <span className="border border-[#2f7453]/25 bg-[#e5f1e8] px-2.5 py-1.5 text-[#275840]">Tailored <strong className="ml-1">{scores.tailored.score}/100</strong></span>
+            <span className={`font-jetbrains text-[9px] font-semibold ${scores.delta >= 0 ? "text-[#2f7453]" : "text-[#a4493d]"}`}>{deltaLabel} role-fit points</span>
+            <span className="text-[10px] text-[#718079]">Visible-content estimate, not a shortlist guarantee.</span>
+        </div>
+    );
+}
+
+function ResumeComparisonPanel({ profile, resume, scores, analysis }: {
+    profile: CandidateProfile;
+    resume: TailoredResume;
+    scores: ResumeScoreComparison;
+    analysis: JobAnalysis;
+}) {
+    const comparison = compareResume(profile, resume);
+    const totalChanges = Object.values(comparison.counts).reduce((total, count) => total + count, 0);
+    const tailoredMatched = new Set(scores.tailored.matchedKeywords.map((keyword) => keyword.toLowerCase()));
+    const supportedVisible = analysis.matchedKeywords.filter((keyword) => tailoredMatched.has(keyword.toLowerCase()));
+    const supportedNotVisible = analysis.matchedKeywords.filter((keyword) => !tailoredMatched.has(keyword.toLowerCase()));
+    const unsupported = analysis.missingKeywords;
+
+    return (
+        <section className="border border-[#23372f]/15 bg-[#fbfaf6]">
+            <div className="border-b border-[#23372f]/15 bg-[#19372d] px-5 py-5 text-white">
+                <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+                    <div><p className="font-jetbrains text-[9px] uppercase tracking-[0.13em] text-[#ff9a52]">Preview-only review</p><h2 className="mt-1 text-lg font-semibold">Regular resume vs tailored resume</h2><p className="mt-2 max-w-3xl text-xs leading-5 text-white/65">Highlights explain selection and editing in this comparison only. Downloaded DOCX and Print/PDF files remain clean.</p></div>
+                    <div className="flex flex-wrap gap-2">{(Object.entries(comparison.counts) as Array<[Exclude<ResumeChangeKind, "unchanged">, number]>).filter(([, count]) => count).map(([change, count]) => <span className={`border px-2.5 py-1.5 text-xs font-semibold ${resumeChangeStyle(change)}`} key={change}>{count} {RESUME_CHANGE_LABELS[change].toLowerCase()}</span>)}{totalChanges === 0 ? <span className="border border-white/20 px-2.5 py-1.5 text-xs text-white/70">No changes detected</span> : null}</div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[10px] text-white/70"><span><strong className="text-[#ffb57d]">Edited</strong> text changed</span><span><strong className="text-[#9fd1ad]">Added</strong> new tailored content</span><span><strong className="text-[#efaaa2]">Omitted</strong> left out for this role</span><span><strong className="text-[#a8c8d6]">Reordered</strong> moved for relevance</span></div>
+            </div>
+            <div className="grid gap-px border-b border-[#23372f]/15 bg-[#23372f]/15 xl:grid-cols-[0.75fr_1.25fr]">
+                <div className="bg-[#fbfaf6] p-5">
+                    <p className="font-jetbrains text-[9px] font-semibold uppercase tracking-[0.1em] text-[#2f7453]">Visible role-fit score</p>
+                    <div className="mt-4 grid grid-cols-2 gap-3"><ResumeScoreCard label="Regular resume" score={scores.regular.score} breakdown={scores.regular.breakdown} /><ResumeScoreCard label="Tailored resume" score={scores.tailored.score} breakdown={scores.tailored.breakdown} /></div>
+                    <p className="mt-3 text-[10px] leading-4 text-[#718079]">Based on visible keyword coverage, role-title alignment, relevant evidence concentration, quantified proof, and document structure. ATS products use different rules.</p>
+                </div>
+                <div className="bg-[#fbfaf6] p-5">
+                    <div><p className="font-jetbrains text-[9px] font-semibold uppercase tracking-[0.1em] text-[#2f7453]">Role keyword audit</p><h3 className="mt-1 text-sm font-semibold">No hidden words are inserted</h3><p className="mt-1 text-xs leading-5 text-[#68756f]">Only visible, supported terms contribute to the score. Add missing skills only after adding truthful evidence to My profile.</p></div>
+                    <div className="mt-4 grid gap-4 lg:grid-cols-3">
+                        <KeywordAuditColumn empty="No supported role keyword is visible yet." label="Visible + supported" tone="supported" values={supportedVisible} />
+                        <KeywordAuditColumn empty="All supported terms are already visible." label="Supported, not visible" tone="available" values={supportedNotVisible} />
+                        <KeywordAuditColumn empty="No unsupported detected keyword." label="Evidence missing · not added" tone="missing" values={unsupported} />
+                    </div>
+                </div>
+            </div>
+            <div className="grid gap-px bg-[#23372f]/15 xl:grid-cols-2">
+                <ComparisonResumeDocument profile={profile} resume={resume} side={comparison.original} variant="original" />
+                <ComparisonResumeDocument profile={profile} resume={resume} side={comparison.tailored} variant="tailored" />
+            </div>
+        </section>
+    );
+}
+
+function ResumeScoreCard({ label, score, breakdown }: { label: string; score: number; breakdown: ResumeScoreComparison["regular"]["breakdown"] }) {
+    return (
+        <div className="border border-[#23372f]/12 bg-white p-3">
+            <p className="text-xs font-semibold text-[#58665f]">{label}</p><p className="mt-1 text-3xl font-semibold text-[#19372d]">{score}<span className="text-xs font-normal text-[#718079]">/100</span></p>
+            <div className="mt-2 h-1.5 bg-[#e1e5e1]"><div className="h-full bg-[#2f7453]" style={{ width: `${score}%` }} /></div>
+            <details className="mt-2"><summary className="cursor-pointer text-[9px] font-semibold text-[#2f7453]">Score breakdown</summary><dl className="mt-2 space-y-1 text-[9px] text-[#68756f]">{Object.entries(breakdown).map(([key, value]) => <div className="flex justify-between gap-2" key={key}><dt>{key.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase())}</dt><dd className="font-semibold">{value}</dd></div>)}</dl></details>
+        </div>
+    );
+}
+
+function KeywordAuditColumn({ label, values, empty, tone }: { label: string; values: string[]; empty: string; tone: "supported" | "available" | "missing" }) {
+    const toneClass = tone === "supported" ? "border-[#2f7453]/20 bg-[#e5f1e8] text-[#275840]" : tone === "available" ? "border-[#52728a]/20 bg-[#e8f0f3] text-[#35566a]" : "border-[#a66d20]/20 bg-[#fbefd8] text-[#80571d]";
+    return <div><p className={LABEL_CLASS}>{label}</p>{values.length ? <div className="flex flex-wrap gap-1.5">{values.map((value) => <span className={`border px-2 py-1 text-[10px] ${toneClass}`} key={value}>{value}</span>)}</div> : <p className="text-[10px] leading-4 text-[#718079]">{empty}</p>}</div>;
+}
+
+function ComparisonResumeDocument({ profile, resume, side, variant }: {
+    profile: CandidateProfile;
+    resume: TailoredResume;
+    side: ComparedResumeSide;
+    variant: "original" | "tailored";
+}) {
+    const original = variant === "original";
+    const education = original ? profile.education : resume.education;
+    const certifications = original ? profile.certifications : resume.certifications;
+    const courses = original ? profile.courses : resume.courses;
+    const achievements = original ? profile.achievements : resume.achievements;
+    const additionalSections = original ? profile.additionalSections : resume.additionalSections;
+
+    return (
+        <div className="bg-[#dfe3de] p-3 sm:p-5">
+            <div className="mb-3 flex items-center justify-between gap-3"><h3 className="text-sm font-semibold text-[#19372d]">{original ? "Regular profile resume" : `Tailored for ${resume.targetTitle || "this role"}`}</h3><span className="font-jetbrains text-[8px] uppercase tracking-[0.08em] text-[#68756f]">{original ? "Baseline" : "Application version"}</span></div>
+            <article className="mx-auto min-h-[720px] bg-white px-5 py-7 text-[#17211c] shadow-[0_4px_18px_rgba(23,33,28,0.12)] sm:px-8">
+                <header className="border-b border-[#23372f]/25 pb-4 text-center"><p className="text-xl font-bold">{profile.fullName || "Candidate name"}</p><div className="mt-1 text-[10px] font-semibold uppercase text-[#2f7453]"><ComparedTextView item={side.headline} original={original} /></div><p className="mt-2 text-[9px] text-[#58665f]">{[profile.location, profile.phone, profile.email].filter(Boolean).join(" | ")}</p></header>
+                <PreviewSection title="Professional summary"><div className="text-[10px] leading-[1.55]"><ComparedTextView item={side.summary} original={original} /></div></PreviewSection>
+                <PreviewSection title="Core skills"><div className="space-y-2">{side.skillGroups.map((group) => <div className={`border-l-2 px-2 py-1 ${resumeChangeStyle(group.change)}`} data-resume-change={group.change === "unchanged" ? undefined : group.change} key={group.id}><div className="flex flex-wrap items-center justify-between gap-2 text-[9px]"><strong>{group.name}</strong><ResumeChangeBadge change={group.change} original={original} /></div><div className="mt-1 flex flex-wrap gap-1">{group.items.map((item, index) => <span className="text-[8px]" key={`${item.text}-${index}`}><ComparedTextView item={item} original={original} /></span>)}</div></div>)}</div></PreviewSection>
+                <PreviewSection title="Experience"><div className="space-y-3">{side.experiences.map((entry) => <div className={`border-l-2 px-2 py-1 ${resumeChangeStyle(entry.change)}`} data-resume-change={entry.change === "unchanged" ? undefined : entry.change} key={entry.id}><div className="flex flex-wrap justify-between gap-2 text-[9px]"><strong>{entry.title}{entry.subtitle ? ` | ${entry.subtitle}` : ""}</strong><span className="flex items-center gap-2 text-[#718079]">{entry.dates}<ResumeChangeBadge change={entry.change} original={original} /></span></div><ul className="mt-1 space-y-1 text-[9px] leading-[1.4]">{entry.bullets.map((item, index) => <ComparedTextView item={item} key={`${item.text}-${index}`} listItem original={original} />)}</ul></div>)}</div></PreviewSection>
+                {side.projects.length ? <PreviewSection title="Selected projects"><div className="space-y-2">{side.projects.map((entry) => <div className={`border-l-2 px-2 py-1 ${resumeChangeStyle(entry.change)}`} data-resume-change={entry.change === "unchanged" ? undefined : entry.change} key={entry.id}><div className="flex flex-wrap items-center justify-between gap-2 text-[9px]"><strong>{entry.title}{entry.subtitle ? ` | ${entry.subtitle}` : ""}</strong><ResumeChangeBadge change={entry.change} original={original} /></div><ul className="mt-1 space-y-1 text-[9px] leading-[1.4]">{entry.bullets.map((item, index) => <ComparedTextView item={item} key={`${item.text}-${index}`} listItem original={original} />)}</ul></div>)}</div></PreviewSection> : null}
+                {education.length ? <PreviewSection title="Education"><div className="space-y-1">{education.map((item) => <p className="text-[9px]" key={item.id}><strong>{item.qualification} | {item.institution}</strong> · {item.dates}</p>)}</div></PreviewSection> : null}
+                {certifications.length ? <PreviewSection title="Certifications"><ul className="list-disc pl-4 text-[9px]">{certifications.map((item) => <li key={item}>{item}</li>)}</ul></PreviewSection> : null}
+                {courses.length ? <PreviewSection title="Courses"><ul className="list-disc pl-4 text-[9px]">{courses.map((item) => <li key={item}>{item}</li>)}</ul></PreviewSection> : null}
+                {achievements.length ? <PreviewSection title="Achievements"><ul className="list-disc pl-4 text-[9px]">{achievements.map((item) => <li key={item}>{item}</li>)}</ul></PreviewSection> : null}
+                {additionalSections.map((section) => section.items.length ? <PreviewSection key={section.id} title={section.name}><ul className="list-disc pl-4 text-[9px]">{section.items.map((item) => <li key={item}>{item}</li>)}</ul></PreviewSection> : null)}
+            </article>
+        </div>
+    );
+}
+
+function CoverLetterEditor({ profile, letter, exporting, onGenerate, onUpdate, onPrint, onDownload }: {
+    profile: CandidateProfile;
+    letter?: CoverLetterDraft;
+    exporting: boolean;
+    onGenerate: () => void;
+    onUpdate: (patch: Partial<CoverLetterDraft>) => void;
+    onPrint: () => void;
+    onDownload: () => void;
+}) {
+    if (!letter) {
+        return (
+            <section className="border border-[#23372f]/15 bg-[#fbfaf6] p-5 sm:p-6">
+                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    <div><p className="font-jetbrains text-[9px] font-semibold uppercase tracking-[0.13em] text-[#2f7453]">Application document</p><h2 className="mt-1 text-lg font-semibold">Cover letter creator</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#68756f]">Create a job-specific draft using only evidence already supported by this profile and analysis.</p></div>
+                    <button className={`${BUTTON_PRIMARY} shrink-0`} onClick={onGenerate} type="button"><Mail className="h-4 w-4" /> Create cover letter</button>
+                </div>
+            </section>
+        );
+    }
+
+    return (
+        <section className="border border-[#23372f]/15 bg-[#fbfaf6]">
+            <div className="flex flex-col justify-between gap-4 border-b border-[#23372f]/15 bg-[#e8eee8] px-5 py-4 sm:flex-row sm:items-center">
+                <div><p className="font-jetbrains text-[9px] font-semibold uppercase tracking-[0.13em] text-[#2f7453]">Application document</p><h2 className="mt-1 text-base font-semibold">Editable cover letter</h2><p className="mt-1 text-xs text-[#68756f]">Grounded in matched skills and literal profile evidence. Personalize the motivation before sending.</p></div>
+                <div className="flex flex-wrap gap-2">
+                    <button className={BUTTON_SECONDARY} onClick={onGenerate} type="button"><RefreshCw className="h-4 w-4" /> Regenerate</button>
+                    <button className={BUTTON_SECONDARY} onClick={onPrint} type="button"><Printer className="h-4 w-4" /> Print / PDF</button>
+                    <button className={BUTTON_PRIMARY} disabled={exporting} onClick={onDownload} type="button">{exporting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} Download DOCX</button>
+                </div>
+            </div>
+            <div className="grid lg:grid-cols-[0.76fr_1.24fr]">
+                <div className="border-b border-[#23372f]/15 p-5 lg:border-b-0 lg:border-r">
+                    <label><span className={LABEL_CLASS}>Recipient</span><textarea className={`${INPUT_CLASS} min-h-20 resize-y text-xs leading-5`} onChange={(event) => onUpdate({ recipient: event.target.value })} value={letter.recipient} /></label>
+                    <label className="mt-4 block"><span className={LABEL_CLASS}>Subject</span><input className={INPUT_CLASS} onChange={(event) => onUpdate({ subject: event.target.value })} value={letter.subject} /></label>
+                    <label className="mt-4 block"><span className={LABEL_CLASS}>Salutation</span><input className={INPUT_CLASS} onChange={(event) => onUpdate({ salutation: event.target.value })} value={letter.salutation} /></label>
+                    <label className="mt-4 block"><span className={LABEL_CLASS}>Letter body</span><textarea className={`${INPUT_CLASS} min-h-[420px] resize-y text-sm leading-6`} onChange={(event) => onUpdate({ body: event.target.value })} value={letter.body} /></label>
+                    <label className="mt-4 block"><span className={LABEL_CLASS}>Sign-off</span><textarea className={`${INPUT_CLASS} min-h-20 resize-y text-xs leading-5`} onChange={(event) => onUpdate({ signOff: event.target.value })} value={letter.signOff} /></label>
+                    <div className="mt-4 border-l-2 border-[#ff7a1a] bg-[#fff5ec] px-3 py-2 text-xs leading-5 text-[#80571d]">Add one honest sentence about why this specific company or team interests you. The generator does not invent company research.</div>
+                </div>
+                <CoverLetterPreview letter={letter} profile={profile} />
+            </div>
+        </section>
+    );
+}
+
+function CoverLetterPreview({ profile, letter }: { profile: CandidateProfile; letter: CoverLetterDraft }) {
+    return (
+        <div className="bg-[#dfe3de] p-3 sm:p-6">
+            <article className="mx-auto min-h-[720px] max-w-[720px] bg-white px-6 py-8 text-[#17211c] shadow-[0_4px_18px_rgba(23,33,28,0.12)] sm:px-10 sm:py-10">
+                <header className="text-right"><h3 className="text-lg font-bold">{profile.fullName || "Candidate name"}</h3><p className="mt-1 text-[9px] text-[#58665f]">{[profile.location, profile.phone, profile.email].filter(Boolean).join(" | ")}</p><p className="mt-1 text-[8px] text-[#718079]">{profile.linkedin}</p></header>
+                <div className="mt-8 whitespace-pre-line text-[10px] leading-5">{letter.recipient}</div>
+                <p className="mt-6 text-[10px]"><strong>Subject: {letter.subject}</strong></p>
+                <p className="mt-5 text-[10px]">{letter.salutation}</p>
+                <div className="mt-4 space-y-4">{letter.body.split(/\n{2,}/).filter(Boolean).map((paragraph, index) => <p className="whitespace-pre-line text-[10px] leading-[1.65]" key={`${paragraph.slice(0, 24)}-${index}`}>{paragraph}</p>)}</div>
+                <div className="mt-6 whitespace-pre-line text-[10px] leading-5">{letter.signOff}</div>
+            </article>
         </div>
     );
 }
@@ -1985,13 +2259,11 @@ function LearningView({ availableJobs, analyzedJobIds, selectedJobId, setJobId, 
     );
 }
 
-function ProfileView({ profile, isOwner, resumeSource, setResumeSource, importingResume, handleResumeFile, applyResumeImport, updateProfile, updateSkillGroup, updateExperience, updateProject, updateEducation, exportBackup, importBackup, resetWorkspace }: {
+function ProfileView({ profile, isOwner, resumeSource, setResumeSource, applyResumeImport, updateProfile, updateSkillGroup, updateExperience, updateProject, updateEducation, exportBackup, importBackup, resetWorkspace }: {
     profile: CandidateProfile;
     isOwner: boolean;
     resumeSource: string;
     setResumeSource: (value: string) => void;
-    importingResume: boolean;
-    handleResumeFile: (event: ChangeEvent<HTMLInputElement>) => void;
     applyResumeImport: () => void;
     updateProfile: (patch: Partial<CandidateProfile>) => void;
     updateSkillGroup: (index: number, patch: Partial<SkillGroup>) => void;
@@ -2007,8 +2279,8 @@ function ProfileView({ profile, isOwner, resumeSource, setResumeSource, importin
             <SectionHeader eyebrow="Source of truth" title="Candidate profile" copy="Tailoring can reorder and emphasize this evidence, but it never invents experience outside this profile." action={isProfileReady(profile) ? <span className="inline-flex items-center gap-2 border border-[#2f7453]/25 bg-[#e5f2e8] px-3 py-2 text-xs font-semibold text-[#275f43]"><CheckCircle2 className="h-4 w-4" /> Ready to tailor</span> : <span className="inline-flex items-center gap-2 border border-[#a66d20]/25 bg-[#fbefd8] px-3 py-2 text-xs font-semibold text-[#80571d]"><Circle className="h-4 w-4" /> Profile incomplete</span>} />
 
             <section className="border border-[#23372f]/15 bg-[#fbfaf6]">
-                <div className="flex flex-col justify-between gap-3 border-b border-[#23372f]/12 bg-[#e8eee8] px-5 py-4 sm:flex-row sm:items-center"><div><h2 className="text-sm font-semibold">Import main resume</h2><p className="mt-1 text-xs text-[#68756f]">PDF, DOCX, TXT, Markdown, or pasted text. Files are read only in this browser.</p></div><label className={`${BUTTON_SECONDARY} cursor-pointer`}><Upload className="h-4 w-4" /> {importingResume ? "Reading file" : "Choose resume"}<input accept=".pdf,.docx,.txt,.md,application/pdf,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" disabled={importingResume} onChange={handleResumeFile} type="file" /></label></div>
-                <div className="p-4 sm:p-5"><label><span className={LABEL_CLASS}>Resume text</span><textarea className={`${INPUT_CLASS} min-h-48 resize-y text-xs leading-5`} onChange={(event) => setResumeSource(event.target.value)} placeholder="Paste your full current resume here..." value={resumeSource} /></label><div className="mt-3 flex justify-end"><button className={BUTTON_PRIMARY} onClick={applyResumeImport} type="button"><Import className="h-4 w-4" /> Import into profile</button></div></div>
+                <div className="border-b border-[#23372f]/12 bg-[#e8eee8] px-5 py-4"><h2 className="text-sm font-semibold">Paste main resume</h2><p className="mt-1 max-w-3xl text-xs leading-5 text-[#68756f]">Open the resume in any PDF, document, email, or job portal, select all text, and paste it below. Review the extracted sections after import.</p></div>
+                <div className="p-4 sm:p-5"><label><span className={LABEL_CLASS}>Full resume text</span><textarea className={`${INPUT_CLASS} min-h-64 resize-y text-xs leading-5`} onChange={(event) => setResumeSource(event.target.value)} placeholder="Paste the complete resume, including contact details, summary, skills, experience, projects, education, certifications, courses, and achievements..." value={resumeSource} /></label><div className="mt-3 flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><p className="text-[10px] text-[#718079]">{resumeSource.trim().length.toLocaleString("en-IN")} characters · minimum 80</p><button className={BUTTON_PRIMARY} disabled={resumeSource.trim().length < 80} onClick={applyResumeImport} type="button"><Import className="h-4 w-4" /> Parse into profile</button></div></div>
             </section>
 
             <section className="mt-6 border border-[#23372f]/15 bg-[#fbfaf6] p-4 sm:p-5">
@@ -2041,6 +2313,17 @@ function ProfileView({ profile, isOwner, resumeSource, setResumeSource, importin
                 <div className="space-y-3">{profile.education.map((education, index) => <div className="grid gap-3 border border-[#23372f]/12 bg-white p-3 md:grid-cols-2 xl:grid-cols-5" key={education.id}><input aria-label="Institution" className={INPUT_CLASS} onChange={(event) => updateEducation(index, { institution: event.target.value })} placeholder="Institution" value={education.institution} /><input aria-label="Qualification" className={`${INPUT_CLASS} xl:col-span-2`} onChange={(event) => updateEducation(index, { qualification: event.target.value })} placeholder="Qualification" value={education.qualification} /><input aria-label="Education dates" className={INPUT_CLASS} onChange={(event) => updateEducation(index, { dates: event.target.value })} placeholder="Dates" value={education.dates} /><div className="flex gap-2"><input aria-label="Education detail" className={INPUT_CLASS} onChange={(event) => updateEducation(index, { detail: event.target.value })} placeholder="CGPA / result" value={education.detail} /><button aria-label="Remove education" className="grid w-10 shrink-0 place-items-center border border-[#a4493d]/20 text-[#a4493d]" onClick={() => updateProfile({ education: profile.education.filter((_, educationIndex) => educationIndex !== index) })} title="Remove education" type="button"><Trash2 className="h-4 w-4" /></button></div></div>)}</div>
             </ProfileArraySection>
 
+            <div className="grid gap-6 lg:grid-cols-3">
+                <ProfileTextListSection copy="Certificates, licences, and credentials only." onChange={(certifications) => updateProfile({ certifications })} title="Certifications" values={profile.certifications} />
+                <ProfileTextListSection copy="Completed courses, training, and relevant coursework." onChange={(courses) => updateProfile({ courses })} title="Courses" values={profile.courses} />
+                <ProfileTextListSection copy="Awards, honors, distinctions, and measurable recognition." onChange={(achievements) => updateProfile({ achievements })} title="Achievements" values={profile.achievements} />
+            </div>
+
+            <section className="mt-6 border border-[#23372f]/15 bg-[#fbfaf6] p-4 sm:p-5">
+                <div className="mb-5 flex items-start justify-between gap-4"><div><h2 className="text-base font-semibold">Additional sections</h2><p className="mt-1 text-xs leading-5 text-[#68756f]">Languages, volunteering, publications, memberships, activities, or another clearly named section.</p></div><button aria-label="Add additional section" className="grid h-9 w-9 shrink-0 place-items-center border border-[#23372f]/20 bg-white hover:bg-[#e8eee8]" onClick={() => updateProfile({ additionalSections: [...profile.additionalSections, { id: crypto.randomUUID(), name: "Additional section", items: [] }] })} title="Add additional section" type="button"><Plus className="h-4 w-4" /></button></div>
+                {profile.additionalSections.length ? <div className="grid gap-4 lg:grid-cols-2">{profile.additionalSections.map((section, index) => <div className="border border-[#23372f]/12 bg-white p-3" key={section.id}><div className="flex gap-2"><input aria-label="Additional section name" className={`${INPUT_CLASS} font-semibold`} onChange={(event) => updateProfile({ additionalSections: profile.additionalSections.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item) })} value={section.name} /><button aria-label={`Remove ${section.name}`} className="grid w-10 shrink-0 place-items-center border border-[#a4493d]/20 text-[#a4493d]" onClick={() => updateProfile({ additionalSections: profile.additionalSections.filter((_, itemIndex) => itemIndex !== index) })} title="Remove section" type="button"><Trash2 className="h-4 w-4" /></button></div><textarea aria-label={`${section.name} items`} className={`${INPUT_CLASS} mt-2 min-h-28 resize-y text-xs leading-5`} onChange={(event) => updateProfile({ additionalSections: profile.additionalSections.map((item, itemIndex) => itemIndex === index ? { ...item, items: event.target.value.split("\n").map((value) => value.trim()).filter(Boolean) } : item) })} value={section.items.join("\n")} /></div>)}</div> : <p className="text-xs text-[#718079]">No additional sections were detected.</p>}
+            </section>
+
             <section className="mt-8 border border-[#23372f]/15 bg-[#fbfaf6] p-5">
                 <h2 className="text-base font-semibold">Local data controls</h2><p className="mt-1 text-sm leading-6 text-[#68756f]">There is no account database. Download a JSON backup before clearing browser data or moving to another device.</p>
                 <div className="mt-4 flex flex-wrap gap-3"><button className={BUTTON_SECONDARY} onClick={exportBackup} type="button"><Download className="h-4 w-4" /> Download backup</button><label className={`${BUTTON_SECONDARY} cursor-pointer`}><Upload className="h-4 w-4" /> Restore backup<input accept="application/json,.json" className="sr-only" onChange={importBackup} type="file" /></label><button className={`${BUTTON_SECONDARY} border-[#a4493d]/25 text-[#a4493d] hover:bg-[#f7e8e5]`} onClick={resetWorkspace} type="button"><RefreshCw className="h-4 w-4" /> Reset {isOwner ? "to Fareeth profile" : "workspace"}</button></div>
@@ -2054,6 +2337,16 @@ function ProfileArraySection({ title, copy, onAdd, children }: { title: string; 
         <section className="mt-6 border border-[#23372f]/15 bg-[#fbfaf6] p-4 sm:p-5">
             <div className="mb-5 flex items-start justify-between gap-4"><div><h2 className="text-base font-semibold">{title}</h2><p className="mt-1 text-xs leading-5 text-[#68756f]">{copy}</p></div><button aria-label={`Add ${title.toLowerCase()}`} className="grid h-9 w-9 shrink-0 place-items-center border border-[#23372f]/20 bg-white hover:bg-[#e8eee8]" onClick={onAdd} title={`Add ${title.toLowerCase()}`} type="button"><Plus className="h-4 w-4" /></button></div>
             {children}
+        </section>
+    );
+}
+
+function ProfileTextListSection({ title, copy, values, onChange }: { title: string; copy: string; values: string[]; onChange: (values: string[]) => void }) {
+    return (
+        <section className="mt-6 border border-[#23372f]/15 bg-[#fbfaf6] p-4 sm:p-5">
+            <h2 className="text-base font-semibold">{title}</h2>
+            <p className="mt-1 text-xs leading-5 text-[#68756f]">{copy}</p>
+            <textarea aria-label={title} className={`${INPUT_CLASS} mt-4 min-h-36 resize-y text-xs leading-5`} onChange={(event) => onChange(event.target.value.split("\n").map((value) => value.trim()).filter(Boolean))} placeholder={`One ${title.toLowerCase().replace(/s$/, "")} per line`} value={values.join("\n")} />
         </section>
     );
 }

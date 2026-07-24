@@ -215,24 +215,30 @@ function compensationFromText(text: string): OfferCompensation {
     const tableBasic = findAnnualTableAmount(text, ["basic"]);
     const tableGross = findAnnualTableAmount(text, ["total earnings (a)", "total earnings"]);
     const tableVariablePay = findAnnualTableAmount(text, ["variable pay", "annual incentive", "target bonus"]);
+    const tablePerformanceBonus = findAnnualTableAmount(text, ["performance bonus"]);
+    const tableJoiningBonus = findAnnualTableAmount(text, ["joining bonus", "sign on bonus", "sign-on bonus"]);
+    const tableRetentionBonus = findAnnualTableAmount(text, ["retention bonus"]);
     const tableEmployeePf = findAnnualTableAmount(text, ["pf employee", "employee pf"]);
     const tableEmployerPf = findAnnualTableAmount(text, ["pf - employer", "pf employer", "employer pf"]);
     const tableGratuity = findAnnualTableAmount(text, ["gratuity"]);
+    const tableInsurance = findAnnualTableAmount(text, ["insurance premium", "medical insurance", "health insurance", "insurance benefit"]);
+    const tableOtherCtc = findAnnualTableAmount(text, ["other ctc benefits", "other ctc component", "other benefits"]);
     const compensation: OfferCompensation = {
         ...EMPTY_OFFER_COMPENSATION,
         statedCtcAnnual: tableCtc || findAmount(text, ["total cost to company", "annual ctc", "total ctc", "cost to company"]),
         basicAnnual: tableBasic || findAmount(text, ["basic salary", "basic pay", "annual basic"]),
         annualGrossSalary: tableGross || findAmount(text, ["annual gross salary", "gross annual salary", "gross salary", "annual fixed pay", "fixed compensation", "total fixed pay", "fixed pay"]),
         annualVariablePay: tableVariablePay || findAmount(text, ["variable pay", "annual incentive", "target bonus"]),
-        performanceBonusAnnual: findAmount(text, ["performance bonus"]),
+        performanceBonusAnnual: tablePerformanceBonus || findAmount(text, ["performance bonus"]),
         performanceBonusPayoutPercent: 0,
-        joiningBonus: findAmount(text, ["joining bonus", "sign on bonus", "sign-on bonus"]),
-        retentionBonus: findAmount(text, ["retention bonus"]),
+        joiningBonus: tableJoiningBonus || findAmount(text, ["joining bonus", "sign on bonus", "sign-on bonus"]),
+        retentionBonus: tableRetentionBonus || findAmount(text, ["retention bonus"]),
         retentionPayoutPercent: 100,
         employerPfAnnual: tableEmployerPf || findAmount(text, ["employer pf", "employer provident fund", "company contribution to pf"]),
         employeePfAnnual: tableEmployeePf || findAmount(text, ["employee pf", "employee provident fund", "employee contribution to pf"]),
         gratuityAnnual: tableGratuity || findAmount(text, ["gratuity"]),
-        insuranceBenefitsAnnual: findAmount(text, ["insurance premium", "medical insurance", "health insurance", "insurance benefit"]),
+        insuranceBenefitsAnnual: tableInsurance || findAmount(text, ["insurance premium", "medical insurance", "health insurance", "insurance benefit"]),
+        otherCtcAnnual: tableOtherCtc || findAmount(text, ["other ctc benefits", "other ctc component", "other benefits"]),
         variablePayoutPercent: findPercentage(text, ["variable pay", "performance bonus", "target bonus"]),
     };
 
@@ -244,7 +250,8 @@ function compensationFromText(text: string): OfferCompensation {
             compensation.retentionBonus +
             compensation.employerPfAnnual +
             compensation.gratuityAnnual +
-            compensation.insuranceBenefitsAnnual;
+            compensation.insuranceBenefitsAnnual +
+            compensation.otherCtcAnnual;
         if (componentTotal > compensation.statedCtcAnnual * 1.05) {
             compensation.annualGrossSalary = 0;
         }
@@ -262,7 +269,8 @@ function compensationFromText(text: string): OfferCompensation {
             compensation.retentionBonus +
             compensation.employerPfAnnual +
             compensation.gratuityAnnual +
-            compensation.insuranceBenefitsAnnual;
+            compensation.insuranceBenefitsAnnual +
+            compensation.otherCtcAnnual;
         compensation.annualGrossSalary = Math.max(0, compensation.statedCtcAnnual - nonCashAndConditional);
         compensation.grossWasEstimated = true;
     }
