@@ -10,7 +10,7 @@ export const FAREETH_PROFILE: CandidateProfile = {
     portfolio: "https://fareeth.vercel.app/",
     github: "https://github.com/fareethraja",
     summary:
-        "MBA Finance and Marketing candidate with hands-on product management experience across AI, fintech, trading workflows, payments, onboarding, and user-facing web products. Currently owning product planning and execution for Finverse through a Bermer Software Limited client/product engagement, combining product thinking with technical execution across AI chat, market tools, checkout, admin workflows, and real-time trading features. Strong fit for APM, Product Intern, and Product Analyst roles requiring user problem definition, feature prioritization, product flows, stakeholder communication, metrics thinking, and close collaboration with engineering.",
+        "MBA Finance and Marketing graduate with hands-on product management experience across AI, fintech, trading workflows, payments, onboarding, and user-facing web products. Currently owning product planning and execution for Finverse through a Bermer Software Limited client/product engagement, combining product thinking with technical execution across AI chat, market tools, checkout, admin workflows, and real-time trading features. Strong fit for APM, Product Intern, and Product Analyst roles requiring user problem definition, feature prioritization, product flows, stakeholder communication, metrics thinking, and close collaboration with engineering.",
     sourceText: "",
     skillGroups: [
         {
@@ -197,9 +197,9 @@ export const FAREETH_PROFILE: CandidateProfile = {
         {
             id: "education-mba",
             institution: "Krupanidhi College of Management",
-            qualification: "MBA in Finance and Marketing",
-            dates: "Oct 2024 - Present",
-            detail: "CGPA: 8.38/10",
+            qualification: "MBA in Finance and Marketing, Gold Medalist",
+            dates: "Oct 2024 - Aug 2026",
+            detail: "CGPA: 8.38/10 | Graduated Aug 8, 2026",
         },
         {
             id: "education-economics",
@@ -218,6 +218,7 @@ export const FAREETH_PROFILE: CandidateProfile = {
     ],
     courses: [],
     achievements: [
+        "Best Outgoing Student in MBA and Finance Gold Medalist, Krupanidhi College of Management (2026).",
         "Gold Medalist in Bachelor of Economics, University of Madras (The New College).",
         "Won first prize for presenting the brand story of Apple among MBA batch 2024-2026 students.",
         "Won first prize for presenting Hybrid 2.0.",

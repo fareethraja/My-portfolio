@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from docx import Document
-from docx.enum.section import WD_SECTION_START
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -11,7 +10,7 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer
+from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate
 
 
 OUTPUT_DIR = Path(__file__).resolve().parents[1] / "public" / "resume"
@@ -25,19 +24,17 @@ CONTACT = (
     "fareeth.vercel.app | linkedin.com/in/fareethraja | github.com/fareethraja"
 )
 SUMMARY = (
-    "MBA Finance and Marketing candidate and technical product builder with hands-on ownership across "
-    "AI, fintech, trading workflows, payments, onboarding, QA, and user-facing web products. "
-    "Turns broad goals into requirements, user journeys, acceptance criteria, test plans, and release-ready workflows."
+    "MBA Finance and Marketing graduate and technical product builder for AI and fintech products. "
+    "Turns founder goals into requirements, user journeys, acceptance criteria, QA plans, and release-ready workflows."
 )
 
 SECTIONS = [
     (
         "CORE PRODUCT SKILLS",
         [
-            "Product: requirements, PRDs, user stories, acceptance criteria, prioritization, roadmaps, stakeholder communication, launch planning",
-            "Technical: Next.js, React, TypeScript, Go, MySQL, REST and WebSocket APIs, OAuth, payments, Docker, Git, Figma",
-            "AI + Fintech: Azure OpenAI, multilingual chat UX, AI guardrails, screeners, backtesting, paper trading, trading journals",
-            "Analytics: activation, retention, conversion, funnels, Power BI, Excel, data visualization, market research",
+            "Product: requirements, PRDs, user stories, acceptance criteria, prioritization, roadmaps, stakeholder communication",
+            "Technical: Next.js, React, TypeScript, Go, MySQL, REST and WebSocket APIs, OAuth, Razorpay, Docker, Git, Figma",
+            "AI + Fintech: Azure OpenAI, multilingual chat UX, AI guardrails, screeners, backtesting, paper trading, analytics",
         ],
     ),
     (
@@ -47,55 +44,39 @@ SECTIONS = [
                 "Product Manager | Finverse client engagement via Bermer Software Limited | Feb 2026 - Present",
                 [
                     "Own product planning for an AI-powered stock-market platform spanning Zeno AI, screeners, strategy builder, backtesting, paper trading, courses, checkout, and admin tools.",
-                    "Translate founder requirements into implementation-ready specs, user journeys, edge cases, bug lists, QA checks, and release priorities across frontend, backend, AI, payments, and admin modules.",
-                    "Shape multilingual finance-assistant flows with guest limits, market-data enrichment, rate limiting, tool-grounded responses, and safety guardrails.",
-                    "Define and validate Razorpay checkout and course-access logic: server-side signature verification, coupons, feature flags, webhook hardening, and verified access states.",
-                    "Test trading workflows including screeners, watchlists, PnL, candles, quotes, strategy rules, and backtest journeys for retail users.",
-                    "Improve production readiness through admin workflows, upload handling, CORS lockdown, health checks, environment configuration, and deployment validation.",
+                    "Translate founder requirements into specs, user journeys, edge cases, acceptance criteria, QA checks, and release priorities across frontend, backend, AI, payments, and admin modules.",
+                    "Shape multilingual finance-assistant workflows with market-data enrichment, guest limits, rate limiting, tool-grounded responses, and safety guardrails.",
+                    "Define and validate Razorpay checkout and course-access logic, including signature verification, coupons, webhooks, feature flags, and verified access states.",
                 ],
             ),
             (
                 "Product Intern | Bermer Software Limited / Niyantha Transits Private Limited | Jan 2026 - Present",
                 [
-                    "Converted early hardware/IoT product ideas into clear presentation narratives, roadmap direction, and stakeholder-ready material.",
-                    "Supported product positioning and business communication before moving into the Finverse product engagement.",
+                    "Converted early hardware/IoT product ideas into stakeholder-ready narratives, product positioning, and roadmap direction.",
                 ],
             ),
             (
                 "Product Manager (Technical) | KiddoFin | Bengaluru | Dec 2025 - Jan 2026",
                 [
                     "Represented KiddoFin at Google as the primary product presenter, communicating product vision, user value, and stakeholder narrative.",
-                    "Led website delivery, automated email onboarding, product roadmaps, feature plans, and product pitches for an early-stage product.",
-                ],
-            ),
-            (
-                "Human Resource Management Intern | Peunier | Remote | Dec 2024 - Jan 2025",
-                [
-                    "Built job descriptions and hiring reports, screened candidates, and streamlined ATS workflows; helped hire 13+ candidates in one month.",
+                    "Led website delivery, automated email onboarding, feature plans, and product pitches for an early-stage product.",
                 ],
             ),
         ],
     ),
     (
-        "PRODUCT CASE STUDIES",
+        "SELECTED PRODUCT WORK",
         [
             (
                 "Finverse | AI-powered Stock Market Super App | 2026",
                 [
-                    "Designed flows across Zeno AI, screeners, strategy/backtesting, paper trading, courses, checkout, admin tooling, and market-data workflows.",
-                    "Built a coherent user loop: learn, ask, analyze, simulate, track, and pay only through verified access states. Case study: fareeth.vercel.app/work/finverse",
+                    "Designed the core loop across AI, analysis, simulation, trading, courses, checkout, and verified access states. Case study: fareeth.vercel.app/work/finverse",
                 ],
             ),
             (
                 "SmartSlot | Mobile-first Dental Appointment PWA | 2025",
                 [
-                    "Built a mobile-first booking product for dental students and interns: daily slots, WhatsApp booking links, leave-day controls, and case tracking without patient login.",
-                ],
-            ),
-            (
-                "RoomSpace | Roommate Key Tracker | 2025",
-                [
-                    "Built a shared key-tracking tool with accountability, real-time updates, offline synchronization, and a simple shared source of truth.",
+                    "Built a mobile-first booking product with slot sharing, WhatsApp booking links, leave controls, and case tracking without patient login.",
                 ],
             ),
         ],
@@ -103,21 +84,20 @@ SECTIONS = [
     (
         "EDUCATION",
         [
-            "Krupanidhi College of Management | MBA, Finance and Marketing | Oct 2024 - Present | CGPA: 8.38/10",
+            "Krupanidhi College of Management | MBA in Finance and Marketing | Gold Medalist | Oct 2024 - Aug 2026 | CGPA: 8.38/10 | Graduated Aug 8, 2026",
             "University of Madras, The New College | B.A. Economics, Gold Medalist | Oct 2021 - Apr 2024 | CGPA: 7.16/10",
         ],
     ),
     (
         "CERTIFICATIONS",
         [
-            "Market Research for Product Management (MTF Institute) | UI/UX Design and Product Management with Figma (Hudson Dynamic Lab)",
-            "Microsoft Excel: Beginner to Advanced (Udemy) | Power BI: data transformation, DAX, dashboards, publishing | Agile, Scrum, and PMP fundamentals",
+            "Market Research for Product Management | UI/UX Design and Product Management with Figma | Power BI | Agile and Scrum fundamentals",
         ],
     ),
     (
         "ACHIEVEMENTS",
         [
-            "Gold Medalist, B.A. Economics | Represented KiddoFin at Google as primary product presenter | First prize: Apple brand story and Hybrid 2.0 sustainable automobile concept | SDG Championship 2022 finalist",
+            "Best Outgoing Student, MBA | Finance Gold Medalist | Gold Medalist, B.A. Economics | KiddoFin product presenter at Google | First prize: Apple brand story and Hybrid 2.0 concept | SDG Championship 2022 finalist",
         ],
     ),
 ]
@@ -125,8 +105,8 @@ SECTIONS = [
 
 def set_cell_border(paragraph):
     paragraph_format = paragraph.paragraph_format
-    paragraph_format.space_before = Pt(7)
-    paragraph_format.space_after = Pt(3)
+    paragraph_format.space_before = Pt(9)
+    paragraph_format.space_after = Pt(4)
     p_pr = paragraph._p.get_or_add_pPr()
     borders = OxmlElement("w:pBdr")
     bottom = OxmlElement("w:bottom")
@@ -152,44 +132,44 @@ def add_docx_text(paragraph, text, bold=False, size=10, color=None):
 def add_docx_section(document, heading, entries):
     paragraph = document.add_paragraph()
     set_cell_border(paragraph)
-    add_docx_text(paragraph, heading, bold=True, size=12, color="1F4E79")
+    add_docx_text(paragraph, heading, bold=True, size=12.5, color="1F4E79")
     for entry in entries:
         if isinstance(entry, tuple):
             role, bullets = entry
             title = document.add_paragraph()
-            title.paragraph_format.space_before = Pt(4)
-            title.paragraph_format.space_after = Pt(1)
-            add_docx_text(title, role, bold=True, size=10)
+            title.paragraph_format.space_before = Pt(5)
+            title.paragraph_format.space_after = Pt(2)
+            add_docx_text(title, role, bold=True, size=10.5)
             for bullet in bullets:
                 item = document.add_paragraph(style="List Bullet")
                 item.paragraph_format.left_indent = Inches(0.17)
                 item.paragraph_format.first_line_indent = Inches(-0.12)
                 item.paragraph_format.space_before = Pt(0)
-                item.paragraph_format.space_after = Pt(1)
-                add_docx_text(item, bullet, size=9.5)
+                item.paragraph_format.space_after = Pt(2)
+                add_docx_text(item, bullet, size=10)
         else:
             item = document.add_paragraph(style="List Bullet")
             item.paragraph_format.left_indent = Inches(0.17)
             item.paragraph_format.first_line_indent = Inches(-0.12)
             item.paragraph_format.space_before = Pt(0)
-            item.paragraph_format.space_after = Pt(1)
-            add_docx_text(item, entry, size=9.5)
+            item.paragraph_format.space_after = Pt(2)
+            add_docx_text(item, entry, size=10)
 
 
 def build_docx():
     document = Document()
     section = document.sections[0]
-    section.top_margin = Inches(0.42)
-    section.bottom_margin = Inches(0.42)
-    section.left_margin = Inches(0.52)
-    section.right_margin = Inches(0.52)
+    section.top_margin = Inches(0.4)
+    section.bottom_margin = Inches(0.5)
+    section.left_margin = Inches(0.42)
+    section.right_margin = Inches(0.42)
     section.header_distance = Inches(0.2)
     section.footer_distance = Inches(0.2)
 
     normal = document.styles["Normal"]
     normal.font.name = "Aptos"
     normal._element.rPr.rFonts.set(qn("w:eastAsia"), "Aptos")
-    normal.font.size = Pt(9.5)
+    normal.font.size = Pt(10)
     normal.paragraph_format.space_after = Pt(0)
     normal.paragraph_format.line_spacing = 1
 
@@ -201,30 +181,20 @@ def build_docx():
     title = document.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     title.paragraph_format.space_after = Pt(2)
-    add_docx_text(title, TITLE, bold=True, size=10, color="1F4E79")
+    add_docx_text(title, TITLE, bold=True, size=10.5, color="1F4E79")
 
     contact = document.add_paragraph()
     contact.alignment = WD_ALIGN_PARAGRAPH.CENTER
     contact.paragraph_format.space_after = Pt(4)
-    add_docx_text(contact, CONTACT, size=8.5)
+    add_docx_text(contact, CONTACT, size=9)
 
     summary = document.add_paragraph()
     summary.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     summary.paragraph_format.space_after = Pt(2)
-    add_docx_text(summary, SUMMARY, size=9.5)
+    add_docx_text(summary, SUMMARY, size=10)
 
-    add_docx_section(document, *SECTIONS[0])
-    add_docx_section(document, *SECTIONS[1])
-    document.add_section(WD_SECTION_START.NEW_PAGE)
-    new_section = document.sections[-1]
-    new_section.top_margin = Inches(0.42)
-    new_section.bottom_margin = Inches(0.42)
-    new_section.left_margin = Inches(0.52)
-    new_section.right_margin = Inches(0.52)
-    add_docx_section(document, *SECTIONS[2])
-    add_docx_section(document, *SECTIONS[3])
-    add_docx_section(document, *SECTIONS[4])
-    add_docx_section(document, *SECTIONS[5])
+    for section_content in SECTIONS:
+        add_docx_section(document, *section_content)
     document.save(DOCX_PATH)
 
 
@@ -232,22 +202,22 @@ def build_pdf():
     doc = SimpleDocTemplate(
         str(PDF_PATH),
         pagesize=letter,
-        rightMargin=0.52 * inch,
-        leftMargin=0.52 * inch,
-        topMargin=0.42 * inch,
-        bottomMargin=0.42 * inch,
+        rightMargin=0.42 * inch,
+        leftMargin=0.42 * inch,
+        topMargin=0.4 * inch,
+        bottomMargin=0.5 * inch,
         title="Fareeth Raja Product Resume",
         author="Fareeth Raja",
     )
     palette = {"navy": HexColor("#17365D"), "blue": HexColor("#1F4E79"), "black": HexColor("#111111")}
     styles = getSampleStyleSheet()
     name_style = ParagraphStyle("ResumeName", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=22, leading=24, alignment=TA_CENTER, textColor=palette["navy"], spaceAfter=1)
-    title_style = ParagraphStyle("ResumeTitle", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=9.5, leading=11, alignment=TA_CENTER, textColor=palette["blue"], spaceAfter=2)
-    contact_style = ParagraphStyle("ResumeContact", parent=styles["Normal"], fontName="Helvetica", fontSize=8, leading=9.5, alignment=TA_CENTER, textColor=palette["black"], spaceAfter=4)
-    summary_style = ParagraphStyle("ResumeSummary", parent=styles["Normal"], fontName="Helvetica", fontSize=9.3, leading=11.2, alignment=TA_LEFT, spaceAfter=2)
-    section_style = ParagraphStyle("ResumeSection", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=11.5, leading=14, textColor=palette["blue"], spaceBefore=6, spaceAfter=2, borderWidth=0.7, borderColor=palette["blue"], borderPadding=1, borderBottom=1)
-    role_style = ParagraphStyle("ResumeRole", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=9.6, leading=11.5, spaceBefore=3, spaceAfter=1)
-    bullet_style = ParagraphStyle("ResumeBullet", parent=styles["Normal"], fontName="Helvetica", fontSize=9.15, leading=10.8, leftIndent=10, firstLineIndent=-7, bulletIndent=0, spaceAfter=1)
+    title_style = ParagraphStyle("ResumeTitle", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=10.5, leading=12, alignment=TA_CENTER, textColor=palette["blue"], spaceAfter=3)
+    contact_style = ParagraphStyle("ResumeContact", parent=styles["Normal"], fontName="Helvetica", fontSize=8.7, leading=10.5, alignment=TA_CENTER, textColor=palette["black"], spaceAfter=5)
+    summary_style = ParagraphStyle("ResumeSummary", parent=styles["Normal"], fontName="Helvetica", fontSize=10, leading=12.2, alignment=TA_LEFT, spaceAfter=3)
+    section_style = ParagraphStyle("ResumeSection", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=12.2, leading=15, textColor=palette["blue"], spaceBefore=8, spaceAfter=3, borderWidth=0.7, borderColor=palette["blue"], borderPadding=1, borderBottom=1)
+    role_style = ParagraphStyle("ResumeRole", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=10.3, leading=12.5, spaceBefore=4, spaceAfter=2)
+    bullet_style = ParagraphStyle("ResumeBullet", parent=styles["Normal"], fontName="Helvetica", fontSize=10, leading=12.1, leftIndent=10, firstLineIndent=-7, bulletIndent=0, spaceAfter=2)
 
     story = [
         Paragraph(NAME, name_style),
@@ -255,9 +225,7 @@ def build_pdf():
         Paragraph(CONTACT, contact_style),
         Paragraph(SUMMARY, summary_style),
     ]
-    for section_index, (heading, entries) in enumerate(SECTIONS):
-        if section_index == 2:
-            story.append(PageBreak())
+    for heading, entries in SECTIONS:
         group = [Paragraph(heading, section_style)]
         for entry in entries:
             if isinstance(entry, tuple):

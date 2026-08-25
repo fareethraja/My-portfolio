@@ -31,10 +31,10 @@ const TIMELINE_DATA = [
             "Improved candidate visibility, screened and interviewed candidates, hired 13+ qualified people in one month, and reduced hiring time by 25% through ATS workflow improvements.",
     },
     {
-        year: "Oct 2024 - Present",
+        year: "Oct 2024 - Aug 2026",
         title: "MBA in Finance and Marketing - Krupanidhi College",
         description:
-            "Building finance, marketing, operations, and analytics depth while applying product thinking to fintech, AI, and business strategy work. Current CGPA: 8.38/10.",
+            "Graduated on Aug 8, 2026 with a CGPA of 8.38/10, earning Best Outgoing Student and the Finance Gold Medal.",
     },
     {
         year: "Oct 2021 - Apr 2024",

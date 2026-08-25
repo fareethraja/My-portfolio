@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     alternates: { canonical: "/now" },
 };
 
-const LAST_UPDATED = "May 2026";
+const LAST_UPDATED = "August 2026";
 
 const FOCUS = [
     {
@@ -19,8 +19,8 @@ const FOCUS = [
     },
     {
         title: "MBA in Finance & Marketing",
-        body: "Building finance, marketing, and analytics depth at Krupanidhi College. Current CGPA: 8.38/10.",
-        tag: "Studying",
+        body: "Graduated from Krupanidhi College on Aug 8, 2026 as Best Outgoing Student and Finance Gold Medalist. CGPA: 8.38/10.",
+        tag: "Graduated",
     },
     {
         title: "This portfolio",

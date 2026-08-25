@@ -70,7 +70,7 @@ export function About() {
 
                         <div className="space-y-4 text-muted-foreground leading-relaxed">
                             <p>
-                                I&apos;m an MBA Finance and Marketing candidate working at the intersection of product management, technical execution, and fintech.
+                                I&apos;m an MBA Finance and Marketing graduate working at the intersection of product management, technical execution, and fintech.
                             </p>
                             <p>
                                 Right now, I work on Finverse as a Product Manager, translating broad founder requirements into feature specs, implementation logic, user journeys, bug lists, QA checks, and release-ready AI/fintech workflows.
