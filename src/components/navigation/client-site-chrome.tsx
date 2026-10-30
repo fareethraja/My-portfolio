@@ -8,6 +8,7 @@ import { CommandPaletteHint } from "@/components/ui/command-palette-hint";
 import { MouseTrail } from "@/components/ui/mouse-trail";
 import ProceduralGroundBackground from "@/components/ui/procedural-ground-background";
 import { PortfolioIntro } from "@/components/ui/portfolio-intro";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function ClientSiteChrome() {
     const pathname = usePathname();
@@ -19,6 +20,7 @@ export function ClientSiteChrome() {
             <PortfolioIntro />
             <ProceduralGroundBackground />
             <MouseTrail />
+            <ThemeToggle />
             <CommandPalette />
             <CommandPaletteHint />
             <div className="hidden md:block">

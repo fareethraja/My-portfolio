@@ -56,7 +56,7 @@ export default function NowPage() {
         <main className="section-container relative z-30 pt-24 pb-20 md:pt-28 sm:pb-24">
             <Link
                 href="/"
-                className="liquid-glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
+                className="liquid-glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-primary/60 hover:text-foreground active:scale-[0.97]"
             >
                 <ArrowLeft className="h-4 w-4" />
                 Back home
@@ -74,7 +74,7 @@ export default function NowPage() {
                         href="https://nownownow.com/about"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="underline decoration-white/30 underline-offset-4 hover:decoration-white"
+                        className="underline decoration-primary/50 underline-offset-4 hover:decoration-primary"
                     >
                         nownownow.com
                     </Link>
@@ -86,10 +86,10 @@ export default function NowPage() {
                 {FOCUS.map((item) => (
                     <article
                         key={item.title}
-                        className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm transition hover:border-white/20"
+                        className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card/20 p-6 backdrop-blur-sm transition hover:border-primary/50"
                     >
                         <div className="flex items-center gap-2">
-                            <span className="font-jetbrains text-[10px] uppercase tracking-[0.2em] text-emerald-300">
+                            <span className="font-jetbrains text-[10px] uppercase tracking-[0.2em] text-accent-foreground">
                                 {item.tag}
                             </span>
                             <span className="h-px flex-1 bg-border" />
@@ -112,7 +112,7 @@ export default function NowPage() {
                     {SHIPPED.map((item) => (
                         <li
                             key={item}
-                            className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-sm text-foreground/90"
+                            className="flex items-start gap-3 rounded-xl border border-border/70 bg-card/20 px-4 py-3 text-sm text-foreground/90"
                         >
                             <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
                             <span>{item}</span>
@@ -129,7 +129,7 @@ export default function NowPage() {
                     {STACK.map((tag) => (
                         <span
                             key={tag}
-                            className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-foreground/80"
+                            className="rounded-full border border-border/70 bg-card/20 px-3 py-1.5 text-xs text-foreground/80"
                         >
                             {tag}
                         </span>
@@ -140,14 +140,14 @@ export default function NowPage() {
             <footer className="mt-14 flex flex-wrap items-center gap-4 text-sm">
                 <Link
                     href="/work"
-                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-foreground transition hover:border-white/30"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border/70 bg-card/20 px-4 py-2 text-foreground transition hover:border-primary/60"
                 >
                     Read product case studies
                     <ArrowUpRight className="h-4 w-4" />
                 </Link>
                 <Link
                     href="/api/resume"
-                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-foreground transition hover:border-white/30"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border/70 bg-card/20 px-4 py-2 text-foreground transition hover:border-primary/60"
                 >
                     Resume
                     <ArrowUpRight className="h-4 w-4" />

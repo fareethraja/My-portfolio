@@ -1,14 +1,14 @@
 "use client";
 
-import * as React from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import clsx from "clsx";
 
 export type AnimatedAvailabilityButtonProps = {
   className?: string;
   labelIdle?: string;
   labelActive?: string;
-  highlightHueDeg?: number;
+  icon?: LucideIcon;
   navigateTo?: string;
   href?: string;
   download?: string;
@@ -22,7 +22,7 @@ export default function AnimatedAvailabilityButton({
   className,
   labelIdle = "Open to Work",
   labelActive = "Let's Connect",
-  highlightHueDeg = 142,
+  icon: Icon,
   navigateTo = "#contact",
   href,
   download,
@@ -32,18 +32,21 @@ export default function AnimatedAvailabilityButton({
   ariaLabel,
 }: AnimatedAvailabilityButtonProps) {
   const [isActive, setIsActive] = useState(false);
+  const pointerFrame = useRef<number | null>(null);
+  const pointerPosition = useRef({ x: 0, y: 0 });
+  const pointerMedia = useRef<MediaQueryList | null>(null);
   const Element = href ? "a" : "button";
 
+  useEffect(() => () => {
+    if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
+  }, []);
+
   const handleClick = () => {
-    if (!isActive) {
-      setIsActive(true);
+    if (navigateTo.startsWith("#")) {
+      const element = document.querySelector(navigateTo);
+      element?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
     } else {
-      if (navigateTo.startsWith("#")) {
-        const element = document.querySelector(navigateTo);
-        element?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-      } else {
-        window.location.href = navigateTo;
-      }
+      window.location.href = navigateTo;
     }
   };
 
@@ -53,7 +56,7 @@ export default function AnimatedAvailabilityButton({
         href={href}
         download={download}
         type={href ? undefined : type}
-        aria-label={ariaLabel || (isActive ? labelActive : labelIdle)}
+        aria-label={ariaLabel || labelIdle}
         disabled={href ? undefined : disabled}
         aria-disabled={disabled || undefined}
         onClick={(event) => {
@@ -63,30 +66,49 @@ export default function AnimatedAvailabilityButton({
           }
           if (!href) handleClick();
         }}
-        onPointerEnter={() => { if (href) setIsActive(true); }}
-        onPointerLeave={() => { if (href) setIsActive(false); }}
-        onFocus={() => { if (href) setIsActive(true); }}
-        onBlur={() => { if (href) setIsActive(false); }}
+        onPointerEnter={() => {
+          if (!disabled) setIsActive(true);
+          pointerMedia.current ??= window.matchMedia("(hover: hover) and (prefers-reduced-motion: no-preference)");
+        }}
+        onPointerMove={(event) => {
+          if (disabled || event.pointerType !== "mouse" || !pointerMedia.current?.matches) return;
+          pointerPosition.current = { x: event.clientX, y: event.clientY };
+          if (pointerFrame.current !== null) return;
+          const element = event.currentTarget;
+          pointerFrame.current = requestAnimationFrame(() => {
+            pointerFrame.current = null;
+            const rect = element.getBoundingClientRect();
+            const x = Math.max(0, Math.min(1, (pointerPosition.current.x - rect.left) / rect.width));
+            const y = Math.max(0, Math.min(1, (pointerPosition.current.y - rect.top) / rect.height));
+            element.style.setProperty("--pointer-x", `${x * 100}%`);
+            element.style.setProperty("--pointer-y", `${y * 100}%`);
+            element.style.setProperty("--tilt-x", `${(0.5 - y) * 4}deg`);
+            element.style.setProperty("--tilt-y", `${(x - 0.5) * 4}deg`);
+          });
+        }}
+        onPointerLeave={(event) => {
+          setIsActive(false);
+          if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
+          pointerFrame.current = null;
+          event.currentTarget.style.setProperty("--tilt-x", "0deg");
+          event.currentTarget.style.setProperty("--tilt-y", "0deg");
+        }}
+        onFocus={() => setIsActive(true)}
+        onBlur={() => setIsActive(false)}
         className={clsx(
           "ui-anim-btn",
-          "relative flex items-center justify-center cursor-pointer select-none",
-          "rounded-3xl px-6 py-3 min-w-[180px]",
-          "bg-[hsl(var(--background))] text-[hsl(var(--foreground))]",
-          "border border-[hsl(var(--border))]/20",
-          "shadow-[inset_0px_1px_1px_rgba(255,255,255,0.2),inset_0px_2px_2px_rgba(255,255,255,0.15),inset_0px_4px_4px_rgba(255,255,255,0.1),inset_0px_8px_8px_rgba(255,255,255,0.05),inset_0px_16px_16px_rgba(255,255,255,0.05),0_-1px_1px_rgba(0,0,0,0.02),0_-2px_2px_rgba(0,0,0,0.03),0_-4px_4px_rgba(0,0,0,0.05),0_-8px_8px_rgba(0,0,0,0.06),0_-16px_16px_rgba(0,0,0,0.08)]",
-          "transition-[border-color,background-color] duration-300 touch-manipulation"
+          "relative isolate flex items-center justify-center cursor-pointer select-none",
+          "min-h-[52px] min-w-[180px] gap-3 rounded-full px-6 py-3 text-foreground",
+          "touch-manipulation"
         )}
-        style={
-          {
-            ["--highlight-hue" as string]: `${highlightHueDeg}deg`,
-          } as React.CSSProperties
-        }
       >
-        {/* Pulsing dot */}
-        <span className="relative flex h-3 w-3 items-center justify-center mr-3 shrink-0">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75"></span>
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
-        </span>
+        {Icon ? (
+          <Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
+        ) : (
+          <span aria-hidden="true" className="flex h-4 w-4 shrink-0 items-center justify-center">
+            <span className="h-2 w-2 rounded-full bg-emerald-700 ring-4 ring-emerald-600/10 dark:bg-emerald-300 dark:ring-emerald-300/10" />
+          </span>
+        )}
         
         <div className="relative grid h-5 place-items-center overflow-hidden">
           <span
@@ -113,90 +135,79 @@ export default function AnimatedAvailabilityButton({
       </Element>
       <style jsx global>{`
         .ui-anim-btn {
-          --padding: 4px;
-          --radius: 24px;
-          --transition: 0.4s;
-          --highlight: hsl(var(--highlight-hue), 100%, 70%);
-          --highlight-50: hsla(var(--highlight-hue), 100%, 70%, 0.5);
-          --highlight-30: hsla(var(--highlight-hue), 100%, 70%, 0.3);
-          --highlight-20: hsla(var(--highlight-hue), 100%, 70%, 0.2);
-          --highlight-80: hsla(var(--highlight-hue), 100%, 70%, 0.8);
+          border: 1px solid hsl(var(--foreground) / 0.35);
+          background: hsl(var(--background) / 0.5);
+          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
+          box-shadow: inset 0 2px 3px rgb(255 255 255 / 0.85),
+            inset 0 -2px 4px hsl(var(--foreground) / 0.15),
+            inset 2px 0 4px rgb(255 255 255 / 0.45),
+            0 6px 14px hsl(var(--glass-shadow) / 0.16),
+            0 1px 3px hsl(var(--glass-shadow) / 0.12);
+          transform: perspective(800px) rotateX(var(--tilt-x, 0deg))
+            rotateY(var(--tilt-y, 0deg)) translateY(var(--lift, 0px)) scale(var(--press, 1));
+          transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+            border-color 240ms ease, background-color 240ms ease;
+        }
+
+        .dark .ui-anim-btn {
+          border-color: hsl(var(--foreground) / 0.4);
+          background: linear-gradient(180deg, rgb(255 255 255 / 0.11), rgb(255 255 255 / 0.025)),
+            hsl(var(--background) / 0.65);
+          box-shadow: inset 0 2px 3px rgb(255 255 255 / 0.32),
+            inset 0 -2px 4px rgb(0 0 0 / 0.5),
+            inset 2px 0 4px rgb(255 255 255 / 0.09),
+            0 6px 14px rgb(0 0 0 / 0.3),
+            0 1px 3px rgb(0 0 0 / 0.25);
         }
 
         .ui-anim-btn::before {
           content: "";
           position: absolute;
-          top: calc(0px - var(--padding));
-          left: calc(0px - var(--padding));
-          width: calc(100% + var(--padding) * 2);
-          height: calc(100% + var(--padding) * 2);
-          border-radius: calc(var(--radius) + var(--padding));
+          inset: 1px;
+          border-radius: inherit;
           pointer-events: none;
-          background-image: linear-gradient(0deg, #0004, #000a);
+          background: radial-gradient(ellipse at var(--pointer-x, 50%) var(--pointer-y, 20%),
+            rgb(255 255 255 / 0.55), transparent 65%);
+          opacity: 0;
           z-index: -1;
-          transition: box-shadow var(--transition), filter var(--transition);
-          box-shadow:
-            0 -8px 8px -6px #0000 inset,
-            0 -16px 16px -8px #00000000 inset,
-            1px 1px 1px #fff2,
-            2px 2px 2px #fff1,
-            -1px -1px 1px #0002,
-            -2px -2px 2px #0001;
+          transition: opacity 360ms ease;
+        }
+
+        .dark .ui-anim-btn::before {
+          background: radial-gradient(ellipse at var(--pointer-x, 50%) var(--pointer-y, 20%),
+            rgb(255 255 255 / 0.16), transparent 65%);
         }
 
         .ui-anim-btn::after {
           content: "";
           position: absolute;
-          inset: 0;
+          inset: 2px;
+          border: 1px solid rgb(255 255 255 / 0.24);
           border-radius: inherit;
+          background: linear-gradient(180deg, rgb(255 255 255 / 0.2), transparent 35%, transparent 75%, rgb(255 255 255 / 0.08));
           pointer-events: none;
-          background-image: linear-gradient(0deg, #fff, var(--highlight), var(--highlight-50), 8%, transparent);
-          background-position: 0 0;
-          opacity: 0;
-          transition: opacity var(--transition), filter var(--transition);
+          z-index: -1;
         }
 
-        /* Hover */
-        .ui-anim-btn:hover {
-          border-color: hsla(var(--highlight-hue), 100%, 80%, 0.4);
+        @media (hover: hover) {
+          .ui-anim-btn:hover:not(:disabled):not([aria-disabled="true"]) {
+            --lift: -2px;
+          }
+          .ui-anim-btn:hover:not(:disabled):not([aria-disabled="true"])::before {
+            opacity: 1;
+          }
         }
-        .ui-anim-btn:hover::before {
-          box-shadow:
-            0 -8px 8px -6px #fffa inset,
-            0 -16px 16px -8px var(--highlight-30) inset,
-            1px 1px 1px #fff2,
-            2px 2px 2px #fff1,
-            -1px -1px 1px #0002,
-            -2px -2px 2px #0001;
-        }
-        .ui-anim-btn:hover::after {
+
+        .ui-anim-btn:focus-visible::before {
           opacity: 1;
-          -webkit-mask-image: linear-gradient(0deg, #fff, transparent);
-          mask-image: linear-gradient(0deg, #fff, transparent);
         }
 
-        /* Active */
-        .ui-anim-btn:active {
-          border-color: hsla(var(--highlight-hue), 100%, 80%, 0.7);
-          background-color: hsla(var(--highlight-hue), 50%, 20%, 0.5);
-        }
-        .ui-anim-btn:active::before {
-          box-shadow:
-            0 -8px 12px -6px #fffa inset,
-            0 -16px 16px -8px var(--highlight-80) inset,
-            1px 1px 1px #fff4,
-            2px 2px 2px #fff2,
-            -1px -1px 1px #0002,
-            -2px -2px 2px #0001;
-        }
-        .ui-anim-btn:active::after {
-          opacity: 1;
-          -webkit-mask-image: linear-gradient(0deg, #fff, transparent);
-          mask-image: linear-gradient(0deg, #fff, transparent);
-          filter: brightness(200%);
+        .ui-anim-btn:active:not(:disabled):not([aria-disabled="true"]) {
+          --lift: 0px;
+          --press: 0.975;
         }
 
-        /* Disabled */
         .ui-anim-btn:disabled,
         .ui-anim-btn[aria-disabled="true"] {
           opacity: 0.6;
@@ -204,8 +215,23 @@ export default function AnimatedAvailabilityButton({
         }
 
         .ui-anim-btn:focus-visible {
-          outline: 2px solid var(--highlight);
+          outline: 2px solid hsl(var(--ring));
           outline-offset: 4px;
+        }
+
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+          .ui-anim-btn {
+            background: hsl(var(--card));
+          }
+          .dark .ui-anim-btn {
+            background: hsl(var(--secondary));
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .ui-anim-btn {
+            transform: none !important;
+          }
         }
       `}</style>
     </div>

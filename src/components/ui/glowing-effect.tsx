@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 import { animate, useReducedMotion } from "motion/react";
 
 type PointerPosition = { x: number; y: number };
-const pointerSubscribers = new Set<(position: PointerPosition) => void>();
+type PointerSubscriber = (position: PointerPosition) => (() => void) | undefined;
+const pointerSubscribers = new Set<PointerSubscriber>();
 let pointerPosition: PointerPosition | null = null;
 let pointerFrame: number | null = null;
 
@@ -14,7 +15,13 @@ function schedulePointerUpdate() {
     pointerFrame = requestAnimationFrame(() => {
         pointerFrame = null;
         if (pointerPosition) {
-            for (const subscriber of pointerSubscribers) subscriber(pointerPosition);
+            // Read every visible card before applying styles to avoid read/write interleaving.
+            const updates: Array<() => void> = [];
+            for (const subscriber of pointerSubscribers) {
+                const update = subscriber(pointerPosition);
+                if (update) updates.push(update);
+            }
+            for (const update of updates) update();
         }
     });
 }
@@ -25,7 +32,7 @@ function handlePointerMove(event: PointerEvent) {
     schedulePointerUpdate();
 }
 
-function subscribePointer(subscriber: (position: PointerPosition) => void) {
+function subscribePointer(subscriber: PointerSubscriber) {
     if (pointerSubscribers.size === 0) {
         document.addEventListener("pointermove", handlePointerMove, { passive: true });
         window.addEventListener("scroll", schedulePointerUpdate, { passive: true });
@@ -90,9 +97,10 @@ const GlowingEffect = memo(
                     const inactiveRadius = 0.5 * Math.min(width, height) * inactiveZone;
 
                     if (distanceFromCenter < inactiveRadius) {
-                        element.style.setProperty("--active", "0");
-                        activeAnimation.current?.stop();
-                        return;
+                        return () => {
+                            element.style.setProperty("--active", "0");
+                            activeAnimation.current?.stop();
+                        };
                     }
 
                     const isActive =
@@ -100,11 +108,6 @@ const GlowingEffect = memo(
                         mouseX < left + width + proximity &&
                         mouseY > top - proximity &&
                         mouseY < top + height + proximity;
-
-                    element.style.setProperty("--active", isActive ? "1" : "0");
-
-                    activeAnimation.current?.stop();
-                    if (!isActive) return;
 
                     const currentAngle =
                         parseFloat(element.style.getPropertyValue("--start")) || 0;
@@ -116,13 +119,18 @@ const GlowingEffect = memo(
                     const angleDiff = ((targetAngle - currentAngle) % 360 + 540) % 360 - 180;
                     const newAngle = currentAngle + angleDiff;
 
-                    activeAnimation.current = animate(currentAngle, newAngle, {
-                        duration: movementDuration,
-                        ease: [0.16, 1, 0.3, 1],
-                        onUpdate: (value) => {
-                            element.style.setProperty("--start", String(value));
-                        },
-                    });
+                    return () => {
+                        element.style.setProperty("--active", isActive ? "1" : "0");
+                        activeAnimation.current?.stop();
+                        if (!isActive) return;
+                        activeAnimation.current = animate(currentAngle, newAngle, {
+                            duration: movementDuration,
+                            ease: [0.16, 1, 0.3, 1],
+                            onUpdate: (value) => {
+                                element.style.setProperty("--start", String(value));
+                            },
+                        });
+                    };
             },
             [inactiveZone, proximity, movementDuration]
         );

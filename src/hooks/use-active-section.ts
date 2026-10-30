@@ -1,65 +1,100 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { SECTIONS } from "@/lib/constants";
 
 export function useActiveSection() {
     const [activeSection, setActiveSection] = useState<string>("hero");
-    const observers = useRef<Map<string, IntersectionObserverEntry>>(new Map());
+    const destination = useRef<number | null>(null);
+    const settleTimer = useRef<number | null>(null);
+    const requestUpdate = useRef<(() => void) | null>(null);
 
     useEffect(() => {
-        const observerCallback: IntersectionObserverCallback = (entries) => {
-            entries.forEach((entry) => {
-                observers.current.set(entry.target.id, entry);
-            });
-
-            // Find the visible section with the maximum intersection ratio
-            let maxRatio = 0;
-            let newActiveSection = "";
-
-            observers.current.forEach((entry, id) => {
-                if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
-                    maxRatio = entry.intersectionRatio;
-                    newActiveSection = id;
-                }
-            });
-
-            if (newActiveSection) {
-                setActiveSection(newActiveSection);
-            }
-        };
-
-        const observerOptions = {
-            root: null,
-            rootMargin: "-10% 0px -10% 0px", // Slight margin to avoid edge cases
-            threshold: Array.from({ length: 11 }, (_, i) => i * 0.1), // [0, 0.1, ... 1.0]
-        };
-
-        const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-        SECTIONS.forEach((section) => {
-            const element = document.getElementById(section.id);
-            if (element) {
-                observer.observe(element);
-            }
+        const sections = SECTIONS.flatMap(({ id }) => {
+            const element = document.getElementById(id);
+            return element ? [{ id, element }] : [];
         });
+        let frame: number | null = null;
 
-        const handleScroll = () => {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
-                const lastSection = SECTIONS[SECTIONS.length - 1];
-                if (lastSection) setActiveSection(lastSection.id);
-            } else if (window.scrollY < 100) {
-                setActiveSection("hero");
-            }
+        const release = () => {
+            destination.current = null;
+            if (settleTimer.current !== null) window.clearTimeout(settleTimer.current);
+            settleTimer.current = null;
         };
 
-        window.addEventListener('scroll', handleScroll, { passive: true });
+        const update = () => {
+            frame = null;
+            if (destination.current !== null) {
+                if (Math.abs(window.scrollY - destination.current) > 2) return;
+                release();
+            }
+            if (!sections.length) return;
+
+            const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+            const activationLine = Math.max(120, Math.min(200, window.innerHeight * 0.25));
+            let current = sections[0].id;
+            for (const section of sections) {
+                if (section.element.getBoundingClientRect().top <= activationLine) current = section.id;
+            }
+            setActiveSection(atBottom ? sections[sections.length - 1].id : current);
+        };
+
+        const schedule = () => {
+            if (frame === null) frame = requestAnimationFrame(update);
+        };
+        const interrupt = () => {
+            release();
+            schedule();
+        };
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) interrupt();
+        };
+
+        requestUpdate.current = schedule;
+        schedule();
+        window.addEventListener("scroll", schedule, { passive: true });
+        window.addEventListener("resize", interrupt, { passive: true });
+        window.addEventListener("wheel", interrupt, { passive: true });
+        window.addEventListener("touchstart", interrupt, { passive: true });
+        window.addEventListener("keydown", onKeyDown);
+        window.addEventListener("scrollend", interrupt);
 
         return () => {
-            observer.disconnect();
-            window.removeEventListener('scroll', handleScroll);
+            release();
+            if (frame !== null) cancelAnimationFrame(frame);
+            requestUpdate.current = null;
+            window.removeEventListener("scroll", schedule);
+            window.removeEventListener("resize", interrupt);
+            window.removeEventListener("wheel", interrupt);
+            window.removeEventListener("touchstart", interrupt);
+            window.removeEventListener("keydown", onKeyDown);
+            window.removeEventListener("scrollend", interrupt);
         };
     }, []);
 
-    return activeSection;
+    const scrollToSection = useCallback((id: string) => {
+        const element = document.getElementById(id);
+        if (!element) {
+            console.warn(`Navigation: section "${id}" is unavailable.`);
+            return false;
+        }
+        const margin = parseFloat(getComputedStyle(element).scrollMarginTop) || 0;
+        const top = element.getBoundingClientRect().top + window.scrollY - margin;
+        destination.current = Math.max(0, Math.min(top, document.documentElement.scrollHeight - window.innerHeight));
+        if (settleTimer.current !== null) window.clearTimeout(settleTimer.current);
+        settleTimer.current = window.setTimeout(() => {
+            destination.current = null;
+            settleTimer.current = null;
+            requestUpdate.current?.();
+        }, 2500);
+        setActiveSection(id);
+        element.scrollIntoView({
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+            block: "start",
+        });
+        requestUpdate.current?.();
+        return true;
+    }, []);
+
+    return { activeSection, scrollToSection };
 }

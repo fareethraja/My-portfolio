@@ -144,7 +144,7 @@ const GridItem = ({ Icon, title, items, gradient, glowColor }: GridItemProps) =>
             variants={cardVariants}
             className="min-h-56 list-none group/item"
         >
-            <div className="relative h-full rounded-2xl border border-zinc-200 dark:border-zinc-800 p-2 md:rounded-3xl md:p-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98] will-change-transform"
+            <div className="relative h-full rounded-2xl border border-border p-2 md:rounded-3xl md:p-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98] will-change-transform"
                 style={{ 
                     boxShadow: `0 0 40px ${glowColor.replace('0.5', '0.1')}`,
                 }}
@@ -157,7 +157,7 @@ const GridItem = ({ Icon, title, items, gradient, glowColor }: GridItemProps) =>
                     inactiveZone={0.01}
                     borderWidth={3}
                 />
-                <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border border-white/10 dark:border-white/10 bg-white/5 dark:bg-black/5 backdrop-blur-xl p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6 transition-colors duration-300 group-hover/item:border-white/20 dark:group-hover/item:border-white/20">
+                <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border border-border/70 bg-white/5 dark:bg-black/5 backdrop-blur-xl p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6 transition-colors duration-300 group-hover/item:border-primary/50">
                     <div className="relative flex flex-1 flex-col justify-between gap-4">
                         {/* Animated Icon with Gradient Background */}
                         <motion.div 
@@ -196,12 +196,12 @@ const GridItem = ({ Icon, title, items, gradient, glowColor }: GridItemProps) =>
                                             "hover:border-transparent",
                                             "hover:bg-gradient-to-r hover:text-white",
                                             gradient.includes('violet') 
-                                                ? "hover:from-violet-500 hover:via-pink-500 hover:to-orange-400"
+                                                ? "hover:from-violet-700 hover:via-pink-700 hover:to-orange-700"
                                                 : gradient.includes('emerald')
-                                                ? "hover:from-emerald-500 hover:to-teal-400"
+                                                ? "hover:from-emerald-700 hover:to-teal-700"
                                                 : gradient.includes('pink')
-                                                ? "hover:from-pink-500 hover:to-rose-400"
-                                                : "hover:from-blue-500 hover:to-cyan-400"
+                                                ? "hover:from-pink-700 hover:to-rose-700"
+                                                : "hover:from-blue-700 hover:to-cyan-700"
                                         )}
                                     >
                                         {item}

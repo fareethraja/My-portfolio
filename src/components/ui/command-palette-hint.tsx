@@ -70,9 +70,9 @@ export function CommandPaletteHint() {
                     {/* arrow / tail pointing up to the Search button */}
                     <div
                         aria-hidden
-                        className="absolute -top-1.5 right-6 h-3 w-3 rotate-45 rounded-[3px] border-l border-t border-white/10 bg-zinc-950/90"
+                        className="absolute -top-1.5 right-6 h-3 w-3 rotate-45 rounded-[3px] border-l border-t border-border bg-popover/90"
                     />
-                    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/90 p-4 shadow-2xl backdrop-blur-xl">
+                    <div className="relative overflow-hidden rounded-2xl border border-border bg-popover/90 p-4 shadow-2xl backdrop-blur-xl">
                         <div
                             aria-hidden
                             className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-gradient-to-br from-violet-500 to-sky-500 opacity-30 blur-2xl"
@@ -81,7 +81,7 @@ export function CommandPaletteHint() {
                             type="button"
                             onClick={dismiss}
                             aria-label="Dismiss hint"
-                            className="absolute right-2 top-2 rounded-md p-1 text-white/40 transition hover:bg-white/5 hover:text-white"
+                            className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                         >
                             <X className="h-3.5 w-3.5" />
                         </button>
@@ -91,14 +91,14 @@ export function CommandPaletteHint() {
                             </p>
                             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                                 Click{" "}
-                                <span className="font-jetbrains uppercase tracking-[0.18em] text-violet-300">
+                                <span className="font-jetbrains uppercase tracking-[0.18em] text-primary">
                                     Search
                                 </span>{" "}
                                 or press{" "}
-                                <kbd className="mx-0.5 rounded border border-white/15 bg-white/5 px-1 py-0.5 font-mono text-[10px] text-white/70">
+                                <kbd className="mx-0.5 rounded border border-border bg-secondary/50 px-1 py-0.5 font-mono text-[10px] text-foreground/80">
                                     {mac ? "⌘" : "Ctrl"}
                                 </kbd>
-                                <kbd className="mx-0.5 rounded border border-white/15 bg-white/5 px-1 py-0.5 font-mono text-[10px] text-white/70">
+                                <kbd className="mx-0.5 rounded border border-border bg-secondary/50 px-1 py-0.5 font-mono text-[10px] text-foreground/80">
                                     K
                                 </kbd>{" "}
                                 to jump anywhere instantly.

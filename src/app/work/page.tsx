@@ -14,17 +14,17 @@ const ACCENT: Record<string, { glow: string; ring: string; text: string }> = {
     violet: {
         glow: "from-violet-500/40 via-fuchsia-500/15 to-sky-500/35",
         ring: "from-violet-500 via-fuchsia-500 to-sky-500",
-        text: "text-violet-100",
+        text: "text-violet-900 dark:text-violet-100",
     },
     sky: {
         glow: "from-sky-500/40 via-cyan-500/15 to-emerald-500/35",
         ring: "from-sky-500 via-cyan-400 to-emerald-400",
-        text: "text-sky-100",
+        text: "text-sky-900 dark:text-sky-100",
     },
     amber: {
         glow: "from-amber-500/40 via-orange-500/15 to-rose-500/35",
         ring: "from-amber-400 via-orange-400 to-rose-400",
-        text: "text-amber-100",
+        text: "text-amber-900 dark:text-amber-100",
     },
 };
 
@@ -33,7 +33,7 @@ export default function WorkIndexPage() {
         <main className="section-container relative z-30 pt-24 pb-20 md:pt-28 sm:pb-24">
             <Link
                 href="/"
-                className="liquid-glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
+                className="liquid-glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-primary/60 hover:text-foreground active:scale-[0.97]"
             >
                 <ArrowLeft className="h-4 w-4" />
                 Back home
@@ -58,13 +58,13 @@ export default function WorkIndexPage() {
                         <Link
                             key={cs.slug}
                             href={`/work/${cs.slug}`}
-                            className="group relative block overflow-hidden rounded-2xl border border-violet-300/55 p-[1px] shadow-[0_18px_50px_rgba(0,0,0,0.35)] transition duration-300 hover:-translate-y-1 hover:border-violet-200/75 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-300 active:scale-[0.99]"
+                            className="group relative block overflow-hidden rounded-2xl border border-violet-700/65 dark:border-violet-300/55 p-[1px] shadow-xl shadow-primary/10 transition duration-300 hover:-translate-y-1 hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring active:scale-[0.99]"
                         >
                             <div
                                 aria-hidden
                                 className={`absolute inset-0 bg-gradient-to-br ${accent.ring} opacity-50 transition duration-500 group-hover:opacity-70`}
                             />
-                            <div className="liquid-glass relative min-h-full overflow-hidden rounded-[calc(1rem-1px)] bg-zinc-950/80 p-6">
+                            <div className="liquid-glass relative min-h-full overflow-hidden rounded-[calc(1rem-1px)] bg-card/90 p-6">
                                 <div
                                     aria-hidden
                                     className={`pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br ${accent.glow} opacity-60 blur-3xl transition duration-500 group-hover:scale-110 group-hover:opacity-80`}
@@ -74,10 +74,10 @@ export default function WorkIndexPage() {
                                         <span className={`liquid-glass rounded-full px-2.5 py-1 ${accent.text}`}>
                                             {cs.role.split("·")[0].trim()}
                                         </span>
-                                        <span className="h-px flex-1 bg-gradient-to-r from-white/20 to-transparent" />
+                                        <span className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
                                         <span>{cs.timeline}</span>
                                     </div>
-                                    {cs.status && <p className="text-xs font-medium text-emerald-300">{cs.status}</p>}
+                                    {cs.status && <p className="text-xs font-medium text-accent-foreground">{cs.status}</p>}
                                     <div className="flex items-start justify-between gap-4">
                                         <div>
                                             <h2 className="font-display text-2xl font-semibold text-foreground">
@@ -85,7 +85,7 @@ export default function WorkIndexPage() {
                                             </h2>
                                             <p className="mt-1 text-sm text-primary">{cs.tagline}</p>
                                         </div>
-                                        <span className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-zinc-950/70 text-white transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:border-white/30">
+                                        <span className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-popover/70 text-foreground transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:border-primary/60">
                                             <ArrowUpRight className="h-4 w-4" />
                                         </span>
                                     </div>

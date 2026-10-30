@@ -13,7 +13,7 @@ interface TrailLine {
     friction: number;
 }
 
-export function renderCanvas(canvas: HTMLCanvasElement) {
+export function renderCanvas(canvas: HTMLCanvasElement, lightTheme = false) {
     const canvasContext = canvas.getContext("2d");
     if (!canvasContext) {
         console.warn("Mouse trail: a 2D canvas context is unavailable.");
@@ -49,9 +49,9 @@ export function renderCanvas(canvas: HTMLCanvasElement) {
         }
 
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.globalCompositeOperation = "lighter";
+        context.globalCompositeOperation = lightTheme ? "source-over" : "lighter";
         phase += 0.0015;
-        context.strokeStyle = `hsla(${Math.round(285 + Math.sin(phase) * 85)},100%,50%,0.05)`;
+        context.strokeStyle = `hsla(${Math.round(265 + Math.sin(phase) * 85)},${lightTheme ? 45 : 75}%,${lightTheme ? 35 : 60}%,0.05)`;
         context.lineWidth = 10;
         let settled = true;
 

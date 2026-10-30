@@ -125,7 +125,7 @@ export function About() {
                                                         viewport={{ once: true }}
                                                         variants={skillCardVariants}
                                                         whileHover={{ scale: 1.05, y: -2 }}
-                                                        className="group relative p-3 rounded-xl bg-white/5 dark:bg-white/[0.03] border border-white/10 dark:border-white/5 cursor-default transition-all duration-300 hover:border-white/20 hover:bg-white/10 dark:hover:bg-white/[0.06]"
+                                                        className="group relative p-3 rounded-xl bg-primary/5 dark:bg-white/[0.03] border border-border/70 cursor-default transition-all duration-300 hover:border-primary/50 hover:bg-primary/10 dark:hover:bg-white/[0.06]"
                                                     >
                                                         {/* Hover glow effect */}
                                                         <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${skill.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 blur-sm`} />
@@ -136,12 +136,12 @@ export function About() {
                                                         </div>
                                                         
                                                         {/* Title */}
-                                                        <h4 className="relative z-10 font-semibold text-sm text-foreground mb-1 group-hover:text-white transition-colors duration-300">
+                                                        <h4 className="relative z-10 font-semibold text-sm text-foreground mb-1 group-hover:text-foreground transition-colors duration-300">
                                                             {skill.title}
                                                         </h4>
                                                         
                                                         {/* Description */}
-                                                        <p className="relative z-10 text-xs text-muted-foreground leading-relaxed group-hover:text-white/70 transition-colors duration-300">
+                                                        <p className="relative z-10 text-xs text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-300">
                                                             {skill.description}
                                                         </p>
                                                     </motion.div>

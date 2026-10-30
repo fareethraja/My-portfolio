@@ -88,10 +88,10 @@ export function Timeline() {
                 </div>
 
                 <div className="relative pl-6 md:pl-0">
-                    <div className="absolute left-2 md:left-1/2 top-0 bottom-0 w-0.5 bg-zinc-200 dark:bg-zinc-800 md:-translate-x-1/2 z-timeline-line pointer-events-none">
+                    <div className="absolute left-2 md:left-1/2 top-0 bottom-0 w-0.5 bg-border/60 md:-translate-x-1/2 z-timeline-line pointer-events-none">
                         <motion.div
                             style={{ height }}
-                            className="absolute top-0 left-0 w-full bg-black dark:bg-white origin-top"
+                            className="absolute top-0 left-0 w-full bg-primary origin-top"
                         />
                     </div>
 
@@ -106,7 +106,7 @@ export function Timeline() {
                                 className={`flex flex-col md:flex-row items-start ${index % 2 !== 0 ? "md:flex-row-reverse" : ""
                                     } relative`}
                             >
-                                <div className="absolute -left-4 md:left-1/2 w-4 h-4 bg-white border-2 border-black dark:border-white dark:bg-black rounded-full -translate-x-1/2 z-10 mt-1.5" />
+                                <div className="absolute -left-4 md:left-1/2 w-4 h-4 bg-background border-2 border-primary rounded-full -translate-x-1/2 z-10 mt-1.5" />
 
                                 <div className="md:w-1/2" />
                                 <div className="w-full min-w-0 md:w-1/2 sm:px-2 md:px-6">
@@ -121,13 +121,13 @@ export function Timeline() {
                                             className="w-full"
                                         >
                                             <div className="liquid-glass w-full rounded-2xl p-5 sm:p-6 md:p-8 flex flex-col justify-start min-h-[220px] sm:min-h-[200px]">
-                                                <span className="relative z-10 text-sm sm:text-base font-mono text-zinc-400 block mb-2">
+                                                <span className="relative z-10 text-sm sm:text-base font-mono text-primary block mb-2">
                                                     {item.year}
                                                 </span>
-                                                <h3 className="relative z-10 text-base sm:text-lg md:text-xl font-semibold mb-2 text-white">
+                                                <h3 className="relative z-10 text-base sm:text-lg md:text-xl font-semibold mb-2 text-foreground">
                                                     {item.title}
                                                 </h3>
-                                                <p className="relative z-10 text-xs sm:text-sm md:text-base text-zinc-300/90 leading-relaxed">
+                                                <p className="relative z-10 text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed">
                                                     {item.description}
                                                 </p>
                                             </div>
@@ -216,7 +216,7 @@ function GoldenCard({ year, title, description }: GoldenCardProps) {
                                 className="h-1.5 w-1.5 rounded-full bg-amber-300"
                                 style={{ boxShadow: "0 0 10px rgba(252, 211, 77, 1)" }}
                             />
-                            <span className="font-jetbrains text-[10px] uppercase tracking-[0.18em] text-amber-100">
+                            <span className="font-jetbrains text-[10px] uppercase tracking-[0.18em] text-amber-800 dark:text-amber-100">
                                 tap me
                             </span>
                             {/* tail */}
@@ -256,7 +256,7 @@ function GoldenCard({ year, title, description }: GoldenCardProps) {
                     active
                         ? {
                             background:
-                                "linear-gradient(135deg, rgba(120, 80, 10, 0.55) 0%, rgba(60, 40, 5, 0.65) 50%, rgba(30, 18, 0, 0.7) 100%)",
+                                "linear-gradient(135deg, #49330f 0%, #302207 50%, #1d1407 100%)",
                             backdropFilter: "blur(20px)",
                         }
                         : undefined
@@ -302,19 +302,19 @@ function GoldenCard({ year, title, description }: GoldenCardProps) {
                 </AnimatePresence>
 
                 <span
-                    className={`relative z-10 text-sm sm:text-base font-mono block mb-2 transition-colors duration-500 ${active ? "text-amber-200" : "text-zinc-400"
+                    className={`relative z-10 text-sm sm:text-base font-mono block mb-2 transition-colors duration-500 ${active ? "text-amber-200" : "text-primary"
                         }`}
                 >
                     {year}
                 </span>
                 <h3
-                    className={`relative z-10 text-base sm:text-lg md:text-xl font-semibold mb-2 transition-colors duration-500 ${active ? "text-amber-50" : "text-white"
+                    className={`relative z-10 text-base sm:text-lg md:text-xl font-semibold mb-2 transition-colors duration-500 ${active ? "text-amber-50" : "text-foreground"
                         }`}
                 >
                     {title}
                 </h3>
                 <p
-                    className={`relative z-10 text-xs sm:text-sm md:text-base leading-relaxed transition-colors duration-500 ${active ? "text-amber-100/90" : "text-zinc-300/90"
+                    className={`relative z-10 text-xs sm:text-sm md:text-base leading-relaxed transition-colors duration-500 ${active ? "text-amber-100/90" : "text-muted-foreground"
                         }`}
                 >
                     {description}

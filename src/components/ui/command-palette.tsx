@@ -171,7 +171,7 @@ export function CommandPalette() {
                 aria-expanded={open}
                 aria-controls="portfolio-search-panel"
                 aria-haspopup="dialog"
-                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-white/20 bg-black/70 px-3 text-xs text-white/80 backdrop-blur-md transition-colors hover:border-violet-300/60 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-300"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-border bg-popover/80 px-3 text-xs text-foreground/80 backdrop-blur-md transition-colors hover:border-primary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
             >
                 <Search className="h-3.5 w-3.5" />
                 <span className="hidden font-jetbrains tracking-[0.18em] uppercase sm:inline">Search</span>
@@ -190,12 +190,12 @@ export function CommandPalette() {
                             width: "min(26rem, calc(100vw - max(1rem, env(safe-area-inset-left)) - max(1rem, env(safe-area-inset-right))))",
                             maxHeight: "min(28rem, calc(100dvh - max(1rem, env(safe-area-inset-top)) - 5rem - env(safe-area-inset-bottom)))",
                         }}
-                        className="absolute right-0 top-full mt-2 flex origin-top-right flex-col overflow-hidden rounded-2xl border border-violet-300/35 bg-zinc-950/95 shadow-2xl backdrop-blur-xl"
+                        className="absolute right-0 top-full mt-2 flex origin-top-right flex-col overflow-hidden rounded-2xl border border-primary/35 bg-popover/95 shadow-2xl backdrop-blur-xl"
                         role="dialog"
                         aria-label="Search portfolio"
                     >
-                            <div className="flex shrink-0 items-center gap-3 border-b border-white/10 px-3 py-2">
-                                <Search className="h-4 w-4 shrink-0 text-white/50" />
+                            <div className="flex shrink-0 items-center gap-3 border-b border-border px-3 py-2">
+                                <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
                                 <input
                                     ref={inputRef}
                                     role="combobox"
@@ -213,19 +213,19 @@ export function CommandPalette() {
                                     }}
                                     onKeyDown={onListKey}
                                     placeholder="Search the portfolio…"
-                                    className="min-w-0 flex-1 bg-transparent py-2 text-base text-white placeholder:text-white/50 focus:outline-none"
+                                    className="min-w-0 flex-1 bg-transparent py-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => closePalette(true)}
                                     aria-label="Close search"
-                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-violet-300"
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
                             </div>
 
-                            {filtered.length === 0 && <p role="status" className="px-4 py-6 text-center text-sm text-white/60">No matches. Try a section or project name.</p>}
+                            {filtered.length === 0 && <p role="status" className="px-4 py-6 text-center text-sm text-muted-foreground">No matches. Try a section or project name.</p>}
                             <ul ref={listRef} id="portfolio-search-results" role="listbox" aria-label="Search results" tabIndex={-1} className="min-h-0 overflow-y-auto overscroll-contain py-2">
                                 {filtered.map((item, i) => {
                                     const Icon = item.icon;
@@ -241,39 +241,39 @@ export function CommandPalette() {
                                                 onMouseEnter={() => setActive(i)}
                                                 onClick={() => runAction(item)}
                                                 className={`flex min-h-11 w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
-                                                    isActive ? "bg-white/[0.06] text-white" : "text-white/80 hover:bg-white/[0.04]"
+                                                    isActive ? "bg-primary/10 text-foreground" : "text-foreground/80 hover:bg-primary/5"
                                                 }`}
                                             >
                                                 <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${
-                                                    isActive ? "border-violet-400/40 bg-violet-500/10 text-violet-200" : "border-white/10 bg-white/[0.03] text-white/60"
+                                                    isActive ? "border-primary/40 bg-primary/10 text-primary" : "border-border bg-secondary/40 text-muted-foreground"
                                                 }`}>
                                                     <Icon className="h-3.5 w-3.5" />
                                                 </span>
                                                 <span className="min-w-0 flex-1">
                                                     <span className="block">{item.label}</span>
                                                     {item.hint && (
-                                                        <span className="block break-all text-[11px] text-white/60">{item.hint}</span>
+                                                        <span className="block break-all text-[11px] text-muted-foreground">{item.hint}</span>
                                                     )}
                                                 </span>
-                                                <ArrowRight className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-violet-300" : "text-white/30"}`} />
+                                                <ArrowRight className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
                                             </button>
                                         </li>
                                     );
                                 })}
                             </ul>
 
-                            <div className="flex shrink-0 items-center justify-between gap-2 border-t border-white/10 px-4 py-2 text-[11px] text-white/60">
+                            <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
                                 <span className="flex items-center gap-2">
-                                    <kbd className="rounded border border-white/15 bg-white/5 px-1 font-mono">↑</kbd>
-                                    <kbd className="rounded border border-white/15 bg-white/5 px-1 font-mono">↓</kbd>
+                                    <kbd className="rounded border border-border bg-secondary/50 px-1 font-mono">↑</kbd>
+                                    <kbd className="rounded border border-border bg-secondary/50 px-1 font-mono">↓</kbd>
                                     navigate
                                 </span>
                                 <span className="flex items-center gap-2">
-                                    <kbd className="rounded border border-white/15 bg-white/5 px-1 font-mono">↵</kbd>
+                                    <kbd className="rounded border border-border bg-secondary/50 px-1 font-mono">↵</kbd>
                                     select
                                 </span>
                                 <span className="flex items-center gap-2">
-                                    <kbd className="rounded border border-white/15 bg-white/5 px-1 font-mono">esc</kbd>
+                                    <kbd className="rounded border border-border bg-secondary/50 px-1 font-mono">esc</kbd>
                                     close
                                 </span>
                             </div>

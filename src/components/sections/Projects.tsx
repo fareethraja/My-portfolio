@@ -113,7 +113,7 @@ export function Projects() {
                 <div className="mt-12 flex justify-center">
                     <Link
                         href="/work"
-                        className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-zinc-950/70 px-5 py-2.5 text-sm text-foreground backdrop-blur-md transition hover:border-white/30 hover:bg-zinc-950/90 active:scale-[0.97]"
+                        className="group inline-flex items-center gap-2 rounded-full border border-border bg-popover/70 px-5 py-2.5 text-sm text-foreground backdrop-blur-md transition hover:border-primary/60 hover:bg-popover/90 active:scale-[0.97]"
                     >
                         Read all case studies
                         <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -140,7 +140,7 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, caseStudySlu
 
     const CardContent = (
         <div
-            className="relative h-full rounded-[1.25rem] border border-violet-300/55 p-2 transition-colors duration-300 group-hover/item:border-violet-200/75 focus-within:border-violet-200 focus-within:ring-1 focus-within:ring-violet-300/60 md:rounded-[1.5rem] md:p-3"
+            className="relative h-full rounded-[1.25rem] border border-violet-700/65 dark:border-violet-300/55 p-2 transition-colors duration-300 group-hover/item:border-primary focus-within:border-primary focus-within:ring-1 focus-within:ring-ring md:rounded-[1.5rem] md:p-3"
         >
             <GlowingEffect
                 spread={80}
@@ -150,7 +150,7 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, caseStudySlu
                 inactiveZone={0.01}
                 borderWidth={3}
             />
-            <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border border-slate-300/25 bg-white/5 dark:bg-black/5 backdrop-blur-xl p-5 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6 transition-colors duration-300 group-hover/item:border-violet-200/50">
+            <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border border-slate-400/45 dark:border-slate-300/25 bg-white/5 dark:bg-black/5 backdrop-blur-xl p-5 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6 transition-colors duration-300 group-hover/item:border-primary/50">
                 <div className="relative flex flex-1 flex-col justify-start gap-3">
                     <div className="w-fit rounded-lg border-[0.75px] border-zinc-200 dark:border-zinc-800 bg-muted p-2">
                         {icon}
@@ -185,7 +185,7 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, caseStudySlu
                         {caseStudySlug && (
                             <Link
                                 href={`/work/${caseStudySlug}`}
-                                className="liquid-glass inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 py-2 font-jetbrains text-[10px] uppercase tracking-[0.18em] text-white/90 shadow-[0_10px_30px_rgba(139,92,246,0.22)] transition hover:border-white/35 hover:text-white active:scale-[0.97]"
+                                className="liquid-glass inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 py-2 font-jetbrains text-[10px] uppercase tracking-[0.18em] text-foreground/90 shadow-[0_10px_30px_rgba(139,92,246,0.22)] transition hover:border-primary/50 hover:text-foreground active:scale-[0.97]"
                             >
                                 Case study
                                 <ArrowUpRight className="h-3 w-3" />
@@ -197,7 +197,7 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, caseStudySlu
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={() => trackProjectClick(title)}
-                                className="liquid-glass inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 py-2 font-jetbrains text-[10px] uppercase tracking-[0.18em] text-white/75 shadow-[0_10px_30px_rgba(56,189,248,0.16)] transition hover:border-white/35 hover:text-white active:scale-[0.97]"
+                                className="liquid-glass inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 py-2 font-jetbrains text-[10px] uppercase tracking-[0.18em] text-foreground/90 shadow-[0_10px_30px_rgba(56,189,248,0.16)] transition hover:border-primary/50 hover:text-foreground active:scale-[0.97]"
                             >
                                 Live demo
                                 <ArrowUpRight className="h-3 w-3" />

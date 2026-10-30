@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
+import { useTheme } from "next-themes";
 
 /**
  * ProceduralGroundBackground
@@ -9,10 +10,17 @@ import React, { useEffect, useRef } from 'react';
  */
 const ProceduralGroundBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { resolvedTheme } = useTheme();
+  const lightTheme = useRef(false);
+
+  useEffect(() => {
+    lightTheme.current = resolvedTheme ? resolvedTheme === "light" : !document.documentElement.classList.contains("dark");
+  }, [resolvedTheme]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    canvas.style.visibility = "hidden";
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const lowMemory = "deviceMemory" in navigator ? navigator.deviceMemory : undefined;
@@ -37,6 +45,7 @@ const ProceduralGroundBackground: React.FC = () => {
       precision highp float;
       uniform float u_time;
       uniform vec2 u_resolution;
+      uniform float u_light;
 
       float hash(vec2 p) {
         return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
@@ -65,9 +74,9 @@ const ProceduralGroundBackground: React.FC = () => {
         float topoLine = smoothstep(0.03, 0.0, abs(ripples));
         
         // Color Palette
-        vec3 baseColor = vec3(0.04, 0.03, 0.12); // Deep Space
-        vec3 accentColor = vec3(0.1, 0.3, 0.8);   // Electric Blue
-        vec3 neonColor = vec3(0.6, 0.2, 1.0);     // Neon Purple
+        vec3 baseColor = vec3(0.045, 0.03, 0.075);
+        vec3 accentColor = vec3(0.12, 0.09, 0.22);
+        vec3 neonColor = vec3(0.3, 0.55, 0.44);
         
         // Composite
         vec3 finalColor = mix(baseColor, accentColor, n * 0.6);
@@ -76,6 +85,8 @@ const ProceduralGroundBackground: React.FC = () => {
         // Horizon Fog / Fade
         float fade = smoothstep(0.1, -1.0, uv.y);
         finalColor *= (1.0 - length(uv) * 0.45) * (1.0 - fade);
+        vec3 lightColor = mix(vec3(0.98, 0.973, 0.988), vec3(0.65, 0.57, 0.75), clamp(length(finalColor) * 0.8, 0.0, 0.3));
+        finalColor = mix(finalColor, lightColor, u_light);
 
         gl_FragColor = vec4(finalColor, 1.0);
       }
@@ -143,11 +154,15 @@ const ProceduralGroundBackground: React.FC = () => {
 
     const timeLoc = gl.getUniformLocation(program, "u_time");
     const resLoc = gl.getUniformLocation(program, "u_resolution");
+    const lightLoc = gl.getUniformLocation(program, "u_light");
 
     let animationFrameId: number | null = null;
     let timerId: number | null = null;
+    let hasRendered = false;
     const canAnimate = () => !document.hidden && !reducedMotion.matches && window.innerWidth >= 640 && !gl.isContextLost();
     const resize = () => {
+      canvas.style.visibility = "hidden";
+      hasRendered = false;
       // The softly filtered background does not need a full-resolution 4K buffer.
       const scale = Math.min(1, Math.sqrt(1280 * 720 / (window.innerWidth * window.innerHeight)));
       canvas.width = Math.max(1, Math.round(window.innerWidth * scale));
@@ -160,7 +175,12 @@ const ProceduralGroundBackground: React.FC = () => {
 
       gl.uniform1f(timeLoc, time * 0.001);
       gl.uniform2f(resLoc, canvas.width, canvas.height);
+      gl.uniform1f(lightLoc, lightTheme.current ? 1 : 0);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
+      if (!hasRendered) {
+        canvas.style.visibility = "visible";
+        hasRendered = true;
+      }
       timerId = window.setTimeout(() => {
         timerId = null;
         animationFrameId = requestAnimationFrame(render);
@@ -190,6 +210,7 @@ const ProceduralGroundBackground: React.FC = () => {
 
     return () => {
       stop();
+      canvas.style.visibility = "hidden";
       document.removeEventListener("visibilitychange", update);
       reducedMotion.removeEventListener("change", update);
       window.removeEventListener("resize", handleResize);
@@ -201,12 +222,11 @@ const ProceduralGroundBackground: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 w-full h-full bg-zinc-950 -z-10 pointer-events-none">
+    <div className="fixed inset-0 w-full h-full bg-background -z-10 pointer-events-none">
       <canvas
         ref={canvasRef}
-        className="w-full h-full block pointer-events-none"
+        className="w-full h-full hidden motion-safe:sm:block pointer-events-none dark:contrast-110 dark:brightness-90"
         aria-hidden="true"
-        style={{ pointerEvents: "none", filter: "contrast(1.1) brightness(0.9)" }}
       />
     </div>
   );

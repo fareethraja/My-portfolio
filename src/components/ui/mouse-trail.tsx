@@ -2,12 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import { renderCanvas } from "@/components/ui/canvas";
+import { useTheme } from "next-themes";
 
 export function MouseTrail() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const { resolvedTheme } = useTheme();
     useEffect(() => {
-        if (canvasRef.current) return renderCanvas(canvasRef.current);
-    }, []);
+        if (canvasRef.current && resolvedTheme) return renderCanvas(canvasRef.current, resolvedTheme === "light");
+    }, [resolvedTheme]);
 
     return (
         <canvas

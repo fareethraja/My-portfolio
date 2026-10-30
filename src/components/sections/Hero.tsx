@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, Zap } from "lucide-react";
+import { BriefcaseBusiness, Download, Github, Linkedin, Mail, Zap } from "lucide-react";
 import Link from "next/link";
 import AnimatedAvailabilityButton from "@/components/ui/animated-availability-button";
 
@@ -124,17 +124,18 @@ export function Hero() {
               <AnimatedAvailabilityButton
                 labelIdle="Open to Work"
                 labelActive="Let's Connect!"
-                highlightHueDeg={142}
                 navigateTo="#contact"
               />
               <AnimatedAvailabilityButton
                 href="/work"
+                icon={BriefcaseBusiness}
                 labelIdle="Product case studies"
                 labelActive="Explore My Work"
                 ariaLabel="Product case studies"
               />
               <AnimatedAvailabilityButton
                 href="/api/resume"
+                icon={Download}
                 download="Fareeth-Raja-APM-Resume-2026.pdf"
                 labelIdle="Download Resume"
                 labelActive="Download PDF"
@@ -156,7 +157,7 @@ export function Hero() {
                 href="https://github.com/fareethraja"
                 target="_blank"
                 aria-label="GitHub"
-                className="rounded-full border border-white/10 p-2 transition hover:border-white/30 hover:text-foreground"
+                className="rounded-full border border-border/70 p-2 transition hover:border-primary/60 hover:text-foreground"
               >
                 <Github className="h-4 w-4" />
               </Link>
@@ -164,14 +165,14 @@ export function Hero() {
                 href="https://www.linkedin.com/in/fareethraja/"
                 target="_blank"
                 aria-label="LinkedIn"
-                className="rounded-full border border-white/10 p-2 transition hover:border-white/30 hover:text-foreground"
+                className="rounded-full border border-border/70 p-2 transition hover:border-primary/60 hover:text-foreground"
               >
                 <Linkedin className="h-4 w-4" />
               </Link>
               <Link
                 href="mailto:fareethraja.26.careers@gmail.com"
                 aria-label="Email"
-                className="rounded-full border border-white/10 p-2 transition hover:border-white/30 hover:text-foreground"
+                className="rounded-full border border-border/70 p-2 transition hover:border-primary/60 hover:text-foreground"
               >
                 <Mail className="h-4 w-4" />
               </Link>
@@ -204,7 +205,7 @@ export function Hero() {
                     rotate: i % 2 === 0 ? -2.5 : 2.5,
                     transition: { type: "spring", stiffness: 400, damping: 14 },
                   }}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 backdrop-blur-sm transition active:border-white/30 hover:border-white/20"
+                  className="group relative overflow-hidden rounded-2xl border border-border bg-card/90 p-4 sm:p-5 backdrop-blur-sm transition active:border-primary hover:border-primary/70"
                 >
                   <div
                     className={`absolute -top-12 -right-12 h-32 w-32 rounded-full bg-gradient-to-br ${stat.accent} opacity-20 blur-2xl transition-opacity group-hover:opacity-50`}
@@ -238,7 +239,7 @@ export function Hero() {
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                   </span>
-                  <span className="font-jetbrains text-[10px] uppercase tracking-[0.2em] text-emerald-300">
+                  <span className="font-jetbrains text-[10px] uppercase tracking-[0.2em] text-accent-foreground">
                     Current focus
                   </span>
                 </div>
@@ -266,7 +267,7 @@ export function Hero() {
           className="mt-12 md:mt-16 lg:mt-20"
         >
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <Zap className="h-3.5 w-3.5 text-violet-400" />
+            <Zap className="h-3.5 w-3.5 text-primary" />
             <span className="font-jetbrains uppercase tracking-[0.2em]">What I do</span>
             <span className="h-px flex-1 bg-border" />
           </div>
@@ -277,7 +278,7 @@ export function Hero() {
               {[...ROLES, ...ROLES].map((role, i) => (
                 <span
                   key={`${role}-${i}`}
-                  className="font-display whitespace-nowrap rounded-full border border-white/10 bg-white/[0.02] px-5 py-2 text-sm text-muted-foreground"
+                  className="font-display whitespace-nowrap rounded-full border border-border/80 bg-card/70 px-5 py-2 text-sm text-muted-foreground"
                 >
                   {role}
                 </span>
