@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Playfair_Display, Orbitron, Cormorant_Garamond, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -13,22 +13,26 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
+  preload: false,
 });
 
 const orbitron = Orbitron({
   variable: "--font-orbitron",
   subsets: ["latin"],
+  preload: false,
 });
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  preload: false,
 });
 
 const spaceGrotesk = Space_Grotesk({
@@ -43,14 +47,20 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600", "700"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://fareeth.vercel.app"),
   title: {
-    default: "Fareeth Raja | Product Manager & Technical Product Builder",
+    default: "Fareeth Raja | Product Manager · AI Products & Developer Tools",
     template: "%s | Fareeth Raja",
   },
   description:
-    "Fareeth Raja is a Product Manager and technical product builder specializing in FinTech, AI products, trading platforms, payments, and automation.",
+    "Fareeth Raja is a Product Manager Trainee at Kumaran Systems, focused on AI product discovery, developer tools, user journeys, and product strategy, with prior fintech product experience.",
   keywords: [
     "Fareeth Raja",
     "Fareeth Raja Portfolio",
@@ -60,20 +70,20 @@ export const metadata: Metadata = {
     "Fareeth",
     "Raja Fareeth",
     "Product Manager Fareeth Raja",
-    "Technical Product Builder Fareeth Raja",
+    "AI Product Manager Fareeth Raja",
     "FinTech Product Manager",
     "Fareeth Raja Projects",
     "Product Manager",
     "Product Management",
-    "Technical Product Builder",
+    "AI Product Discovery",
+    "Developer Experience",
+    "Product Strategy",
+    "Kumaran Systems",
     "FinTech",
     "AI Products",
     "Trading Tools",
     "Finverse",
     "Portfolio",
-    "React Developer",
-    "Next.js Developer",
-    "Go Developer",
     "SmartSlot",
     "RoomSpace",
   ],
@@ -90,16 +100,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://fareeth.vercel.app",
-    title: "Fareeth Raja | Product Manager & Technical Product Builder",
+    title: "Fareeth Raja | Product Manager · AI Products & Developer Tools",
     description:
-      "Explore Fareeth Raja's product management portfolio across FinTech, AI products, trading platforms, payments, and automation.",
+      "AI product discovery, developer-tool evaluation, and practical product case studies by Fareeth Raja, Product Manager Trainee at Kumaran Systems.",
     siteName: "Fareeth Raja Portfolio",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fareeth Raja | Product Manager & Technical Product Builder",
+    title: "Fareeth Raja | Product Manager · AI Products & Developer Tools",
     description:
-      "Fareeth Raja's product management portfolio across FinTech, AI products, trading platforms, payments, and automation.",
+      "Explore Fareeth Raja's work in AI product discovery, developer tools, feature prioritization, and user-centered products.",
   },
   robots: {
     index: true,
@@ -151,13 +161,16 @@ export default function RootLayout({
                   "https://www.linkedin.com/in/fareethraja/",
                   "https://github.com/fareethraja",
                 ],
-                jobTitle: "Product Manager and Technical Product Builder",
+                jobTitle: "Product Manager Trainee",
                 worksFor: {
                   "@type": "Organization",
-                  name: "Finverse Innovations Private Limited",
+                  name: "Kumaran Systems",
                 },
                 knowsAbout: [
                   "Product Management",
+                  "AI Product Discovery",
+                  "Developer Experience",
+                  "Feature Prioritization",
                   "AI Automation",
                   "FinTech Products",
                   "Trading Tools",
@@ -170,7 +183,7 @@ export default function RootLayout({
                   "MySQL",
                 ],
                 description:
-                  "Fareeth Raja is a technical product builder translating founder goals into FinTech, AI chat, trading, payments, and automation workflows.",
+                  "Fareeth Raja is a Product Manager Trainee at Kumaran Systems contributing to AI discovery, developer-tool evaluation, user journeys, and ecosystem positioning.",
               }),
             }}
           />
@@ -201,7 +214,7 @@ export default function RootLayout({
                 url: "https://fareeth.vercel.app",
                 name: "Fareeth Raja | Product Manager Portfolio",
                 description:
-                  "The official portfolio of Fareeth Raja, a Product Manager and technical product builder specializing in FinTech and AI products.",
+                  "The official portfolio of Fareeth Raja, an emerging AI Product Manager with experience in enterprise AI discovery, developer tools, and fintech products.",
                 mainEntity: {
                   "@id": "https://fareeth.vercel.app/#person",
                 },

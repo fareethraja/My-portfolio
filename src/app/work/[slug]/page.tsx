@@ -65,10 +65,10 @@ export default async function CaseStudyPage(
     const accent = ACCENT[cs.accent] ?? ACCENT.violet;
 
     return (
-        <main className="relative z-30 mx-auto w-full max-w-5xl px-6 pt-14 pb-20 sm:pt-16 sm:pb-24">
+        <main className="section-container relative z-30 pt-24 pb-20 md:pt-28 sm:pb-24">
             <Link
                 href="/work"
-                className="liquid-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
+                className="liquid-glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
             >
                 <ArrowLeft className="h-4 w-4" />
                 All case studies
@@ -105,8 +105,15 @@ export default async function CaseStudyPage(
                     <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
                         {cs.summary}
                     </p>
+                    {cs.status && <p className="mt-4 text-sm font-medium text-emerald-300">{cs.status}</p>}
+                    {cs.disclosure && (
+                        <p className="mt-4 rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm leading-relaxed text-muted-foreground">
+                            {cs.disclosure}
+                        </p>
+                    )}
 
-                    <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {cs.impact.length > 0 && (
+                        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
                         {cs.impact.map((m) => (
                             <div
                                 key={m.label}
@@ -124,7 +131,8 @@ export default async function CaseStudyPage(
                                 </div>
                             </div>
                         ))}
-                    </div>
+                        </div>
+                    )}
 
                     {cs.links.length > 0 && (
                         <div className="mt-6 flex flex-wrap gap-2">
@@ -132,6 +140,7 @@ export default async function CaseStudyPage(
                                 <a
                                     key={l.href}
                                     href={l.href}
+                                    data-project-demo={l.type === "live" ? cs.title : undefined}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="liquid-glass group/link inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground transition hover:border-white/30 active:scale-[0.97]"
@@ -150,7 +159,13 @@ export default async function CaseStudyPage(
                 </div>
             </section>
 
-            <Section eyebrow="The problem">
+            {cs.context && (
+                <Section eyebrow="Product context & my role">
+                    <p className="text-base leading-relaxed text-foreground/90">{cs.context}</p>
+                </Section>
+            )}
+
+            <Section eyebrow="The problem & constraints">
                 <p className="text-base leading-relaxed text-foreground/90">{cs.problem}</p>
                 {cs.constraints.length > 0 && (
                     <ul className="mt-5 grid gap-2">
@@ -169,7 +184,15 @@ export default async function CaseStudyPage(
                 )}
             </Section>
 
-            <Section eyebrow="Approach">
+            {cs.observations && (
+                <Section eyebrow="What I observed">
+                    <ul className="list-disc space-y-3 pl-5 text-sm leading-relaxed text-foreground/90">
+                        {cs.observations.map((observation) => <li key={observation}>{observation}</li>)}
+                    </ul>
+                </Section>
+            )}
+
+            <Section eyebrow={cs.decision ? "My approach & recommendations" : "Approach"}>
                 <ol className="grid gap-4">
                     {cs.approach.map((step, i) => (
                         <li
@@ -198,7 +221,18 @@ export default async function CaseStudyPage(
                 </ol>
             </Section>
 
-            <Section eyebrow="Stack">
+            {cs.decision && (
+                <Section eyebrow="Product direction & attribution">
+                    <p className="text-base leading-relaxed text-foreground/90">{cs.decision}</p>
+                </Section>
+            )}
+            {cs.outcome && (
+                <Section eyebrow="Outcome & current status">
+                    <p className="text-base leading-relaxed text-foreground/90">{cs.outcome}</p>
+                </Section>
+            )}
+
+            <Section eyebrow="Methods & tools">
                 <div className="flex flex-wrap gap-2">
                     {cs.stack.map((s) => (
                         <span
@@ -234,20 +268,20 @@ export default async function CaseStudyPage(
                         Want the full story?
                     </h2>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Happy to walk through tradeoffs, metrics, and what didn&apos;t work.
+                        Happy to discuss my contribution, trade-offs, and learnings within confidentiality limits.
                     </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     <Link
                         href="/work"
-                        className="liquid-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground transition hover:border-white/30"
+                        className="liquid-glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground transition hover:border-white/30"
                     >
                         <ArrowLeft className="h-3.5 w-3.5" />
                         More case studies
                     </Link>
                     <Link
                         href="/#contact"
-                        className="liquid-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/90 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
+                        className="liquid-glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/90 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
                     >
                         Get in touch
                         <ArrowUpRight className="h-3.5 w-3.5" />
@@ -274,7 +308,7 @@ function Section({
                 </h2>
                 <span className="h-px flex-1 bg-gradient-to-l from-transparent via-white/15 to-white/5" />
             </div>
-            <div className="mt-5">{children}</div>
+            <div className="mt-5 [&_p]:max-w-[85ch]">{children}</div>
         </section>
     );
 }

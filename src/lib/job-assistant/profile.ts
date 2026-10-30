@@ -2,7 +2,7 @@ import type { CandidateProfile, WorkspaceState } from "./types";
 
 export const FAREETH_PROFILE: CandidateProfile = {
     fullName: "Fareeth Raja",
-    headline: "Associate Product Manager | AI + FinTech Products | MBA Finance & Marketing",
+    headline: "Product Manager Trainee | AI Products + Developer Tools | MBA Finance & Marketing",
     email: "fareethraja.26.careers@gmail.com",
     phone: "+91 9159469088",
     location: "India",
@@ -10,7 +10,7 @@ export const FAREETH_PROFILE: CandidateProfile = {
     portfolio: "https://fareeth.vercel.app/",
     github: "https://github.com/fareethraja",
     summary:
-        "MBA Finance and Marketing graduate with hands-on product management experience across AI, fintech, trading workflows, payments, onboarding, and user-facing web products. Currently owning product planning and execution for Finverse through a Bermer Software Limited client/product engagement, combining product thinking with technical execution across AI chat, market tools, checkout, admin workflows, and real-time trading features. Strong fit for APM, Product Intern, and Product Analyst roles requiring user problem definition, feature prioritization, product flows, stakeholder communication, metrics thinking, and close collaboration with engineering.",
+        "Product Manager Trainee at Kumaran Systems since September 2026, contributing to enterprise AI discovery, developer-tool evaluation, feature-priority recommendations, and product positioning. MBA Finance and Marketing graduate and Economics Gold Medalist with prior AI and fintech product experience at Finverse through Bermer Software Limited, concluded in August 2026. Combines user journeys, competitive demonstrations, technical fluency, and business reasoning without presenting proposals as shipped outcomes.",
     sourceText: "",
     skillGroups: [
         {
@@ -18,6 +18,9 @@ export const FAREETH_PROFILE: CandidateProfile = {
             name: "Product Management",
             items: [
                 "Product roadmapping",
+                "Product discovery",
+                "Competitive evaluation",
+                "SWOT analysis",
                 "Feature prioritization",
                 "User stories",
                 "Acceptance criteria",
@@ -35,6 +38,10 @@ export const FAREETH_PROFILE: CandidateProfile = {
             name: "AI + FinTech Product",
             items: [
                 "AI assistant workflows",
+                "Memory and personalization evaluation",
+                "Context continuity",
+                "AI developer-tool evaluation",
+                "GitHub Copilot demonstrations",
                 "Azure OpenAI",
                 "Multilingual chat UX",
                 "Prompt design",
@@ -104,15 +111,29 @@ export const FAREETH_PROFILE: CandidateProfile = {
     ],
     experiences: [
         {
+            id: "experience-kumaran",
+            role: "Product Manager Trainee",
+            company: "Kumaran Systems",
+            location: "",
+            startDate: "Sep 2026",
+            endDate: "Present",
+            bullets: [
+                "Contributed to enterprise AI product discovery through target-market discussions, SWOT analysis, user journeys, and competitive positioning.",
+                "Evaluated memory and personalization approaches and proposed context-import onboarding to address cold-start friction; no implementation or launch outcome is claimed.",
+                "Demonstrated GitHub Copilot workflows, recorded walkthroughs, and recommended feature priorities and phased implementation for an internal AI developer tool.",
+                "Contributed to agentic AI workflow discussions, enterprise integration use cases, platform-level positioning, and product communication without claiming engineering delivery ownership.",
+            ],
+        },
+        {
             id: "experience-finverse",
             role: "Product Manager",
             company: "Finverse Client Engagement via Bermer Software Limited",
             location: "",
             startDate: "Feb 2026",
-            endDate: "Present",
+            endDate: "Aug 2026",
             bullets: [
-                "Own product planning and execution for Finverse, an AI-powered stock market super app covering Zeno AI, stock screeners, strategy builder, backtesting, paper trading, courses, admin panel, subscription and course checkout, and market-data workflows.",
-                "Translate complex finance and trading problems into product flows, user journeys, feature plans, and implementation-ready requirements for AI, payments, learning, market data, and trading simulation modules.",
+                "Owned product planning and execution for Finverse, an AI-powered stock market super app covering Zeno AI, stock screeners, strategy builder, backtesting, paper trading, courses, admin panel, subscription and course checkout, and market-data workflows.",
+                "Translated complex finance and trading problems into product flows, user journeys, feature plans, and implementation-ready requirements for AI, payments, learning, market data, and trading simulation modules.",
                 "Shaped Zeno AI workflows for multilingual finance queries, chat history, guest limits, IPO, GMP, and market-data enrichment, rate limiting, and tool-grounded AI responses to improve usefulness and trust.",
                 "Prioritized and shipped fintech workflows including screeners, watchlists, paper trading journal, PnL handling, candles, quotes, and strategy backtest journeys for retail trading use cases.",
                 "Implemented and validated Razorpay course and subscription checkout flows with order validation, signature verification, webhook hardening, coupons, feature flags, and content access controls.",
@@ -126,7 +147,7 @@ export const FAREETH_PROFILE: CandidateProfile = {
             company: "Bermer Software Limited / Niyantha Transits Private Limited",
             location: "",
             startDate: "Jan 2026",
-            endDate: "Present",
+            endDate: "Aug 2026",
             bullets: [
                 "Supported product and business presentation work for Niyantha, a hardware and IoT product initiative under Bermer Software Limited.",
                 "Contributed to product positioning, stakeholder-facing presentations, and business communication before transitioning into the Finverse client engagement.",
@@ -163,6 +184,16 @@ export const FAREETH_PROFILE: CandidateProfile = {
     ],
     projects: [
         {
+            id: "project-placement-desk",
+            name: "Placement Desk",
+            subtitle: "Local-first Student Job-Search Workspace",
+            dates: "2026",
+            bullets: [
+                "Built connected workflows for candidate profiles, role discovery, evidence-based resume tailoring, application tracking, interview preparation, and offer analysis.",
+                "Implemented browser-local storage, JSON backup and restore, and DOCX/PDF resume output without claiming hiring or placement outcomes.",
+            ],
+        },
+        {
             id: "project-smartslot",
             name: "SmartSlot",
             subtitle: "Mobile-first Dental Appointment PWA",
@@ -197,9 +228,9 @@ export const FAREETH_PROFILE: CandidateProfile = {
         {
             id: "education-mba",
             institution: "Krupanidhi College of Management",
-            qualification: "MBA in Finance and Marketing, Gold Medalist",
+            qualification: "MBA in Finance and Marketing, Finance Gold Medalist",
             dates: "Oct 2024 - Aug 2026",
-            detail: "CGPA: 8.38/10 | Graduated Aug 8, 2026",
+            detail: "CGPA: 8.38/10 | Graduated Aug 8, 2026 | Best Outgoing Student",
         },
         {
             id: "education-economics",
@@ -219,10 +250,14 @@ export const FAREETH_PROFILE: CandidateProfile = {
     courses: [],
     achievements: [
         "Best Outgoing Student in MBA and Finance Gold Medalist, Krupanidhi College of Management (2026).",
+        "Economics Association Department Secretary and Shift-1 Students' Union Leader at The New College; co-founded IRA 2K24, coordinated 400 student organizers, welcomed over 2,500 visitors in one day, and attracted sponsorship funding.",
+        "Organized over 20 events during a one-year Students' Union leadership term.",
+        "Organized Orphic 2025, an inter-college fest, and emceed the majority of MBA college events.",
+        "Best Presenter, Krupacon International Conference 2025; Emerging Entrepreneur award during MBA.",
         "Gold Medalist in Bachelor of Economics, University of Madras (The New College).",
         "Won first prize for presenting the brand story of Apple among MBA batch 2024-2026 students.",
         "Won first prize for presenting Hybrid 2.0.",
-        "Led a team to the finale of the SDG Championship 2022.",
+        "Won the college-level SDG Championship 2022 and led an environmental-focus team onward to state level.",
     ],
     additionalSections: [],
 };

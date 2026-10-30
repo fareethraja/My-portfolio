@@ -31,6 +31,38 @@ npm run dev -- --webpack
 
 Open the portfolio at `http://localhost:3000`.
 
+## Portfolio Content and Resume
+
+The public portfolio presents AI product discovery and developer-tool evaluation alongside independent builds and earlier fintech work. Kumaran Systems contributions start in September 2026; the Finverse and Bermer engagements concluded in August 2026.
+
+- Employer case studies use anonymized labels, with no internal product names, screenshots, recordings, roadmap details, or architecture documents.
+- Discovery, recommendations, and implemented work are labeled separately. Do not convert proposed benefits into measured results.
+- Case study content lives in `src/lib/case-studies.ts`; those entries automatically populate the work routes and sitemap.
+- `/api/resume` redirects to `public/resume/Fareeth-Raja-APM-Resume-2026.pdf`. The matching DOCX is in the same folder. Both preserve the original plain-blue resume style with a centered black name, blue section and role headings, and a single-column layout. Earlier resume files are preserved as historical originals, not the current download.
+- Regenerate the current PDF and DOCX with `python scripts\generate-resume.py` using an environment with `python-docx` and `reportlab`. The generator refuses to save a PDF that exceeds one page.
+- PDF and DOCX files are marked as binary in `.gitattributes` to prevent Windows line-ending conversion from altering exported documents.
+- The default Placement Desk owner profile is updated for newly initialized workspaces. Existing browser-local profiles are not overwritten; review or import the new resume explicitly.
+- The one-page resume omits the standalone Bermer/Niyantha internship, but retains Finverse's Bermer attribution. The website and full owner profile preserve the complete history.
+- Leadership evidence includes IRA 2K24's 2,500+ one-day visitors, 400 student organizers, sponsorship funding, and 20+ events over a one-year Students' Union term, plus MBA event organizing and presentation recognition. Do not invent sponsor amounts or claim a state-level SDG win.
+
+## Portfolio UI and Performance
+
+- The original visual design is preserved: animated hero and stat cards, role marquee, WebGL ground background, mouse trail, tubelight navigation, alternating scroll-linked timeline, interactive gold-medal easter egg, glow cards, skill chips, and social buttons.
+- Search is a nonmodal glass dropdown anchored below the launcher on phones and desktops, with Ctrl/Cmd+K, arrow/Enter navigation, internally scrolling results, Escape/close-button focus restoration, and outside-click dismissal. Opening search dismisses its transient hint; it never blocks or blurs the full page.
+- An original welcome intro cycles English, French, Spanish, Hindi, and Tamil greetings before a curved split-curtain reveal. Soft lavender curtains with a subtle mint accent contrast against the dark site; the greetings use deep-purple text. It runs on every full public-page load, not client-side navigation; private Placement Desk pages bypass it. It uses CSS transform/opacity animations and the existing fonts, with a native modal for focus containment, Skip/Escape controls, reduced-motion bypass, and a timed fail-open safeguard.
+- Public sections and work/now routes share a full-width fluid container capped at 1600px, responsive safe-area-aware gutters, and readable card layouts. The hero scroll cue and forced full-screen section heights are removed so content follows naturally. Mobile timeline cards use a smaller left indent, and selected-work cards have visible violet/slate borders at rest and on keyboard focus.
+- Project and skill card surfaces retain the original 5% tint; stronger project borders do not require opaque card fills.
+- Current career content, anonymized case studies, confirmed leadership facts, metadata, and the updated resume download are preserved inside the original layouts.
+- One root analytics tracker owns page views, passive scroll-depth tracking, and delegated contact/demo clicks. Private Placement Desk routes are not tracked.
+- The original fonts, styles, UI components, and supporting dependencies are restored. Original resume files and source portraits are retained.
+- All three hero actions share `AnimatedAvailabilityButton`. The case-study and resume variants are native links that act on the first click, with hover/focus label transitions; the resume retains its PDF download attribute.
+- Performance tuning preserves the visuals: pointer glows share one frame-coalesced listener, offscreen glow cards skip layout reads, replaced angle tweens are stopped, and tilt uses motion values/refs instead of per-move React state.
+- The mouse trail uses 40 blended paths instead of 80, retains 50 nodes per path, and stops after settling. Its listeners and frames are cleaned up on unmount, blur, hidden tabs, and reduced-motion changes.
+- The slow-moving WebGL background is capped at 30 updates per second and roughly 1280 x 720 internal resolution, pauses in hidden tabs or with reduced motion, and releases GPU resources on unmount. Foreground spring/hover animations are not frame-capped. Decorative fonts remain available but are not eagerly preloaded.
+- Repository-local Vercel `web-design-guidelines` and `vercel-react-best-practices` skills are installed under `.agents/skills`, with sources recorded in `skills-lock.json`. Other pre-existing local skills are not part of this installation.
+
+The earlier zero-animation measurements applied only to the rejected redesign and are no longer representative of the restored site; no percentage speed claim is made.
+
 Private workspaces use `http://localhost:3000/job-assistant/{username}`.
 
 Passwords are stored as salted scrypt hashes in server-only code. Do not add plaintext credentials to source, documentation, issues, or commits.
@@ -80,7 +112,8 @@ Run before deployment:
 
 ```powershell
 npx tsc --noEmit
-npx eslint src/components/job-assistant src/lib/job-assistant src/app/api/job-assistant "src/app/job-assistant/[inviteId]" src/components/navigation/client-site-chrome.tsx next.config.ts src/app/robots.ts
+npm test
+npx eslint src next.config.ts
 npm run build
 ```
 

@@ -60,16 +60,16 @@ const SocialConnect = () => {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 font-sans w-full pt-4">
-      <div className="relative w-full max-w-2xl">
+    <div className="section-container pt-6 font-sans">
+      <div className="relative w-full">
         {/* 3D Glowing Container */}
         <div 
-          className="rounded-3xl bg-gradient-to-br from-gray-800/80 to-gray-900/90 border border-gray-700/50 shadow-2xl backdrop-blur-3xl overflow-hidden p-8 transition-all duration-500 hover:scale-[1.02]"
+          className="rounded-3xl bg-gradient-to-br from-gray-800/80 to-gray-900/90 border border-gray-700/50 shadow-2xl backdrop-blur-3xl overflow-hidden px-4 py-6 sm:p-8 transition-all duration-500 hover:scale-[1.02]"
           style={{
             boxShadow: '0 0 50px rgba(139, 92, 246, 0.6), 0 0 80px rgba(124, 58, 237, 0.4)'
           }}
         >
-          <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
+          <div className="flex flex-wrap justify-evenly gap-4 sm:gap-8">
             {socialPlatforms.map((platform) => (
               <a 
                 key={platform.name}

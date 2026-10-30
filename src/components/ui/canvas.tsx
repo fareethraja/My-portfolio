@@ -1,238 +1,131 @@
-/* eslint-disable */
-// @ts-nocheck
 "use client";
 
-// @ts-ignore
-function n(e) {
-    // @ts-ignore
-    this.init(e || {});
-}
-n.prototype = {
-    // @ts-ignore
-    init: function (e) {
-        // @ts-ignore
-        this.phase = e.phase || 0;
-        // @ts-ignore
-        this.offset = e.offset || 0;
-        // @ts-ignore
-        this.frequency = e.frequency || 0.001;
-        // @ts-ignore
-        this.amplitude = e.amplitude || 1;
-    },
-    update: function () {
-        return (
-            // @ts-ignore
-            (this.phase += this.frequency),
-            // @ts-ignore
-            (e = this.offset + Math.sin(this.phase) * this.amplitude)
-        );
-    },
-    value: function () {
-        return e;
-    },
-};
-
-// @ts-ignore
-function Line(e) {
-    // @ts-ignore
-    this.init(e || {});
+interface TrailNode {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
 }
 
-Line.prototype = {
-    // @ts-ignore
-    init: function (e) {
-        // @ts-ignore
-        this.spring = e.spring + 0.1 * Math.random() - 0.05;
-        // @ts-ignore
-        this.friction = E.friction + 0.01 * Math.random() - 0.005;
-        // @ts-ignore
-        this.nodes = [];
-        for (var t, n = 0; n < E.size; n++) {
-            // @ts-ignore
-            t = new ParticleNode();
-            // @ts-ignore
-            t.x = pos.x;
-            // @ts-ignore
-            t.y = pos.y;
-            // @ts-ignore
-            this.nodes.push(t);
-        }
-    },
-    update: function () {
-        // @ts-ignore
-        let e = this.spring,
-            // @ts-ignore
-            t = this.nodes[0];
-        // @ts-ignore
-        t.vx += (pos.x - t.x) * e;
-        // @ts-ignore
-        t.vy += (pos.y - t.y) * e;
-        // @ts-ignore
-        for (var n, i = 0, a = this.nodes.length; i < a; i++)
-            // @ts-ignore
-            (t = this.nodes[i]),
-                0 < i &&
-                // @ts-ignore
-                ((n = this.nodes[i - 1]),
-                    (t.vx += (n.x - t.x) * e),
-                    (t.vy += (n.y - t.y) * e),
-                    (t.vx += n.vx * E.dampening),
-                    (t.vy += n.vy * E.dampening)),
-                // @ts-ignore
-                (t.vx *= this.friction),
-                // @ts-ignore
-                (t.vy *= this.friction),
-                (t.x += t.vx),
-                (t.y += t.vy),
-                (e *= E.tension);
-    },
-    draw: function () {
-        let e,
-            t,
-            // @ts-ignore
-            n = this.nodes[0].x,
-            // @ts-ignore
-            i = this.nodes[0].y;
-        // @ts-ignore
-        ctx.beginPath();
-        // @ts-ignore
-        ctx.moveTo(n, i);
-        // @ts-ignore
-        for (var a = 1, o = this.nodes.length - 2; a < o; a++) {
-            // @ts-ignore
-            e = this.nodes[a];
-            // @ts-ignore
-            t = this.nodes[a + 1];
-            n = 0.5 * (e.x + t.x);
-            i = 0.5 * (e.y + t.y);
-            // @ts-ignore
-            ctx.quadraticCurveTo(e.x, e.y, n, i);
-        }
-        // @ts-ignore
-        e = this.nodes[a];
-        // @ts-ignore
-        t = this.nodes[a + 1];
-        // @ts-ignore
-        ctx.quadraticCurveTo(e.x, e.y, t.x, t.y);
-        // @ts-ignore
-        ctx.stroke();
-        // @ts-ignore
-        ctx.closePath();
-    },
-};
+interface TrailLine {
+    nodes: TrailNode[];
+    spring: number;
+    friction: number;
+}
 
-// @ts-ignore
-function onMousemove(e) {
-    function o() {
+export function renderCanvas(canvas: HTMLCanvasElement) {
+    const canvasContext = canvas.getContext("2d");
+    if (!canvasContext) {
+        console.warn("Mouse trail: a 2D canvas context is unavailable.");
+        return;
+    }
+    const context = canvasContext;
+
+    const media = window.matchMedia("(min-width: 768px) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
+    const position = { x: 0, y: 0 };
+    let lines: TrailLine[] = [];
+    let frame: number | null = null;
+    let lastInput = 0;
+    let phase = Math.random() * Math.PI * 2;
+
+    function stop() {
+        if (frame !== null) cancelAnimationFrame(frame);
+        frame = null;
         lines = [];
-        for (let e = 0; e < E.trails; e++)
-            lines.push(new Line({ spring: 0.45 + (e / E.trails) * 0.025 }));
+        context.clearRect(0, 0, canvas.width, canvas.height);
     }
-    // @ts-ignore
-    function c(e) {
-        e.touches
-            ? // @ts-ignore
-            ((pos.x = e.touches[0].pageX), (pos.y = e.touches[0].pageY))
-            : // @ts-ignore
-            ((pos.x = e.clientX), (pos.y = e.clientY));
-        // Removed e.preventDefault() to allow scrolling and clicks
-    }
-    // @ts-ignore
-    function l(e) {
-        // @ts-ignore
-        1 == e.touches.length &&
-            ((pos.x = e.touches[0].pageX), (pos.y = e.touches[0].pageY));
-    }
-    document.removeEventListener("mousemove", onMousemove),
-        document.removeEventListener("touchstart", onMousemove),
-        document.addEventListener("mousemove", c),
-        document.addEventListener("touchmove", c),
-        document.addEventListener("touchstart", l),
-        c(e),
-        o(),
-        render();
-}
 
-function render() {
-    // @ts-ignore
-    if (ctx.running) {
-        // @ts-ignore
-        ctx.globalCompositeOperation = "source-over";
-        // @ts-ignore
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        // @ts-ignore
-        ctx.globalCompositeOperation = "lighter";
-        // @ts-ignore
-        ctx.strokeStyle = "hsla(" + Math.round(f.update()) + ",100%,50%,0.025)";
-        // @ts-ignore
-        ctx.lineWidth = 10;
-        for (var e, t = 0; t < E.trails; t++) {
-            // @ts-ignore
-            (e = lines[t]).update();
-            e.draw();
+    function resize() {
+        stop();
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    function render(time: number) {
+        frame = null;
+        if (document.hidden || !media.matches || time - lastInput > 3000) {
+            stop();
+            return;
         }
-        // @ts-ignore
-        ctx.frame++;
-        window.requestAnimationFrame(render);
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.globalCompositeOperation = "lighter";
+        phase += 0.0015;
+        context.strokeStyle = `hsla(${Math.round(285 + Math.sin(phase) * 85)},100%,50%,0.05)`;
+        context.lineWidth = 10;
+        let settled = true;
+
+        for (const line of lines) {
+            let spring = line.spring;
+            for (let index = 0; index < line.nodes.length; index++) {
+                const node = line.nodes[index];
+                const previous = line.nodes[index - 1];
+                const target = previous ?? position;
+                node.vx += (target.x - node.x) * spring;
+                node.vy += (target.y - node.y) * spring;
+                if (previous) {
+                    node.vx += previous.vx * 0.025;
+                    node.vy += previous.vy * 0.025;
+                }
+                node.vx *= line.friction;
+                node.vy *= line.friction;
+                node.x += node.vx;
+                node.y += node.vy;
+                spring *= 0.99;
+                if (Math.abs(node.x - position.x) + Math.abs(node.y - position.y) + Math.abs(node.vx) + Math.abs(node.vy) > 0.1) {
+                    settled = false;
+                }
+            }
+
+            context.beginPath();
+            context.moveTo(line.nodes[0].x, line.nodes[0].y);
+            for (let index = 1; index < line.nodes.length - 2; index++) {
+                const node = line.nodes[index];
+                const next = line.nodes[index + 1];
+                context.quadraticCurveTo(node.x, node.y, (node.x + next.x) / 2, (node.y + next.y) / 2);
+            }
+            const penultimate = line.nodes[line.nodes.length - 2];
+            const last = line.nodes[line.nodes.length - 1];
+            context.quadraticCurveTo(penultimate.x, penultimate.y, last.x, last.y);
+            context.stroke();
+        }
+
+        if (settled && time - lastInput > 100) stop();
+        else frame = requestAnimationFrame(render);
     }
-}
 
-function resizeCanvas() {
-    // @ts-ignore
-    ctx.canvas.width = window.innerWidth - 20;
-    // @ts-ignore
-    ctx.canvas.height = window.innerHeight;
-}
+    function move(event: PointerEvent) {
+        if (!media.matches || document.hidden || event.pointerType === "touch") return;
+        position.x = event.clientX;
+        position.y = event.clientY;
+        lastInput = performance.now();
+        if (!lines.length) {
+            lines = Array.from({ length: 40 }, (_, index) => ({
+                spring: 0.45 + index / 40 * 0.025 + Math.random() * 0.1 - 0.05,
+                friction: 0.5 + Math.random() * 0.01 - 0.005,
+                nodes: Array.from({ length: 50 }, () => ({ ...position, vx: 0, vy: 0 })),
+            }));
+        }
+        if (frame === null) frame = requestAnimationFrame(render);
+    }
 
-// @ts-ignore
-var ctx,
-    // @ts-ignore
-    f,
-    e = 0,
-    pos = {},
-    // @ts-ignore
-    lines = [],
-    E = {
-        debug: true,
-        friction: 0.5,
-        trails: 80,
-        size: 50,
-        dampening: 0.025,
-        tension: 0.99,
+    function handleVisibility() {
+        if (document.hidden) stop();
+    }
+
+    resize();
+    document.addEventListener("pointermove", move, { passive: true });
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("blur", stop);
+    media.addEventListener("change", stop);
+
+    return () => {
+        stop();
+        document.removeEventListener("pointermove", move);
+        document.removeEventListener("visibilitychange", handleVisibility);
+        window.removeEventListener("resize", resize);
+        window.removeEventListener("blur", stop);
+        media.removeEventListener("change", stop);
     };
-function ParticleNode() {
-    this.x = 0;
-    this.y = 0;
-    this.vy = 0;
-    this.vx = 0;
 }
-
-export const renderCanvas = function () {
-    // @ts-ignore
-    ctx = document.getElementById("canvas").getContext("2d");
-    ctx.running = true;
-    ctx.frame = 1;
-    f = new n({
-        phase: Math.random() * 2 * Math.PI,
-        amplitude: 85,
-        frequency: 0.0015,
-        offset: 285,
-    });
-    document.addEventListener("mousemove", onMousemove);
-    document.addEventListener("touchstart", onMousemove);
-    document.body.addEventListener("orientationchange", resizeCanvas);
-    window.addEventListener("resize", resizeCanvas);
-    window.addEventListener("focus", () => {
-        // @ts-ignore
-        if (!ctx.running) {
-            // @ts-ignore
-            ctx.running = true;
-            render();
-        }
-    });
-    window.addEventListener("blur", () => {
-        // @ts-ignore
-        ctx.running = true;
-    });
-    resizeCanvas();
-};

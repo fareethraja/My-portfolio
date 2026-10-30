@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const RESUME_PATH = "/resume/Fareeth-Raja-Product-Resume-APM-PM.pdf";
+const RESUME_PATH = "/resume/Fareeth-Raja-APM-Resume-2026.pdf";
 
 export const dynamic = "force-dynamic";
 

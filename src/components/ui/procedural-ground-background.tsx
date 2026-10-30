@@ -14,19 +14,17 @@ const ProceduralGroundBackground: React.FC = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Skip heavy WebGL on low-end mobile, very small screens, or when the user
-    // prefers reduced motion. Falls back to the static gradient body.
-    if (typeof window !== "undefined") {
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const tooSmall = window.innerWidth < 640;
-      const lowMemory = (navigator as unknown as { deviceMemory?: number }).deviceMemory;
-      if (reduceMotion || tooSmall || (typeof lowMemory === "number" && lowMemory <= 2)) {
-        return;
-      }
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const lowMemory = "deviceMemory" in navigator ? navigator.deviceMemory : undefined;
+    if (window.innerWidth < 640 || (typeof lowMemory === "number" && lowMemory <= 2)) {
+      return;
     }
 
-    const gl = canvas.getContext('webgl');
-    if (!gl) return;
+    const gl = canvas.getContext('webgl', { alpha: false, antialias: false, depth: false });
+    if (!gl) {
+      console.warn("Procedural background: WebGL is unavailable; using the static background.");
+      return;
+    }
 
     const vsSource = `
       attribute vec2 position;
@@ -84,19 +82,55 @@ const ProceduralGroundBackground: React.FC = () => {
     `;
 
     const createShader = (gl: WebGLRenderingContext, type: number, source: string) => {
-      const shader = gl.createShader(type)!;
+      const shader = gl.createShader(type);
+      if (!shader) {
+        console.error("Procedural background: could not allocate a shader.");
+        return null;
+      }
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error("Procedural background shader compilation failed:", gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+      }
       return shader;
     };
 
-    const program = gl.createProgram()!;
-    gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
-    gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+    if (!vertexShader || !fragmentShader) {
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
+      return;
+    }
+    const program = gl.createProgram();
+    if (!program) {
+      console.error("Procedural background: could not allocate a program.");
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
+      return;
+    }
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error("Procedural background program linking failed:", gl.getProgramInfoLog(program));
+      gl.deleteProgram(program);
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
+      return;
+    }
     gl.useProgram(program);
 
     const buffer = gl.createBuffer();
+    if (!buffer) {
+      console.error("Procedural background: could not allocate the vertex buffer.");
+      gl.deleteProgram(program);
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
+      return;
+    }
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
       -1, -1, 1, -1, -1, 1,
@@ -110,25 +144,59 @@ const ProceduralGroundBackground: React.FC = () => {
     const timeLoc = gl.getUniformLocation(program, "u_time");
     const resLoc = gl.getUniformLocation(program, "u_resolution");
 
-    let animationFrameId: number;
+    let animationFrameId: number | null = null;
+    let timerId: number | null = null;
+    const canAnimate = () => !document.hidden && !reducedMotion.matches && window.innerWidth >= 640 && !gl.isContextLost();
+    const resize = () => {
+      // The softly filtered background does not need a full-resolution 4K buffer.
+      const scale = Math.min(1, Math.sqrt(1280 * 720 / (window.innerWidth * window.innerHeight)));
+      canvas.width = Math.max(1, Math.round(window.innerWidth * scale));
+      canvas.height = Math.max(1, Math.round(window.innerHeight * scale));
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    };
     const render = (time: number) => {
-      const { innerWidth: width, innerHeight: height } = window;
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
-        gl.viewport(0, 0, width, height);
-      }
+      animationFrameId = null;
+      if (!canAnimate()) return;
 
       gl.uniform1f(timeLoc, time * 0.001);
-      gl.uniform2f(resLoc, width, height);
+      gl.uniform2f(resLoc, canvas.width, canvas.height);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
-      animationFrameId = requestAnimationFrame(render);
+      timerId = window.setTimeout(() => {
+        timerId = null;
+        animationFrameId = requestAnimationFrame(render);
+      }, Math.max(0, 1000 / 30 - (performance.now() - time)));
     };
 
-    animationFrameId = requestAnimationFrame(render);
+    const stop = () => {
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+      if (timerId !== null) window.clearTimeout(timerId);
+      animationFrameId = null;
+      timerId = null;
+    };
+    const update = () => {
+      stop();
+      if (canAnimate()) animationFrameId = requestAnimationFrame(render);
+    };
+    const handleResize = () => {
+      resize();
+      update();
+    };
+
+    resize();
+    update();
+    document.addEventListener("visibilitychange", update);
+    reducedMotion.addEventListener("change", update);
+    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      stop();
+      document.removeEventListener("visibilitychange", update);
+      reducedMotion.removeEventListener("change", update);
+      window.removeEventListener("resize", handleResize);
+      gl.deleteBuffer(buffer);
+      gl.deleteProgram(program);
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
     };
   }, []);
 

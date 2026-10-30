@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const TOOLS_DATA = [
     {
         category: "Product Management",
-        items: ["Roadmapping", "Requirement Gathering", "Feature Planning", "User Flows", "Stakeholder Communication"],
+        items: ["Product Discovery", "Competitive Evaluation", "Feature Prioritization", "User Journeys", "Requirements", "Stakeholder Communication"],
         icon: LineChart,
         gradient: "from-blue-500 to-cyan-400",
         glowColor: "rgba(59, 130, 246, 0.5)",
@@ -29,7 +29,7 @@ const TOOLS_DATA = [
     },
     {
         category: "AI & FinTech",
-        items: ["Azure OpenAI", "AI Chatbots", "Prompt Engineering", "Market Data", "Screeners", "Backtesting", "Paper Trading"],
+        items: ["Azure OpenAI", "GitHub Copilot", "AI Assistant Workflows", "Memory & Personalization", "Context Continuity", "Market Data", "Paper Trading"],
         icon: Cpu,
         gradient: "from-violet-500 via-pink-500 to-orange-400",
         glowColor: "rgba(139, 92, 246, 0.5)",
@@ -88,7 +88,7 @@ export function Tools() {
     return (
         <section
             id="tools"
-            className="min-h-screen py-24 flex flex-col items-center justify-center"
+            className="w-full py-12 md:py-16 flex flex-col items-center justify-center"
         >
             <div className="section-container">
                 <motion.div

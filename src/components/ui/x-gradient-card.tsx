@@ -38,7 +38,7 @@ function XCard({
     const CardContent = (
         <div
             className={cn(
-                "w-full min-w-[300px] max-w-xl p-1.5 rounded-2xl relative isolate overflow-hidden",
+                "w-full min-w-0 p-1.5 rounded-2xl relative isolate overflow-hidden",
                 "bg-white/5 dark:bg-black/90",
                 "bg-gradient-to-br from-black/5 to-black/[0.02] dark:from-white/5 dark:to-white/[0.02]",
                 "backdrop-blur-xl backdrop-saturate-[180%]",

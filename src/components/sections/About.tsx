@@ -8,20 +8,20 @@ import { Cpu, LineChart, Rocket, Target } from "lucide-react";
 
 const SKILLS_DATA = [
     {
-        title: "Product Ownership",
-        description: "Turning founder asks into requirements, user flows, acceptance criteria, and launch checks",
+        title: "Product Discovery",
+        description: "Exploring target users, user journeys, market positioning, and product assumptions",
         icon: Target,
         gradient: "from-blue-500 to-cyan-500",
     },
     {
-        title: "Technical Execution",
-        description: "Explaining APIs, auth, payments, AI guardrails, backend logic, and QA tradeoffs",
+        title: "Developer Experience",
+        description: "Translating hands-on demonstrations into feature priorities and phased recommendations",
         icon: Rocket,
         gradient: "from-pink-500 to-rose-500",
     },
     {
         title: "AI & Automation",
-        description: "Designing AI chat flows, automation logic, and workflows that reduce manual work",
+        description: "Evaluating context continuity, personalization, memory, and cost trade-offs",
         icon: Cpu,
         gradient: "from-violet-500 to-indigo-500",
     },
@@ -49,8 +49,8 @@ const skillCardVariants = {
 
 export function About() {
     return (
-        <section id="about" className="min-h-fit md:min-h-screen py-12 md:py-24 flex items-center justify-center relative">
-            <div className="w-full max-w-6xl mx-auto px-6 md:px-8">
+        <section id="about" className="w-full pt-8 pb-12 md:pb-16 flex items-center justify-center relative">
+            <div className="section-container">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
 
                     {/* Left Column - Text Content */}
@@ -70,19 +70,20 @@ export function About() {
 
                         <div className="space-y-4 text-muted-foreground leading-relaxed">
                             <p>
-                                I&apos;m an MBA Finance and Marketing graduate working at the intersection of product management, technical execution, and fintech.
+                                I&apos;m an MBA Finance and Marketing graduate and Economics Gold Medalist working at the intersection of product management, AI, and business reasoning.
                             </p>
                             <p>
-                                Right now, I work on Finverse as a Product Manager, translating broad founder requirements into feature specs, implementation logic, user journeys, bug lists, QA checks, and release-ready AI/fintech workflows.
+                                At Kumaran Systems, I contribute to enterprise AI discovery, developer-tool evaluation, user journeys, and feature-priority recommendations. Previously, I shaped AI and fintech workflows at Finverse through Bermer Software Limited.
                             </p>
                             <p>
-                                I care about products that move from idea to usable systems: clear user flows, reliable payments, grounded AI chat, admin tooling, analytics, and trading workflows that can survive real users.
+                                I also build independent products such as SmartSlot and Placement Desk, connecting product decisions with the details that make a workflow usable. I care about understanding the user before expanding the feature list.
                             </p>
                         </div>
 
                         {/* Download Resume Button - Interactive Hover Button */}
                         <a
                             href="/api/resume"
+                            download="Fareeth-Raja-APM-Resume-2026.pdf"
                             aria-label="Download Fareeth Raja resume"
                             title="Download Fareeth Raja resume"
                             className="inline-block mt-4"

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Fareeth Raja | Product Manager & Technical Product Builder";
+export const alt = "Fareeth Raja | Product Manager · AI Products & Developer Tools";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -65,12 +65,12 @@ export default function OpengraphImage() {
                                 color: "transparent",
                             }}
                         >
-                            Product · AI · FinTech
+                            Product · AI · Strategy
                         </span>
                     </div>
                     <div style={{ fontSize: 28, color: "rgba(255,255,255,0.7)", maxWidth: 920 }}>
-                        Technical product builder translating founder goals into Finverse AI chat,
-                        screeners, strategy backtesting, paper trading, payments.
+                        Product Manager Trainee at Kumaran Systems.
+                        AI discovery, developer tools, and user-centered product decisions.
                     </div>
                 </div>
 

@@ -9,13 +9,18 @@ export const metadata: Metadata = {
     alternates: { canonical: "/now" },
 };
 
-const LAST_UPDATED = "August 2026";
+const LAST_UPDATED = "October 2026";
 
 const FOCUS = [
     {
-        title: "Finverse AI super app",
-        body: "Owning product planning and execution across Zeno AI, screeners, strategy backtesting, paper trading, courses, checkout, and admin tooling at Finverse Innovations Private Limited.",
+        title: "AI product discovery at Kumaran Systems",
+        body: "Since September 2026, contributing as a Product Manager Trainee to enterprise AI discovery, developer-tool evaluation, feature-priority recommendations, and product positioning. Internal product names and implementation details remain private.",
         tag: "Day-to-day",
+    },
+    {
+        title: "Developer experience & context continuity",
+        body: "Exploring memory and personalization trade-offs, demonstrating competitive AI coding workflows, and recommending phased feature priorities. Public case studies distinguish proposals from implemented features.",
+        tag: "Product questions",
     },
     {
         title: "MBA in Finance & Marketing",
@@ -23,8 +28,8 @@ const FOCUS = [
         tag: "Graduated",
     },
     {
-        title: "This portfolio",
-        body: "Polishing the site as a living product: command palette, /now page, mobile nav, easter eggs, and reduced-motion support.",
+        title: "Placement Desk & this portfolio",
+        body: "Building connected, evidence-based job-search workflows and documenting product decisions alongside independent projects. Finverse and the Bermer engagement concluded in August 2026.",
         tag: "Side build",
     },
 ];
@@ -42,16 +47,16 @@ const SHIPPED = [
 const STACK = [
     "Next.js · React · TypeScript",
     "Tailwind v4 · Framer Motion",
-    "Go · MySQL · Razorpay",
-    "Azure OpenAI · Market data",
+    "GitHub Copilot · Competitive demos",
+    "User journeys · Prioritization · AI product evaluation",
 ];
 
 export default function NowPage() {
     return (
-        <main className="relative z-30 mx-auto w-full max-w-3xl px-6 pt-14 pb-20 sm:pt-16 sm:pb-24">
+        <main className="section-container relative z-30 pt-24 pb-20 md:pt-28 sm:pb-24">
             <Link
                 href="/"
-                className="liquid-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
+                className="liquid-glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
             >
                 <ArrowLeft className="h-4 w-4" />
                 Back home
@@ -77,7 +82,7 @@ export default function NowPage() {
                 </p>
             </header>
 
-            <section className="mt-12 grid gap-4">
+            <section className="mt-12 grid gap-4 md:grid-cols-2">
                 {FOCUS.map((item) => (
                     <article
                         key={item.title}
@@ -118,7 +123,7 @@ export default function NowPage() {
 
             <section className="mt-12">
                 <h2 className="font-jetbrains text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                    Stack I&apos;m living in
+                    Methods &amp; tools
                 </h2>
                 <div className="mt-4 flex flex-wrap gap-2">
                     {STACK.map((tag) => (
@@ -134,12 +139,10 @@ export default function NowPage() {
 
             <footer className="mt-14 flex flex-wrap items-center gap-4 text-sm">
                 <Link
-                    href="https://finverse.trade/"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="/work"
                     className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-foreground transition hover:border-white/30"
                 >
-                    See Finverse live
+                    Read product case studies
                     <ArrowUpRight className="h-4 w-4" />
                 </Link>
                 <Link

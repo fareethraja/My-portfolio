@@ -1,17 +1,44 @@
 "use client";
 
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import { ArrowUpRight, Calendar, Key, TrendingUp, Zap } from "lucide-react";
+import { ArrowUpRight, Brain, Calendar, Code2, Key, Layers3, TrendingUp, Zap } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useAnalytics } from "@/hooks/use-analytics";
 
 const PROJECTS_DATA = [
     {
+        title: "Enterprise AI",
+        subtitle: "Memory, Personalization & Context Continuity",
+        description:
+            "Contributed to AI product discovery and evaluated context continuity and personalization trade-offs. Proposed context-import onboarding as a direction to explore, not a shipped feature.",
+        tags: ["Product Discovery", "User Journeys", "AI Personalization", "Proposal"],
+        icon: <Brain className="h-4 w-4" />,
+        caseStudySlug: "enterprise-ai",
+    },
+    {
+        title: "AI Developer Tool",
+        subtitle: "Competitive Evaluation & Feature Priorities",
+        description:
+            "Demonstrated GitHub Copilot workflows, recorded walkthroughs, and recommended initial feature priorities versus later-phase capabilities for an internal AI developer tool.",
+        tags: ["Competitive Evaluation", "Developer Experience", "Prioritization", "Recommendations"],
+        icon: <Code2 className="h-4 w-4" />,
+        caseStudySlug: "ai-developer-tool",
+    },
+    {
+        title: "Placement Desk",
+        subtitle: "Student Job-Search Workflow",
+        description:
+            "Built a local-first workspace connecting candidate profiles, role discovery, evidence-based resume tailoring, application tracking, and interview preparation. Private workspace access stays unlisted.",
+        tags: ["Workflow Design", "Product Development", "Privacy", "Next.js"],
+        icon: <Layers3 className="h-4 w-4" />,
+        caseStudySlug: "placement-desk",
+    },
+    {
         title: "Finverse",
         subtitle: "AI-powered Stock Market Super App",
         description:
-            "Translate founder goals into feature specs, user flows, implementation logic, QA checks, and shipped workflows across Zeno AI, screeners, strategy builder, backtesting, paper trading, courses, checkout, admin, and market tools.",
+            "Translated founder goals into feature specs, user flows, implementation logic, QA checks, and release-ready workflows across Zeno AI, screeners, strategy builder, backtesting, paper trading, courses, checkout, admin, and market tools.",
         tags: ["Product Management", "FinTech", "AI Chat", "Next.js", "Go", "Razorpay"],
         icon: <TrendingUp className="h-4 w-4" />,
         link: "https://finverse.trade/",
@@ -54,16 +81,16 @@ export function Projects() {
     return (
         <section
             id="projects"
-            className="min-h-screen py-24 flex flex-col items-center justify-center"
+            className="w-full py-12 md:py-16 flex flex-col items-center justify-center"
         >
             <div className="section-container">
                 <div className="flex flex-col items-center mb-16 text-center">
                     <span className="eyebrow mb-5">Selected Work</span>
                     <h2 className="font-display text-4xl md:text-6xl font-bold tracking-[-0.03em] text-foreground">
-                        <span className="text-gradient-accent">Product work</span> I&apos;ve shipped
+                        <span className="text-gradient-accent">Product work</span> &amp; decisions
                     </h2>
                     <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground">
-                        Case studies across fintech, AI, payments, user flows, QA, and mobile-first product experiments.
+                        AI discovery, developer-tool recommendations, and hands-on product builds. Each story distinguishes proposals from implementation.
                     </p>
                 </div>
 
@@ -113,7 +140,7 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, caseStudySlu
 
     const CardContent = (
         <div
-            className="relative h-full rounded-[1.25rem] border-[0.75px] border-zinc-200 p-2 transition-colors duration-300 dark:border-zinc-800 md:rounded-[1.5rem] md:p-3"
+            className="relative h-full rounded-[1.25rem] border border-violet-300/55 p-2 transition-colors duration-300 group-hover/item:border-violet-200/75 focus-within:border-violet-200 focus-within:ring-1 focus-within:ring-violet-300/60 md:rounded-[1.5rem] md:p-3"
         >
             <GlowingEffect
                 spread={80}
@@ -123,7 +150,7 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, caseStudySlu
                 inactiveZone={0.01}
                 borderWidth={3}
             />
-            <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] border-white/10 dark:border-white/10 bg-white/5 dark:bg-black/5 backdrop-blur-xl p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6 transition-colors duration-300 group-hover/item:border-white/20 dark:group-hover/item:border-white/20">
+            <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border border-slate-300/25 bg-white/5 dark:bg-black/5 backdrop-blur-xl p-5 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6 transition-colors duration-300 group-hover/item:border-violet-200/50">
                 <div className="relative flex flex-1 flex-col justify-start gap-3">
                     <div className="w-fit rounded-lg border-[0.75px] border-zinc-200 dark:border-zinc-800 bg-muted p-2">
                         {icon}
@@ -158,7 +185,7 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, caseStudySlu
                         {caseStudySlug && (
                             <Link
                                 href={`/work/${caseStudySlug}`}
-                                className="liquid-glass inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 font-jetbrains text-[10px] uppercase tracking-[0.18em] text-white/90 shadow-[0_10px_30px_rgba(139,92,246,0.22)] transition hover:border-white/35 hover:text-white active:scale-[0.97]"
+                                className="liquid-glass inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 py-2 font-jetbrains text-[10px] uppercase tracking-[0.18em] text-white/90 shadow-[0_10px_30px_rgba(139,92,246,0.22)] transition hover:border-white/35 hover:text-white active:scale-[0.97]"
                             >
                                 Case study
                                 <ArrowUpRight className="h-3 w-3" />
@@ -170,7 +197,7 @@ const GridItem = ({ icon, title, subtitle, description, tags, link, caseStudySlu
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={() => trackProjectClick(title)}
-                                className="liquid-glass inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 font-jetbrains text-[10px] uppercase tracking-[0.18em] text-white/75 shadow-[0_10px_30px_rgba(56,189,248,0.16)] transition hover:border-white/35 hover:text-white active:scale-[0.97]"
+                                className="liquid-glass inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 py-2 font-jetbrains text-[10px] uppercase tracking-[0.18em] text-white/75 shadow-[0_10px_30px_rgba(56,189,248,0.16)] transition hover:border-white/35 hover:text-white active:scale-[0.97]"
                             >
                                 Live demo
                                 <ArrowUpRight className="h-3 w-3" />

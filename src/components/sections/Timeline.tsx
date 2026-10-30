@@ -7,40 +7,46 @@ import TiltedCard from "@/components/ui/tilted-card";
 
 const TIMELINE_DATA = [
     {
-        year: "Feb 2026 - Present",
-        title: "Product Manager - Finverse Innovations Private Limited",
+        year: "Sep 2026 - Present",
+        title: "Product Manager Trainee - Kumaran Systems",
         description:
-            "Owning product planning and execution for an AI-powered stock market super app, spanning Zeno AI, screeners, strategies, backtesting, paper trading, courses, checkout, and admin flows.",
+            "Contributing to enterprise AI discovery, user journeys, memory and personalization evaluation, GitHub Copilot demonstrations, and phased feature-priority recommendations. Proposals are not presented as shipped features.",
     },
     {
-        year: "Jan 2026 - Present",
-        title: "Product Intern - Niyantha",
+        year: "Feb 2026 - Aug 2026",
+        title: "Product Manager - Finverse via Bermer Software Limited",
         description:
-            "Supported product positioning, business communication, stakeholder presentation work, and hardware/IoT product storytelling before transitioning into active Finverse product ownership.",
+            "Shaped requirements, user journeys, acceptance criteria, release priorities, and QA checks across AI chat, market tools, trading simulation, courses, checkout, and admin flows.",
+    },
+    {
+        year: "Jan 2026 - Aug 2026",
+        title: "Product Intern - Bermer / Niyantha",
+        description:
+            "Supported hardware and IoT product positioning, business communication, and stakeholder-ready narratives before transitioning into the Finverse engagement.",
     },
     {
         year: "Dec 2025 - Jan 2026",
         title: "Product Manager (Technical) - Kiddofin",
         description:
-            "Designed automated email onboarding, led website design and development, and translated product goals into roadmaps, feature plans, and stakeholder-ready product pitches.",
+            "Led website delivery, automated email onboarding, feature planning, and stakeholder pitches. Presented the product vision and user value at Google.",
     },
     {
         year: "Dec 2024 - Jan 2025",
         title: "Human Resource Management Intern - Peunier",
         description:
-            "Improved candidate visibility, screened and interviewed candidates, hired 13+ qualified people in one month, and reduced hiring time by 25% through ATS workflow improvements.",
+            "Screened and interviewed candidates, supported hiring, and improved ATS-based recruitment workflows.",
     },
     {
         year: "Oct 2024 - Aug 2026",
         title: "MBA in Finance and Marketing - Krupanidhi College",
         description:
-            "Graduated on Aug 8, 2026 with a CGPA of 8.38/10, earning Best Outgoing Student and the Finance Gold Medal.",
+            "Graduated on Aug 8, 2026 with a CGPA of 8.38/10, earning Best Outgoing Student and the Finance Gold Medal. Organized Orphic 2025 and emceed most college events; Best Presenter at Krupacon International Conference 2025 and Emerging Entrepreneur award recipient.",
     },
     {
         year: "Oct 2021 - Apr 2024",
         title: "Bachelor of Economics - The New College",
         description:
-            "Graduated as a University of Madras gold medalist, building a foundation in analytical thinking, markets, economics, and business reasoning.",
+            "Economics Gold Medalist and Students' Union Leader. Co-founded IRA 2K24, coordinated 400 student organizers for over 2,500 visitors in one day, attracted sponsorship funding, and organized 20+ events over a one-year term. Won the college-level SDG Championship 2022 and led an environmental-focus team onward to state level.",
         easterEgg: "gold",
     },
 ];
@@ -58,7 +64,7 @@ export function Timeline() {
         <section
             id="timeline"
             ref={containerRef}
-            className="min-h-screen py-24 flex flex-col items-center justify-center relative overflow-hidden"
+            className="w-full py-12 md:py-16 flex flex-col items-center justify-center relative overflow-hidden"
         >
             <div className="section-container relative">
                 <div className="flex flex-col items-center mb-20 text-center">
@@ -67,7 +73,7 @@ export function Timeline() {
                         <span className="text-gradient-primary">Experience</span>
                     </h2>
                     <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground">
-                        Product, fintech, AI, and business work shaping the current portfolio.
+                        Enterprise AI today, with earlier experience in fintech products, IoT, entrepreneurship, and student leadership.
                     </p>
                     <span
                         aria-hidden
@@ -81,8 +87,8 @@ export function Timeline() {
                     />
                 </div>
 
-                <div className="relative pl-8 md:pl-0">
-                    <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-zinc-200 dark:bg-zinc-800 md:-translate-x-1/2 z-timeline-line pointer-events-none">
+                <div className="relative pl-6 md:pl-0">
+                    <div className="absolute left-2 md:left-1/2 top-0 bottom-0 w-0.5 bg-zinc-200 dark:bg-zinc-800 md:-translate-x-1/2 z-timeline-line pointer-events-none">
                         <motion.div
                             style={{ height }}
                             className="absolute top-0 left-0 w-full bg-black dark:bg-white origin-top"
@@ -98,12 +104,12 @@ export function Timeline() {
                                 viewport={{ once: true, amount: 0.18, margin: "0px 0px -12% 0px" }}
                                 transition={{ duration: 0.42, delay: 0.03, ease: [0.32, 0.72, 0, 1] }}
                                 className={`flex flex-col md:flex-row items-start ${index % 2 !== 0 ? "md:flex-row-reverse" : ""
-                                    } relative pl-12 md:pl-0`}
+                                    } relative`}
                             >
-                                <div className="absolute left-4 md:left-1/2 w-4 h-4 bg-white border-2 border-black dark:border-white dark:bg-black rounded-full -translate-x-1/2 z-10 mt-1.5" />
+                                <div className="absolute -left-4 md:left-1/2 w-4 h-4 bg-white border-2 border-black dark:border-white dark:bg-black rounded-full -translate-x-1/2 z-10 mt-1.5" />
 
                                 <div className="md:w-1/2" />
-                                <div className="md:w-1/2 px-2 sm:px-4 md:px-6">
+                                <div className="w-full min-w-0 md:w-1/2 sm:px-2 md:px-6">
                                     {item.easterEgg === "gold" ? (
                                         <GoldenCard year={item.year} title={item.title} description={item.description} />
                                     ) : (

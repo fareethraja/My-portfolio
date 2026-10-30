@@ -1,24 +1,24 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowDown, ArrowUpRight, FileText, Github, Linkedin, Mail, Sparkles, Zap } from "lucide-react";
+import { Github, Linkedin, Mail, Zap } from "lucide-react";
 import Link from "next/link";
 import AnimatedAvailabilityButton from "@/components/ui/animated-availability-button";
 
 const ROLES = [
-  "Product Manager",
-  "Technical Product Builder",
-  "FinTech Builder",
+  "Product Manager Trainee",
+  "AI Product Discovery",
+  "Developer Experience",
   "AI Product Thinker",
-  "Requirements to Release",
-  "Trading Tools",
-  "Payments & Checkout",
+  "User Journeys",
+  "Feature Prioritization",
+  "FinTech Experience",
   "APIs · AI · Payments",
 ];
 
 const STATS = [
-  { value: "Finverse", label: "Feature ownership across AI, payments and markets", accent: "from-violet-500 to-fuchsia-500" },
-  { value: "Specs · QA · Ship", label: "Founder asks turned into release-ready flows", accent: "from-sky-500 to-cyan-400" },
+  { value: "Kumaran Systems", label: "Product Manager Trainee · Enterprise AI & developer tools", accent: "from-violet-500 to-fuchsia-500" },
+  { value: "Discover · Evaluate · Prioritize", label: "User journeys, competitive demonstrations and recommendations", accent: "from-sky-500 to-cyan-400" },
   { value: "MBA + Economics", label: "Finance, marketing and product mind", accent: "from-emerald-500 to-teal-400" },
 ];
 
@@ -61,7 +61,7 @@ export function Hero() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pt-10 pb-12 sm:px-6 sm:pt-36 md:px-10 md:pt-32 md:pb-16 lg:pt-36">
+      <div className="section-container relative z-10 pt-20 pb-6 md:pt-32 md:pb-8 lg:pt-36">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:gap-8 lg:gap-12">
           {/* LEFT : headline column */}
           <div className="md:col-span-7">
@@ -106,11 +106,11 @@ export function Hero() {
               custom={2}
               className="mt-6 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed text-muted-foreground"
             >
-              I&apos;m a <span className="font-semibold text-foreground">Product Manager</span> and
-              technical product builder who turns founder goals into requirements, user flows,
-              QA checks, and shipped{" "}
-              <span className="text-foreground">FinTech, AI chat, trading, payments,</span>{" "}
-              and automation workflows.
+              I&apos;m a <span className="font-semibold text-foreground">Product Manager Trainee at Kumaran Systems</span>,
+              exploring user problems and evaluating{" "}
+              <span className="text-foreground">enterprise AI and developer tools.</span>{" "}
+              I connect user journeys, competitive demonstrations, and feature recommendations
+              with hands-on experience building AI and fintech workflows.
             </motion.p>
 
             {/* CTAs */}
@@ -127,42 +127,19 @@ export function Hero() {
                 highlightHueDeg={142}
                 navigateTo="#contact"
               />
-              <Link
+              <AnimatedAvailabilityButton
                 href="/work"
-                className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition hover:border-white/30 hover:bg-white/[0.06] active:scale-95 active:border-white/40"
-              >
-                <Sparkles className="h-4 w-4 text-violet-400" />
-                Product case studies
-                <ArrowUpRight className="h-4 w-4 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </Link>
-              <motion.a
+                labelIdle="Product case studies"
+                labelActive="Explore My Work"
+                ariaLabel="Product case studies"
+              />
+              <AnimatedAvailabilityButton
                 href="/api/resume"
-                whileHover={{
-                  rotate: [0, -2, 2, -1, 1, 0],
-                  scale: 1.03,
-                  transition: { duration: 0.5, ease: "easeInOut" },
-                }}
-                whileTap={{
-                  scale: 0.96,
-                  rotate: [0, -3, 3, 0],
-                  transition: { duration: 0.4, ease: "easeInOut" },
-                }}
-                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition hover:border-white/25 active:border-white/40"
-              >
-                {/* soft gradient orb glow on hover, matching stat cards */}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-gradient-to-br from-violet-500 to-sky-500 opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-50"
-                />
-                {/* shimmer sweep */}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 -left-full w-1/2 bg-gradient-to-r from-transparent via-white/15 to-transparent transition-all duration-700 group-hover:left-full"
-                />
-                <FileText className="relative h-4 w-4 text-violet-300" />
-                <span className="relative">Resume</span>
-                <ArrowDown className="relative h-4 w-4 text-muted-foreground transition group-hover:translate-y-0.5 group-hover:text-foreground" />
-              </motion.a>
+                download="Fareeth-Raja-APM-Resume-2026.pdf"
+                labelIdle="Download Resume"
+                labelActive="Download PDF"
+                ariaLabel="Download Fareeth Raja's one-page resume as a PDF"
+              />
             </motion.div>
 
             {/* Socials */}
@@ -262,17 +239,16 @@ export function Hero() {
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                   </span>
                   <span className="font-jetbrains text-[10px] uppercase tracking-[0.2em] text-emerald-300">
-                    Now shipping
+                    Current focus
                   </span>
                 </div>
                 <p className="mt-3 text-sm text-foreground">
-                  Zeno AI, screeners, strategy backtesting, paper trading and checkout on{" "}
+                  Enterprise AI discovery, context continuity, and personalization trade-offs. Explore my{" "}
                   <Link
-                    href="https://finverse.trade/"
-                    target="_blank"
+                    href="/work/enterprise-ai"
                     className="font-semibold underline decoration-emerald-400/40 underline-offset-4 hover:decoration-emerald-400"
                   >
-                    finverse.trade
+                    product discovery work
                   </Link>
                   .
                 </p>
@@ -310,27 +286,6 @@ export function Hero() {
           </div>
         </motion.div>
 
-        {/* Scroll cue */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.6 }}
-          className="mt-10 hidden justify-center lg:flex"
-        >
-          <Link
-            href="#about"
-            className="group flex flex-col items-center gap-2 text-xs text-muted-foreground transition hover:text-foreground"
-          >
-            <span className="font-jetbrains uppercase tracking-[0.2em]">Scroll</span>
-            <span className="flex h-9 w-5 justify-center rounded-full border border-white/15 p-1">
-              <motion.span
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-                className="h-1.5 w-1 rounded-full bg-foreground/70"
-              />
-            </span>
-          </Link>
-        </motion.div>
       </div>
     </section>
   );

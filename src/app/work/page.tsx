@@ -6,7 +6,7 @@ import { CASE_STUDIES } from "@/lib/case-studies";
 export const metadata: Metadata = {
     title: "Case Studies",
     description:
-        "Selected case studies from Fareeth Raja covering Finverse, SmartSlot, RoomSpace and more. Problem, approach, and impact.",
+        "Fareeth Raja's product case studies: enterprise AI discovery, developer-tool evaluation, Placement Desk, Finverse, and mobile-first products.",
     alternates: { canonical: "/work" },
 };
 
@@ -30,10 +30,10 @@ const ACCENT: Record<string, { glow: string; ring: string; text: string }> = {
 
 export default function WorkIndexPage() {
     return (
-        <main className="relative z-30 mx-auto w-full max-w-4xl px-6 pt-14 pb-20 sm:pt-16 sm:pb-24">
+        <main className="section-container relative z-30 pt-24 pb-20 md:pt-28 sm:pb-24">
             <Link
                 href="/"
-                className="liquid-glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
+                className="liquid-glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/85 shadow-[0_10px_30px_rgba(139,92,246,0.18)] transition hover:border-white/30 hover:text-foreground active:scale-[0.97]"
             >
                 <ArrowLeft className="h-4 w-4" />
                 Back home
@@ -42,27 +42,27 @@ export default function WorkIndexPage() {
             <header className="mt-6">
                 <span className="eyebrow mb-5">Case Studies</span>
                 <h1 className="font-display mt-5 text-4xl md:text-5xl font-bold tracking-[-0.03em] text-foreground">
-                    Things I&apos;ve <span className="text-gradient-accent">shipped</span>,
+                    Product <span className="text-gradient-accent">decisions</span>,
                     <br className="hidden sm:block" /> told properly.
                 </h1>
                 <p className="mt-4 max-w-2xl text-base text-muted-foreground">
-                    Each case study covers the problem, the constraints, the approach,
-                    and what actually moved, not just screenshots.
+                    From discovery and recommendations to working products: the problem,
+                    my contribution, the trade-offs, and the current status.
                 </p>
             </header>
 
-            <section className="mt-12 grid gap-5">
+            <section className="mt-12 grid gap-5 md:grid-cols-2">
                 {CASE_STUDIES.map((cs) => {
                     const accent = ACCENT[cs.accent] ?? ACCENT.violet;
                     return (
                         <Link
                             key={cs.slug}
                             href={`/work/${cs.slug}`}
-                            className="group relative block overflow-hidden rounded-2xl p-[1px] shadow-[0_18px_50px_rgba(0,0,0,0.35)] transition duration-300 hover:-translate-y-1 active:scale-[0.99]"
+                            className="group relative block overflow-hidden rounded-2xl border border-violet-300/55 p-[1px] shadow-[0_18px_50px_rgba(0,0,0,0.35)] transition duration-300 hover:-translate-y-1 hover:border-violet-200/75 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-300 active:scale-[0.99]"
                         >
                             <div
                                 aria-hidden
-                                className={`absolute inset-0 bg-gradient-to-br ${accent.ring} opacity-30 transition duration-500 group-hover:opacity-60`}
+                                className={`absolute inset-0 bg-gradient-to-br ${accent.ring} opacity-50 transition duration-500 group-hover:opacity-70`}
                             />
                             <div className="liquid-glass relative min-h-full overflow-hidden rounded-[calc(1rem-1px)] bg-zinc-950/80 p-6">
                                 <div
@@ -70,13 +70,14 @@ export default function WorkIndexPage() {
                                     className={`pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br ${accent.glow} opacity-60 blur-3xl transition duration-500 group-hover:scale-110 group-hover:opacity-80`}
                                 />
                                 <div className="relative flex flex-col gap-3">
-                                    <div className="flex items-center gap-2 font-jetbrains text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                                    <div className="flex flex-wrap items-center gap-2 font-jetbrains text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                                         <span className={`liquid-glass rounded-full px-2.5 py-1 ${accent.text}`}>
                                             {cs.role.split("·")[0].trim()}
                                         </span>
                                         <span className="h-px flex-1 bg-gradient-to-r from-white/20 to-transparent" />
                                         <span>{cs.timeline}</span>
                                     </div>
+                                    {cs.status && <p className="text-xs font-medium text-emerald-300">{cs.status}</p>}
                                     <div className="flex items-start justify-between gap-4">
                                         <div>
                                             <h2 className="font-display text-2xl font-semibold text-foreground">

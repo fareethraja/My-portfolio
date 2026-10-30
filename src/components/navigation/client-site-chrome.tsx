@@ -7,6 +7,7 @@ import { CommandPalette } from "@/components/ui/command-palette";
 import { CommandPaletteHint } from "@/components/ui/command-palette-hint";
 import { MouseTrail } from "@/components/ui/mouse-trail";
 import ProceduralGroundBackground from "@/components/ui/procedural-ground-background";
+import { PortfolioIntro } from "@/components/ui/portfolio-intro";
 
 export function ClientSiteChrome() {
     const pathname = usePathname();
@@ -15,6 +16,7 @@ export function ClientSiteChrome() {
 
     return (
         <>
+            <PortfolioIntro />
             <ProceduralGroundBackground />
             <MouseTrail />
             <CommandPalette />

@@ -10,6 +10,8 @@ export type AnimatedAvailabilityButtonProps = {
   labelActive?: string;
   highlightHueDeg?: number;
   navigateTo?: string;
+  href?: string;
+  download?: string;
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
   id?: string;
@@ -22,12 +24,15 @@ export default function AnimatedAvailabilityButton({
   labelActive = "Let's Connect",
   highlightHueDeg = 142,
   navigateTo = "#contact",
+  href,
+  download,
   type = "button",
   disabled = false,
   id,
   ariaLabel,
 }: AnimatedAvailabilityButtonProps) {
   const [isActive, setIsActive] = useState(false);
+  const Element = href ? "a" : "button";
 
   const handleClick = () => {
     if (!isActive) {
@@ -35,7 +40,7 @@ export default function AnimatedAvailabilityButton({
     } else {
       if (navigateTo.startsWith("#")) {
         const element = document.querySelector(navigateTo);
-        element?.scrollIntoView({ behavior: "smooth" });
+        element?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
       } else {
         window.location.href = navigateTo;
       }
@@ -44,11 +49,24 @@ export default function AnimatedAvailabilityButton({
 
   return (
     <div className={clsx("relative inline-block", className)} id={id}>
-      <button
-        type={type}
+      <Element
+        href={href}
+        download={download}
+        type={href ? undefined : type}
         aria-label={ariaLabel || (isActive ? labelActive : labelIdle)}
-        disabled={disabled}
-        onClick={handleClick}
+        disabled={href ? undefined : disabled}
+        aria-disabled={disabled || undefined}
+        onClick={(event) => {
+          if (disabled) {
+            event.preventDefault();
+            return;
+          }
+          if (!href) handleClick();
+        }}
+        onPointerEnter={() => { if (href) setIsActive(true); }}
+        onPointerLeave={() => { if (href) setIsActive(false); }}
+        onFocus={() => { if (href) setIsActive(true); }}
+        onBlur={() => { if (href) setIsActive(false); }}
         className={clsx(
           "ui-anim-btn",
           "relative flex items-center justify-center cursor-pointer select-none",
@@ -56,7 +74,7 @@ export default function AnimatedAvailabilityButton({
           "bg-[hsl(var(--background))] text-[hsl(var(--foreground))]",
           "border border-[hsl(var(--border))]/20",
           "shadow-[inset_0px_1px_1px_rgba(255,255,255,0.2),inset_0px_2px_2px_rgba(255,255,255,0.15),inset_0px_4px_4px_rgba(255,255,255,0.1),inset_0px_8px_8px_rgba(255,255,255,0.05),inset_0px_16px_16px_rgba(255,255,255,0.05),0_-1px_1px_rgba(0,0,0,0.02),0_-2px_2px_rgba(0,0,0,0.03),0_-4px_4px_rgba(0,0,0,0.05),0_-8px_8px_rgba(0,0,0,0.06),0_-16px_16px_rgba(0,0,0,0.08)]",
-          "transition-all duration-400"
+          "transition-[border-color,background-color] duration-300 touch-manipulation"
         )}
         style={
           {
@@ -70,12 +88,12 @@ export default function AnimatedAvailabilityButton({
           <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
         </span>
         
-        <div className="relative flex items-center justify-center h-5 overflow-hidden">
+        <div className="relative grid h-5 place-items-center overflow-hidden">
           <span
             className={clsx(
-              "whitespace-nowrap text-sm font-medium transition-all duration-500 ease-out",
+              "[grid-area:1/1] whitespace-nowrap text-sm font-medium transition-[opacity,transform] duration-300 ease-out",
               isActive 
-                ? "opacity-0 -translate-y-4 absolute" 
+                ? "opacity-0 -translate-y-4"
                 : "opacity-100 translate-y-0"
             )}
           >
@@ -83,17 +101,17 @@ export default function AnimatedAvailabilityButton({
           </span>
           <span
             className={clsx(
-              "whitespace-nowrap text-sm font-medium transition-all duration-500 ease-out",
+              "[grid-area:1/1] whitespace-nowrap text-sm font-medium transition-[opacity,transform] duration-300 ease-out",
               isActive 
                 ? "opacity-100 translate-y-0" 
-                : "opacity-0 translate-y-4 absolute"
+                : "opacity-0 translate-y-4"
             )}
           >
             {labelActive}
           </span>
         </div>
-      </button>
-      <style jsx>{`
+      </Element>
+      <style jsx global>{`
         .ui-anim-btn {
           --padding: 4px;
           --radius: 24px;
@@ -179,9 +197,15 @@ export default function AnimatedAvailabilityButton({
         }
 
         /* Disabled */
-        .ui-anim-btn:disabled {
+        .ui-anim-btn:disabled,
+        .ui-anim-btn[aria-disabled="true"] {
           opacity: 0.6;
           cursor: not-allowed;
+        }
+
+        .ui-anim-btn:focus-visible {
+          outline: 2px solid var(--highlight);
+          outline-offset: 4px;
         }
       `}</style>
     </div>

@@ -21,7 +21,15 @@ export function CommandPaletteHint() {
     useEffect(() => {
         if (!isLikelyDesktop()) return;
         const showTimer = window.setTimeout(() => setShow(true), 1200);
-        return () => window.clearTimeout(showTimer);
+        const dismissOnSearch = () => {
+            window.clearTimeout(showTimer);
+            setShow(false);
+        };
+        window.addEventListener("portfolio-search-open", dismissOnSearch);
+        return () => {
+            window.clearTimeout(showTimer);
+            window.removeEventListener("portfolio-search-open", dismissOnSearch);
+        };
     }, []);
 
     useEffect(() => {
@@ -57,7 +65,7 @@ export function CommandPaletteHint() {
                         transition: { duration: 0.24, ease: [0.32, 0.72, 0, 1] },
                     }}
                     transition={{ type: "spring", damping: 22, stiffness: 280, mass: 0.7 }}
-                    className="fixed right-5 top-[3.6rem] z-[80] hidden max-w-xs md:block"
+                    className="fixed right-5 top-[4.5rem] z-[65] hidden max-w-xs md:block"
                 >
                     {/* arrow / tail pointing up to the Search button */}
                     <div

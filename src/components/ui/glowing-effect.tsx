@@ -2,7 +2,48 @@
 
 import { memo, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { animate } from "motion/react";
+import { animate, useReducedMotion } from "motion/react";
+
+type PointerPosition = { x: number; y: number };
+const pointerSubscribers = new Set<(position: PointerPosition) => void>();
+let pointerPosition: PointerPosition | null = null;
+let pointerFrame: number | null = null;
+
+function schedulePointerUpdate() {
+    if (pointerFrame !== null || !pointerPosition || document.hidden) return;
+    pointerFrame = requestAnimationFrame(() => {
+        pointerFrame = null;
+        if (pointerPosition) {
+            for (const subscriber of pointerSubscribers) subscriber(pointerPosition);
+        }
+    });
+}
+
+function handlePointerMove(event: PointerEvent) {
+    if (event.pointerType === "touch") return;
+    pointerPosition = { x: event.clientX, y: event.clientY };
+    schedulePointerUpdate();
+}
+
+function subscribePointer(subscriber: (position: PointerPosition) => void) {
+    if (pointerSubscribers.size === 0) {
+        document.addEventListener("pointermove", handlePointerMove, { passive: true });
+        window.addEventListener("scroll", schedulePointerUpdate, { passive: true });
+        window.addEventListener("resize", schedulePointerUpdate, { passive: true });
+    }
+    pointerSubscribers.add(subscriber);
+    return () => {
+        pointerSubscribers.delete(subscriber);
+        if (pointerSubscribers.size === 0) {
+            document.removeEventListener("pointermove", handlePointerMove);
+            window.removeEventListener("scroll", schedulePointerUpdate);
+            window.removeEventListener("resize", schedulePointerUpdate);
+            if (pointerFrame !== null) cancelAnimationFrame(pointerFrame);
+            pointerFrame = null;
+            pointerPosition = null;
+        }
+    };
+}
 
 interface GlowingEffectProps {
     blur?: number;
@@ -25,33 +66,21 @@ const GlowingEffect = memo(
         variant = "default",
         glow = false,
         className,
-        movementDuration = 2,
+        movementDuration = 0.35,
         borderWidth = 1,
         disabled = true,
     }: GlowingEffectProps) => {
         const containerRef = useRef<HTMLDivElement>(null);
-        const lastPosition = useRef({ x: 0, y: 0 });
-        const animationFrameRef = useRef<number>(0);
+        const isVisible = useRef(false);
+        const activeAnimation = useRef<ReturnType<typeof animate> | null>(null);
+        const reducedMotion = useReducedMotion();
 
         const handleMove = useCallback(
-            (e?: MouseEvent | { x: number; y: number }) => {
-                if (!containerRef.current) return;
-
-                if (animationFrameRef.current) {
-                    cancelAnimationFrame(animationFrameRef.current);
-                }
-
-                animationFrameRef.current = requestAnimationFrame(() => {
+            ({ x: mouseX, y: mouseY }: PointerPosition) => {
                     const element = containerRef.current;
-                    if (!element) return;
+                    if (!element || !isVisible.current) return;
 
                     const { left, top, width, height } = element.getBoundingClientRect();
-                    const mouseX = e?.x ?? lastPosition.current.x;
-                    const mouseY = e?.y ?? lastPosition.current.y;
-
-                    if (e) {
-                        lastPosition.current = { x: mouseX, y: mouseY };
-                    }
 
                     const center = [left + width * 0.5, top + height * 0.5];
                     const distanceFromCenter = Math.hypot(
@@ -62,6 +91,7 @@ const GlowingEffect = memo(
 
                     if (distanceFromCenter < inactiveRadius) {
                         element.style.setProperty("--active", "0");
+                        activeAnimation.current?.stop();
                         return;
                     }
 
@@ -73,6 +103,7 @@ const GlowingEffect = memo(
 
                     element.style.setProperty("--active", isActive ? "1" : "0");
 
+                    activeAnimation.current?.stop();
                     if (!isActive) return;
 
                     const currentAngle =
@@ -82,40 +113,46 @@ const GlowingEffect = memo(
                         Math.PI +
                         90;
 
-                    const angleDiff = ((targetAngle - currentAngle + 180) % 360) - 180;
+                    const angleDiff = ((targetAngle - currentAngle) % 360 + 540) % 360 - 180;
                     const newAngle = currentAngle + angleDiff;
 
-                    animate(currentAngle, newAngle, {
+                    activeAnimation.current = animate(currentAngle, newAngle, {
                         duration: movementDuration,
                         ease: [0.16, 1, 0.3, 1],
                         onUpdate: (value) => {
                             element.style.setProperty("--start", String(value));
                         },
                     });
-                });
             },
             [inactiveZone, proximity, movementDuration]
         );
 
         useEffect(() => {
-            if (disabled) return;
+            const element = containerRef.current;
+            if (disabled || reducedMotion || !element) return;
 
-            const handleScroll = () => handleMove();
-            const handlePointerMove = (e: PointerEvent) => handleMove(e);
-
-            window.addEventListener("scroll", handleScroll, { passive: true });
-            document.body.addEventListener("pointermove", handlePointerMove, {
-                passive: true,
+            const observer = new IntersectionObserver(([entry]) => {
+                isVisible.current = entry.isIntersecting;
+                if (!entry.isIntersecting) {
+                    element.style.setProperty("--active", "0");
+                    activeAnimation.current?.stop();
+                } else {
+                    schedulePointerUpdate();
+                }
+            }, {
+                rootMargin: `${proximity}px`,
             });
+            observer.observe(element);
+            const unsubscribe = subscribePointer(handleMove);
 
             return () => {
-                if (animationFrameRef.current) {
-                    cancelAnimationFrame(animationFrameRef.current);
-                }
-                window.removeEventListener("scroll", handleScroll);
-                document.body.removeEventListener("pointermove", handlePointerMove);
+                unsubscribe();
+                observer.disconnect();
+                isVisible.current = false;
+                activeAnimation.current?.stop();
+                element.style.setProperty("--active", "0");
             };
-        }, [handleMove, disabled]);
+        }, [handleMove, disabled, reducedMotion, proximity]);
 
         return (
             <>

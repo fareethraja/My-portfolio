@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
     ArrowRight,
     Briefcase,
@@ -13,6 +13,7 @@ import {
     Search,
     Sparkles,
     User,
+    X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -38,6 +39,9 @@ const ITEMS: PaletteItem[] = [
     { id: "timeline", label: "Experience", hint: "Career timeline", icon: Briefcase, keywords: ["experience", "timeline", "career", "work"], action: { type: "scroll", id: "timeline" } },
     { id: "projects", label: "Projects", hint: "Selected work", icon: Briefcase, keywords: ["projects", "work", "portfolio", "finverse"], action: { type: "scroll", id: "projects" } },
     { id: "work", label: "Case Studies", hint: "All case studies", icon: FileText, keywords: ["case", "studies", "writeup", "work"], action: { type: "navigate", href: "/work" } },
+    { id: "case-enterprise-ai", label: "Enterprise AI Case Study", hint: "/work/enterprise-ai", icon: FileText, keywords: ["enterprise", "ai", "memory", "personalization", "discovery"], action: { type: "navigate", href: "/work/enterprise-ai" } },
+    { id: "case-developer-tool", label: "AI Developer Tool Case Study", hint: "/work/ai-developer-tool", icon: FileText, keywords: ["developer", "copilot", "ai", "prioritization"], action: { type: "navigate", href: "/work/ai-developer-tool" } },
+    { id: "case-placement-desk", label: "Placement Desk Case Study", hint: "/work/placement-desk", icon: FileText, keywords: ["placement", "desk", "candidate", "job"], action: { type: "navigate", href: "/work/placement-desk" } },
     { id: "case-finverse", label: "Finverse Case Study", hint: "/work/finverse", icon: FileText, keywords: ["finverse", "case", "study", "ai", "fintech"], action: { type: "navigate", href: "/work/finverse" } },
     { id: "case-smartslot", label: "SmartSlot Case Study", hint: "/work/smartslot", icon: FileText, keywords: ["smartslot", "case", "dental", "pwa"], action: { type: "navigate", href: "/work/smartslot" } },
     { id: "case-roomspace", label: "RoomSpace Case Study", hint: "/work/roomspace", icon: FileText, keywords: ["roomspace", "case", "key", "tracker"], action: { type: "navigate", href: "/work/roomspace" } },
@@ -57,6 +61,22 @@ export function CommandPalette() {
     const [query, setQuery] = useState("");
     const [active, setActive] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const rootRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef<HTMLUListElement>(null);
+    const reducedMotion = useReducedMotion();
+
+    const closePalette = useCallback((restoreFocus = false) => {
+        setOpen(false);
+        if (restoreFocus) triggerRef.current?.focus({ preventScroll: true });
+    }, []);
+
+    const openPalette = useCallback(() => {
+        setQuery("");
+        setActive(0);
+        setOpen(true);
+        window.dispatchEvent(new Event("portfolio-search-open"));
+    }, []);
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -71,30 +91,37 @@ export function CommandPalette() {
         const onKey = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
                 e.preventDefault();
-                setOpen((v) => !v);
+                if (open) closePalette(true);
+                else openPalette();
                 return;
             }
-            if (e.key === "Escape") {
-                setOpen(false);
+            if (open && e.key === "Escape") {
+                e.preventDefault();
+                closePalette(true);
             }
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
-    }, []);
+    }, [open, openPalette, closePalette]);
 
     useEffect(() => {
-        if (open) {
-            requestAnimationFrame(() => {
-                setQuery("");
-                setActive(0);
-                inputRef.current?.focus();
-            });
-        }
-    }, [open]);
+        if (!open) return;
+        const frame = requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
+        const onOutsidePointer = (event: PointerEvent) => {
+            if (event.target instanceof Node && !rootRef.current?.contains(event.target)) {
+                closePalette();
+            }
+        };
+        document.addEventListener("pointerdown", onOutsidePointer);
+        return () => {
+            cancelAnimationFrame(frame);
+            document.removeEventListener("pointerdown", onOutsidePointer);
+        };
+    }, [open, closePalette]);
 
     const runAction = useCallback(
         (item: PaletteItem) => {
-            setOpen(false);
+            closePalette(true);
             const { action } = item;
             if (action.type === "scroll") {
                 if (window.location.pathname !== "/") {
@@ -102,23 +129,23 @@ export function CommandPalette() {
                     return;
                 }
                 const el = document.getElementById(action.id);
-                el?.scrollIntoView({ behavior: "smooth" });
+                el?.scrollIntoView({ behavior: reducedMotion ? "instant" : "smooth" });
             } else if (action.type === "navigate") {
                 router.push(action.href);
             } else if (action.type === "external") {
                 window.open(action.href, "_blank", "noopener,noreferrer");
             }
         },
-        [router],
+        [router, closePalette, reducedMotion],
     );
 
     const onListKey = (e: React.KeyboardEvent) => {
-        if (e.key === "ArrowDown") {
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
             e.preventDefault();
-            setActive((i) => Math.min(i + 1, filtered.length - 1));
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            setActive((i) => Math.max(i - 1, 0));
+            if (!filtered.length) return;
+            const next = Math.max(0, Math.min(active + (e.key === "ArrowDown" ? 1 : -1), filtered.length - 1));
+            setActive(next);
+            listRef.current?.children[next]?.scrollIntoView({ block: "nearest", behavior: "instant" });
         } else if (e.key === "Enter") {
             e.preventDefault();
             const item = filtered[active];
@@ -127,104 +154,115 @@ export function CommandPalette() {
     };
 
     return (
-        <>
-            {/* floating launcher (visible on desktop, top-right) */}
+        <div
+            ref={rootRef}
+            className="fixed right-[max(1rem,env(safe-area-inset-right))] top-[max(1rem,env(safe-area-inset-top))] z-[70]"
+            onBlur={(event) => {
+                if (event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) {
+                    closePalette();
+                }
+            }}
+        >
             <button
+                ref={triggerRef}
                 type="button"
-                onClick={() => setOpen(true)}
-                aria-label="Open command palette"
-                className="fixed right-5 top-5 z-[60] hidden items-center gap-2 rounded-full border border-white/10 bg-black/40 px-3 py-1.5 text-xs text-white/70 backdrop-blur-md transition hover:border-white/30 hover:text-white md:inline-flex"
+                onClick={() => open ? closePalette(true) : openPalette()}
+                aria-label="Search portfolio"
+                aria-expanded={open}
+                aria-controls="portfolio-search-panel"
+                aria-haspopup="dialog"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-white/20 bg-black/70 px-3 text-xs text-white/80 backdrop-blur-md transition-colors hover:border-violet-300/60 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-300"
             >
                 <Search className="h-3.5 w-3.5" />
-                <span className="font-jetbrains tracking-[0.18em] uppercase">Search</span>
+                <span className="hidden font-jetbrains tracking-[0.18em] uppercase sm:inline">Search</span>
             </button>
 
             <AnimatePresence>
                 {open && (
                     <motion.div
-                        key="cmdk-backdrop"
-                        initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-                        animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
-                        exit={{ opacity: 0, backdropFilter: "blur(0px)", transition: { duration: 0.28, ease: [0.32, 0.72, 0, 1] } }}
-                        transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-                        className="fixed inset-0 z-[100] flex items-start justify-center bg-black/55 px-4 pt-[15vh]"
-                        onClick={() => setOpen(false)}
+                        id="portfolio-search-panel"
+                        key="cmdk-dropdown"
+                        initial={{ opacity: 0, y: reducedMotion ? 0 : -8, scale: reducedMotion ? 1 : 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: reducedMotion ? 0 : -4 }}
+                        transition={reducedMotion ? { duration: 0 } : { type: "spring", damping: 26, stiffness: 360 }}
+                        style={{
+                            width: "min(26rem, calc(100vw - max(1rem, env(safe-area-inset-left)) - max(1rem, env(safe-area-inset-right))))",
+                            maxHeight: "min(28rem, calc(100dvh - max(1rem, env(safe-area-inset-top)) - 5rem - env(safe-area-inset-bottom)))",
+                        }}
+                        className="absolute right-0 top-full mt-2 flex origin-top-right flex-col overflow-hidden rounded-2xl border border-violet-300/35 bg-zinc-950/95 shadow-2xl backdrop-blur-xl"
+                        role="dialog"
+                        aria-label="Search portfolio"
                     >
-                        <motion.div
-                            key="cmdk-card"
-                            initial={{ opacity: 0, y: -16, scale: 0.94 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{
-                                opacity: 0,
-                                y: -8,
-                                scale: 0.97,
-                                filter: "blur(4px)",
-                                transition: { duration: 0.26, ease: [0.32, 0.72, 0, 1] },
-                            }}
-                            transition={{
-                                type: "spring",
-                                damping: 22,
-                                stiffness: 320,
-                                mass: 0.7,
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-xl"
-                            role="dialog"
-                            aria-modal="true"
-                            aria-label="Command palette"
-                            onKeyDown={onListKey}
-                        >
-                            <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
-                                <Search className="h-4 w-4 text-white/50" />
+                            <div className="flex shrink-0 items-center gap-3 border-b border-white/10 px-3 py-2">
+                                <Search className="h-4 w-4 shrink-0 text-white/50" />
                                 <input
                                     ref={inputRef}
+                                    role="combobox"
+                                    aria-label="Search sections, case studies, and links"
+                                    aria-autocomplete="list"
+                                    aria-expanded="true"
+                                    aria-controls="portfolio-search-results"
+                                    aria-activedescendant={filtered[active] ? `search-option-${filtered[active].id}` : undefined}
+                                    autoComplete="off"
+                                    spellCheck={false}
                                     value={query}
                                     onChange={(e) => {
                                         setQuery(e.target.value);
                                         setActive(0);
                                     }}
-                                    placeholder="Jump to a section, link, or action…"
-                                    className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 focus:outline-none"
+                                    onKeyDown={onListKey}
+                                    placeholder="Search the portfolio…"
+                                    className="min-w-0 flex-1 bg-transparent py-2 text-base text-white placeholder:text-white/50 focus:outline-none"
                                 />
-                                <kbd className="hidden rounded border border-white/15 bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-white/50 sm:inline">esc</kbd>
+                                <button
+                                    type="button"
+                                    onClick={() => closePalette(true)}
+                                    aria-label="Close search"
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-violet-300"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
                             </div>
 
-                            <ul className="max-h-[60vh] overflow-y-auto py-2">
-                                {filtered.length === 0 && (
-                                    <li className="px-4 py-6 text-center text-sm text-white/50">No matches.</li>
-                                )}
+                            {filtered.length === 0 && <p role="status" className="px-4 py-6 text-center text-sm text-white/60">No matches. Try a section or project name.</p>}
+                            <ul ref={listRef} id="portfolio-search-results" role="listbox" aria-label="Search results" tabIndex={-1} className="min-h-0 overflow-y-auto overscroll-contain py-2">
                                 {filtered.map((item, i) => {
                                     const Icon = item.icon;
                                     const isActive = i === active;
                                     return (
-                                        <li key={item.id}>
+                                        <li key={item.id} role="presentation">
                                             <button
+                                                id={`search-option-${item.id}`}
+                                                role="option"
+                                                aria-selected={isActive}
+                                                tabIndex={-1}
                                                 type="button"
                                                 onMouseEnter={() => setActive(i)}
                                                 onClick={() => runAction(item)}
-                                                className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition ${
+                                                className={`flex min-h-11 w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
                                                     isActive ? "bg-white/[0.06] text-white" : "text-white/80 hover:bg-white/[0.04]"
                                                 }`}
                                             >
-                                                <span className={`flex h-7 w-7 items-center justify-center rounded-md border ${
+                                                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${
                                                     isActive ? "border-violet-400/40 bg-violet-500/10 text-violet-200" : "border-white/10 bg-white/[0.03] text-white/60"
                                                 }`}>
                                                     <Icon className="h-3.5 w-3.5" />
                                                 </span>
-                                                <span className="flex-1">
+                                                <span className="min-w-0 flex-1">
                                                     <span className="block">{item.label}</span>
                                                     {item.hint && (
-                                                        <span className="block text-[11px] text-white/40">{item.hint}</span>
+                                                        <span className="block break-all text-[11px] text-white/60">{item.hint}</span>
                                                     )}
                                                 </span>
-                                                <ArrowRight className={`h-3.5 w-3.5 ${isActive ? "text-violet-300" : "text-white/30"}`} />
+                                                <ArrowRight className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-violet-300" : "text-white/30"}`} />
                                             </button>
                                         </li>
                                     );
                                 })}
                             </ul>
 
-                            <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-[11px] text-white/40">
+                            <div className="flex shrink-0 items-center justify-between gap-2 border-t border-white/10 px-4 py-2 text-[11px] text-white/60">
                                 <span className="flex items-center gap-2">
                                     <kbd className="rounded border border-white/15 bg-white/5 px-1 font-mono">↑</kbd>
                                     <kbd className="rounded border border-white/15 bg-white/5 px-1 font-mono">↓</kbd>
@@ -239,10 +277,9 @@ export function CommandPalette() {
                                     close
                                 </span>
                             </div>
-                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </>
+        </div>
     );
 }
