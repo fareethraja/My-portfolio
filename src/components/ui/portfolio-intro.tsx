@@ -87,7 +87,7 @@ export function PortfolioIntro() {
             }}
         >
             <p id="portfolio-intro-title" className="sr-only">Welcome to Fareeth Raja&apos;s portfolio</p>
-            <p id="portfolio-intro-description" className="sr-only">A short welcome animation. Skip to explore the portfolio.</p>
+            <p id="portfolio-intro-description" className="sr-only">A short welcome animation. Press Escape to explore the portfolio immediately.</p>
             <div
                 aria-hidden="true"
                 className="portfolio-intro-panel portfolio-intro-top"
@@ -98,13 +98,6 @@ export function PortfolioIntro() {
                 className="portfolio-intro-panel portfolio-intro-bottom"
                 style={{ animationDelay: `${REVEAL_DELAY_MS}ms`, animationDuration: `${REVEAL_DURATION_MS}ms` }}
             />
-            <div
-                aria-hidden="true"
-                className="portfolio-intro-caption font-jetbrains"
-                style={{ animationDelay: `${REVEAL_DELAY_MS - 300}ms` }}
-            >
-                Fareeth Raja / Product &amp; AI
-            </div>
             <div aria-hidden="true" className="portfolio-intro-greetings font-display">
                 {GREETINGS.map((greeting, index) => (
                     <span
@@ -118,9 +111,6 @@ export function PortfolioIntro() {
                     </span>
                 ))}
             </div>
-            <button type="button" className="portfolio-intro-skip font-jetbrains" onClick={finish}>
-                Skip intro <span aria-hidden="true">&rarr;</span>
-            </button>
         </dialog>
     );
 }

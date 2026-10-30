@@ -872,7 +872,7 @@ button:focus-visible > .gb-logo .gb-logo__letters {
   overflow: hidden;
   border: 0;
   background: transparent;
-  color: #2f1e46;
+  color: #21152f;
   overscroll-behavior: contain;
   touch-action: none;
   animation: portfolio-intro-failsafe 0s linear forwards;
@@ -888,8 +888,8 @@ button:focus-visible > .gb-logo .gb-logo__letters {
   width: 100%;
   height: calc(50% + 3rem);
   background:
-    radial-gradient(ellipse at 12% 18%, #34d39926, transparent 55%),
-    linear-gradient(135deg, #ede5fc 0%, #d1bdf4 55%, #c4b5fd 100%);
+    radial-gradient(ellipse at 12% 18%, #34d3991a, transparent 55%),
+    linear-gradient(135deg, #b8a6d2 0%, #a48fbe 55%, #9682b1 100%);
   animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
   animation-fill-mode: forwards;
 }
@@ -904,17 +904,6 @@ button:focus-visible > .gb-logo .gb-logo__letters {
   bottom: 0;
   border-radius: 50% 50% 0 0 / 3rem 3rem 0 0;
   animation-name: portfolio-intro-open-bottom;
-}
-
-.portfolio-intro-caption {
-  position: absolute;
-  top: max(1.5rem, env(safe-area-inset-top));
-  left: max(1.5rem, env(safe-area-inset-left));
-  color: #59416f;
-  font-size: 0.65rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  animation: portfolio-intro-caption-out 250ms ease forwards;
 }
 
 .portfolio-intro-greetings {
@@ -942,46 +931,14 @@ button:focus-visible > .gb-logo .gb-logo__letters {
   height: 0.5rem;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #6d28d9;
-  box-shadow: 0 0 20px #6d28d930;
-}
-
-.portfolio-intro-skip {
-  position: absolute;
-  right: max(1.5rem, env(safe-area-inset-right));
-  bottom: max(1.5rem, env(safe-area-inset-bottom));
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid #6d28d960;
-  border-radius: 999px;
-  background: #f2eafb;
-  color: #302047;
-  font-size: 0.7rem;
-  cursor: pointer;
-  transition: border-color 150ms ease, color 150ms ease;
-}
-
-.portfolio-intro-skip:hover {
-  border-color: #6d28d9;
-  color: #241739;
-}
-
-.portfolio-intro-skip:focus-visible {
-  outline: 2px solid #5b21b6;
-  outline-offset: 4px;
+  background: #45b991;
+  box-shadow: 0 0 20px #34d39926;
 }
 
 @keyframes portfolio-intro-greeting {
   0% { opacity: 0; transform: translateY(14px); }
   20%, 65% { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(-14px); }
-}
-
-@keyframes portfolio-intro-caption-out {
-  to { opacity: 0; transform: translateY(-8px); }
 }
 
 @keyframes portfolio-intro-open-top {
